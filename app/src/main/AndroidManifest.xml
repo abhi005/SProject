@@ -30,7 +30,9 @@
         <activity android:name=".Chat" />
         <activity android:name=".Images" />
         <activity android:name=".Vault" />
-        <activity android:name=".Audio"></activity>
+        <activity android:name=".Audio" />
+        <activity android:name=".Video" />
+        <activity android:name=".Document"></activity>
     </application>
 
 </manifest>

@@ -52,6 +52,10 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                     intent = new Intent(MainActivity.this, Images.class);
                 } else if (position == 3) {
                     intent = new Intent(MainActivity.this, Audio.class);
+                } else if (position == 4) {
+                    intent = new Intent(MainActivity.this, Video.class);
+                } else if (position == 5) {
+                    intent = new Intent(MainActivity.this, Document.class);
                 } else {
                     intent = new Intent(MainActivity.this, MainActivity.class);
                 }

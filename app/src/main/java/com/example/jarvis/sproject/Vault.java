@@ -47,6 +47,7 @@ public class Vault extends AppCompatActivity implements View.OnLongClickListener
     private EditText searchField;
     private ImageView selectAllButton;
     private ViewGroup actionMenu;
+    private ViewGroup searchBar;
     private ImageView actionMenuBackButton;
     private ImageView actionMenuDeleteButton;
     private ImageView actionMenuRenameButton;
@@ -94,6 +95,9 @@ public class Vault extends AppCompatActivity implements View.OnLongClickListener
             }
         });
 
+        //search bar
+        searchBar = (ViewGroup) findViewById(R.id.search_bar);
+
         //prepare data
         prepareData();
 
@@ -104,6 +108,21 @@ public class Vault extends AppCompatActivity implements View.OnLongClickListener
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(vaultAdapter);
+
+        //search bar hide effect with recycler view scroll
+        /*recyclerView.addOnScrollListener(new RecyclerScrollHideBehaviour() {
+            @Override
+            public void show() {
+                searchBar.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2)).start();
+                searchBar.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void hide() {
+                searchBar.setVisibility(View.GONE);
+                searchBar.animate().translationY(-searchBar.getHeight()).setInterpolator(new AccelerateInterpolator(2)).start();
+            }
+        });*/
 
         //search bar
         searchField = (EditText) findViewById(R.id.search_field);
@@ -229,6 +248,16 @@ public class Vault extends AppCompatActivity implements View.OnLongClickListener
 
     private void prepareData() {
         files = new ArrayList<>();
+        files.add(new File("Android", "dir", "04/08/2016", 539.65));
+        files.add(new File("resume", "doc", "03/09/2018", 10.123));
+        files.add(new File("My Pic", "image", "03/09/2018", 1.66));
+        files.add(new File("Shape of you", "audio", "25/07/2017", 11.9936));
+        files.add(new File("Interstellar", "video", "17/12/2015", 1228.8));
+        files.add(new File("Android", "dir", "04/08/2016", 539.65));
+        files.add(new File("resume", "doc", "03/09/2018", 10.123));
+        files.add(new File("My Pic", "image", "03/09/2018", 1.66));
+        files.add(new File("Shape of you", "audio", "25/07/2017", 11.9936));
+        files.add(new File("Interstellar", "video", "17/12/2015", 1228.8));
         files.add(new File("Android", "dir", "04/08/2016", 539.65));
         files.add(new File("resume", "doc", "03/09/2018", 10.123));
         files.add(new File("My Pic", "image", "03/09/2018", 1.66));
