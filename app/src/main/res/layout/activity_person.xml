@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".Person">
+
+    <LinearLayout
+        android:id="@+id/person_toolbar"
+        android:background="@drawable/home_header_gradient"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:elevation="0dp"
+        android:weightSum="7"
+        android:layout_height="?attr/actionBarSize">
+
+        <ImageView
+            android:id="@+id/back_btn_call_logs"
+            android:layout_weight="1"
+            android:padding="16dp"
+            android:src="@drawable/back_arrow"
+            android:scaleType="centerInside"
+            android:tint="@color/white"
+            android:background="?selectableItemBackgroundBorderless"
+            android:layout_width="0dp"
+            android:clickable="true"
+            android:layout_height="match_parent"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/call_type_call_log"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:layout_weight="5"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+        <ImageView
+            android:id="@+id/menu_btn_call_log"
+            android:tint="@color/white"
+            android:padding="18dp"
+            android:src="@drawable/three_dot_menu"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:clickable="true"
+            android:background="?selectableItemBackgroundBorderless"
+            android:layout_height="match_parent"
+            android:focusable="true" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:background="@drawable/home_header_gradient"
+        android:id="@+id/person_info_container"
+        android:layout_below="@+id/person_toolbar"
+        android:paddingBottom="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:tint="@color/white"
+            android:id="@+id/profile_image"
+            android:src="@drawable/ic_account_circle_white_36dp"
+            android:layout_width="match_parent"
+            android:layout_height="82dp" />
+
+        <TextView
+            android:text="person name"
+            android:textAlignment="center"
+            android:layout_below="@+id/profile_image"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:id="@+id/person_tv1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:text="contact"
+            android:layout_below="@+id/person_tv1"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:id="@+id/person_tv2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:padding="18dp"
+        android:id="@+id/person_call_history_btn"
+        android:layout_below="@+id/person_info_container"
+        android:orientation="horizontal"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="@drawable/bottom_border"
+        android:weightSum="6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:tint="@color/grey"
+            android:src="@drawable/ic_access_time_black_24dp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:textSize="18sp"
+            android:textColor="@color/grey"
+            android:text="Call history"
+            android:layout_weight="5"
+            android:layout_width="0dp"
+            android:paddingStart="16dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:padding="18dp"
+        android:id="@+id/person_dial_btn"
+        android:layout_below="@+id/person_call_history_btn"
+        android:orientation="horizontal"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="@drawable/bottom_border"
+        android:weightSum="6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:tint="@color/grey"
+            android:src="@drawable/ic_phone_black_24dp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:textSize="18sp"
+            android:textColor="@color/grey"
+            android:text="Voice call"
+            android:layout_weight="5"
+            android:layout_width="0dp"
+            android:paddingStart="16dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:padding="18dp"
+        android:id="@+id/person_message_btn"
+        android:layout_below="@+id/person_dial_btn"
+        android:orientation="horizontal"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="@drawable/bottom_border"
+        android:weightSum="6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:tint="@color/grey"
+            android:src="@drawable/ic_message_black_24dp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:textSize="18sp"
+            android:textColor="@color/grey"
+            android:text="Text message"
+            android:layout_weight="5"
+            android:layout_width="0dp"
+            android:paddingStart="16dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:padding="18dp"
+        android:id="@+id/person_block_btn"
+        android:layout_below="@+id/person_message_btn"
+        android:orientation="horizontal"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="@drawable/bottom_border"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:textSize="18sp"
+            android:textColor="@color/primaryBlue"
+            android:text="Block"
+            android:textStyle="bold"
+            android:layout_width="match_parent"
+            android:gravity="center"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/add"
+        android:tint="@color/white"
+        android:background="@color/primaryBlue" />
+
+</RelativeLayout>

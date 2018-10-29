@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".Messaging">
+
+    <RelativeLayout
+        android:id="@+id/messaging_toolbar"
+        android:background="@drawable/home_header_gradient"
+        android:layout_width="match_parent"
+        android:elevation="0dp"
+        android:layout_height="?attr/actionBarSize">
+
+        <ImageView
+            android:id="@+id/back_btn_messaging"
+            android:layout_alignStart="@+id/heading_tv"
+            android:padding="20dp"
+            android:src="@drawable/back_arrow"
+            android:scaleType="centerInside"
+            android:tint="@color/white"
+            android:background="?selectableItemBackgroundBorderless"
+            android:layout_width="wrap_content"
+            android:clickable="true"
+            android:layout_height="match_parent"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/heading_tv"
+            android:text="@string/messaging"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ImageView
+            android:id="@+id/menu_btn_messaging"
+            android:tint="@color/white"
+            android:padding="20dp"
+            android:src="@drawable/three_dot_menu"
+            android:layout_width="wrap_content"
+            android:clickable="true"
+            android:layout_alignEnd="@+id/heading_tv"
+            android:background="?selectableItemBackgroundBorderless"
+            android:layout_height="match_parent"
+            android:focusable="true" />
+
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/menu_select_all_btn"
+            android:padding="18dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/checkbox_unchecked"
+            android:layout_alignEnd="@+id/heading_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:background="@drawable/home_header_gradient"
+        android:id="@+id/search_bar"
+        android:focusableInTouchMode="true"
+        android:paddingEnd="10dp"
+        android:paddingStart="10dp"
+        android:layout_below="@+id/messaging_toolbar"
+        android:paddingBottom="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/search_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:textSize="16sp"
+            android:drawableStart="@drawable/ic_search_white_24dp"
+            android:textColor="@color/grey"
+            android:textColorHint="@color/lightGrey"
+            android:drawablePadding="6dp"
+            android:background="@drawable/edittext_rounded_corner"
+            android:inputType="textPersonName"
+            android:hint="@string/search" />
+
+    </RelativeLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:scrollbars="vertical"
+        android:layout_below="@+id/search_bar"
+        android:id="@+id/messaging_main_container"
+        android:background="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <RelativeLayout
+        android:id="@+id/messaging_bottom_bar"
+        android:layout_width="match_parent"
+        android:gravity="center_horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_height="wrap_content">
+
+        <include
+            android:visibility="gone"
+            android:id="@+id/messaging_action_menu"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginBottom="12dp"
+            layout="@layout/messaging_action_menu" />
+
+    </RelativeLayout>
+</RelativeLayout>

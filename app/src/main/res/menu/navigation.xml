@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/bottom_nav_home"
+        android:icon="@drawable/bottom_nav_home_selector"
+        android:title="Home" />
+    <item
+        android:id="@+id/bottom_nav_folder"
+        android:icon="@drawable/bottom_nav_manager_selector"
+        android:title="File Manager" />
+    <item
+        android:id="@+id/bottom_nav_vault"
+        android:icon="@drawable/bottom_nav_locker_selector"
+        android:title="Vault" />
+    <item
+        android:id="@+id/bottom_nav_setting"
+        android:icon="@drawable/bottom_nav_settings_selector"
+        android:title="Settings" />
+</menu>

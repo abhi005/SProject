@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">S Project</string>
+    <string name="percentage_symbol">%</string>
+    <string name="encrypted">Encrypted</string>
+    <string name="gb">GB</string>
+    <string name="free_space">Free Space</string>
+    <string name="internal_storage_pictures"><![CDATA[Internal Storage > Pictures > Personal > Docs]]></string>
+    <string name="title_activity_call_logs">CallLogs</string>
+    <string name="profile">profile</string>
+    <string name="all_calls">All Calls</string>
+    <string name="search">Search</string>
+    <string name="messaging">Messaging</string>
+    <string name="message_text">message text</string>
+    <string name="title_activity_person">person</string>
+    <string name="enter_text">Enter text...</string>
+    <string name="_0_item_selected">0 item selected</string>
+    <string name="images">Images</string>
+    <string name="vault">Vault</string>
+</resources>
