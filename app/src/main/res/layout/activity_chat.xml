@@ -11,12 +11,12 @@
         android:background="@color/white"
         android:layout_width="match_parent"
         android:elevation="0dp"
-        android:layout_height="?attr/actionBarSize">
+        android:layout_height="@dimen/tool_bar_size">
 
         <ImageView
             android:id="@+id/back_btn_chat"
             android:layout_alignStart="@+id/person_name_chat"
-            android:padding="20dp"
+            android:padding="@dimen/tool_bar_icon_padding"
             android:src="@drawable/back_arrow"
             android:scaleType="centerInside"
             android:tint="@color/grey"
@@ -27,9 +27,10 @@
             android:focusable="true" />
 
         <TextView
-            android:text="person name"
+            android:text="@string/sample_text"
             android:id="@+id/person_name_chat"
-            android:textSize="18sp"
+            android:textSize="@dimen/heading"
+            android:ellipsize="end"
             android:textColor="@color/darkGrey"
             android:gravity="center"
             android:layout_width="match_parent"
@@ -39,7 +40,6 @@
 
     <android.support.v7.widget.RecyclerView
         android:scrollbars="vertical"
-        android:paddingTop="12dp"
         android:layout_below="@+id/chat_toolbar"
         android:layout_above="@+id/chat_bottom_bar"
         android:id="@+id/chat_main_container"
@@ -52,50 +52,53 @@
         android:id="@+id/chat_bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
+        android:gravity="center"
         android:background="@color/white">
 
-        <RelativeLayout
+        <LinearLayout
+            android:orientation="horizontal"
+            android:weightSum="10"
             android:id="@+id/chat_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
             android:padding="8dp">
 
             <EditText
                 android:id="@+id/chat_message_text"
-                android:layout_width="match_parent"
-                android:layout_height="42dp"
-                android:layout_toStartOf="@+id/chat_send_btn"
-                android:background="@drawable/chat_edittext_white_background"
+                android:layout_weight="10"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/chat_edittext_background"
                 android:hint="@string/enter_text"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
+                android:ems="10"
+                android:paddingTop="12dp"
+                android:paddingEnd="18dp"
+                android:paddingBottom="12dp"
+                android:paddingStart="18dp"
                 android:layout_marginEnd="16dp"
                 android:scrollHorizontally="false"
                 android:maxLines="2"
                 android:textColor="@color/grey"
                 android:textColorHint="@color/grey"
-                android:textSize="14sp" />
+                android:textSize="@dimen/text_field" />
 
             <ImageView
                 android:id="@+id/chat_send_btn"
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:layout_alignParentEnd="true"
-                android:layout_gravity="center"
+                android:layout_width="@dimen/chat_send_button"
+                android:layout_height="@dimen/chat_send_button"
                 android:background="@drawable/round_button_background"
                 android:clickable="true"
+                android:layout_gravity="center"
                 android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:padding="12dp"
+                android:padding="@dimen/chat_send_button_icon_padding"
+                android:scaleType="centerInside"
                 android:src="@drawable/ic_send_white_24dp" />
-        </RelativeLayout>
+        </LinearLayout>
 
         <include
             android:id="@+id/chat_action_menu"
-            layout="@layout/chat_action_menu"
-            android:layout_marginBottom="12dp"
+            layout="@layout/action_menu_chat"
+            android:layout_marginBottom="@dimen/action_menu_bottom_margin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone" />

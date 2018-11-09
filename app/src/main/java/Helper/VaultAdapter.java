@@ -29,7 +29,7 @@ public class VaultAdapter extends RecyclerView.Adapter<VaultAdapter.ItemViewHold
     @NonNull
     @Override
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.vault_item_layout, parent, false);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_vault, parent, false);
         return new VaultAdapter.ItemViewHolder(itemView, activity);
     }
 

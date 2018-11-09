@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -28,8 +27,9 @@ import java.util.List;
 
 import Helper.CallLogsAdapter;
 import Model.Call;
+import utils.PortraitActivity;
 
-public class CallLogs extends AppCompatActivity implements View.OnLongClickListener {
+public class CallLogs extends PortraitActivity implements View.OnLongClickListener {
 
     private List<Call> callHistory;
     private RecyclerView recyclerView;

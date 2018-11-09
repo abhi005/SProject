@@ -11,27 +11,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="@id/navigation"
         android:orientation="vertical">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/app_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@drawable/home_header_gradient"
-            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
-
-            <ImageButton
-                android:id="@+id/profile_btn"
-                android:src="@drawable/ic_account_circle_white_36dp"
-                android:background="@color/transparent"
-                android:layout_width="28dp"
-                android:scaleType="fitXY"
-                android:layout_height="28dp"
-                android:layout_alignParentEnd="true"
-                android:contentDescription="@string/profile" />
-
-        </android.support.v7.widget.Toolbar>
 
         <RelativeLayout
             android:id="@+id/header"
@@ -41,7 +22,7 @@
             <ImageView
                 android:id="@+id/header_bg"
                 android:layout_width="match_parent"
-                android:layout_height="140dp"
+                android:layout_height="180dp"
                 android:background="@drawable/home_header_gradient" />
 
             <ImageView
@@ -55,8 +36,8 @@
             <LinearLayout
                 android:id="@+id/header_linear_layout"
                 android:layout_width="match_parent"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginTop="48dp"
+                android:layout_marginBottom="48dp"
                 android:layout_height="wrap_content"
                 android:baselineAligned="false"
                 android:orientation="horizontal">
@@ -64,6 +45,7 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
                     android:layout_weight="1">
 
                     <TextView
@@ -83,22 +65,23 @@
                         android:layout_toEndOf="@+id/encryption_data"
                         android:text="@string/percentage_symbol"
                         android:textColor="@color/white"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/small_text" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
-                        android:layout_marginTop="55dp"
+                        android:layout_marginTop="48dp"
                         android:text="@string/encrypted"
                         android:textColor="@color/white"
-                        android:textSize="14sp" />
+                        android:textSize="@dimen/small_text" />
 
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
                     android:layout_weight="1">
 
                     <TextView
@@ -118,18 +101,17 @@
                         android:layout_toEndOf="@+id/storage_data"
                         android:text="@string/gb"
                         android:textColor="@color/white"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/small_text" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
-                        android:layout_marginTop="55dp"
+                        android:layout_marginTop="48dp"
                         android:text="@string/free_space"
                         android:textColor="@color/white"
-                        android:textSize="14sp" />
+                        android:textSize="@dimen/small_text" />
                 </RelativeLayout>
-
             </LinearLayout>
         </RelativeLayout>
 

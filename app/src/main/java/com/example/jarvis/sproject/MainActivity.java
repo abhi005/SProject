@@ -3,27 +3,24 @@ package com.example.jarvis.sproject;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v7.app.AppCompatActivity;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-import Helper.BottomNavigationViewHelper;
 import Helper.HomeMenuAdapter;
+import utils.CustomBottomNavigation;
+import utils.PortraitActivity;
 
-public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends PortraitActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     private GridView homeMenu;
     private BottomNavigationView navigationView;
@@ -35,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         setStatusBarGradient(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // gridview
         homeMenu = (GridView) findViewById(R.id.grid_view_menu);
@@ -66,19 +64,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         //customizing navigation
         navigationView = (BottomNavigationView) findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(this);
-        BottomNavigationViewHelper.disableShiftMode(navigationView);
-        BottomNavigationMenuView menuView = (BottomNavigationMenuView) navigationView.getChildAt(0);
-        for (int i = 0; i < menuView.getChildCount(); i++) {
-            final View iconView = menuView.getChildAt(i).findViewById(android.support.design.R.id.icon);
-            final ViewGroup.LayoutParams layoutParams = iconView.getLayoutParams();
-            final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-            // set your height here
-            layoutParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, displayMetrics);
-            // set your width here
-            layoutParams.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, displayMetrics);
-            iconView.setLayoutParams(layoutParams);
-        }
-
+        CustomBottomNavigation.disableShiftMode(navigationView);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)

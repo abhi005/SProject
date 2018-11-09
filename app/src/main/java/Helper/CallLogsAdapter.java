@@ -29,7 +29,7 @@ public class CallLogsAdapter extends RecyclerView.Adapter<CallLogsAdapter.MyView
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.call_logs_item_layout, parent, false);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_call_logs, parent, false);
         return new MyViewHolder(itemView, callLogs);
     }
 
@@ -102,11 +102,12 @@ public class CallLogsAdapter extends RecyclerView.Adapter<CallLogsAdapter.MyView
             view.setOnLongClickListener(callLogs);
 
             view.setOnLongClickListener(activity);
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            view.setOnClickListener(v -> {
+                if(callLogs.isInActionMode) {
                     CheckBox cb = v.findViewById(R.id.call_history_item_cb);
                     activity.prepareSelection(cb, getAdapterPosition());
+                } else {
+
                 }
             });
         }

@@ -41,7 +41,7 @@ public class FileManagerAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        convertView = inflater.inflate(R.layout.manager_item_layout, null);
+        convertView = inflater.inflate(R.layout.item_layout_manager, null);
         ImageView icon = (ImageView) convertView.findViewById(R.id.file_type_icon);
         TextView name = (TextView) convertView.findViewById(R.id.file_name);
         TextView size = (TextView) convertView.findViewById(R.id.file_size);

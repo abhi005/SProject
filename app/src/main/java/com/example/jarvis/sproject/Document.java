@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -24,8 +23,9 @@ import java.util.ArrayList;
 
 import Helper.DocumentAdapter;
 import Model.DocFile;
+import utils.PortraitActivity;
 
-public class Document extends AppCompatActivity implements View.OnLongClickListener {
+public class Document extends PortraitActivity implements View.OnLongClickListener {
 
 
     public boolean isInActionMode = false;

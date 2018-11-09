@@ -10,15 +10,11 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,11 +28,12 @@ import android.widget.ImageView;
 
 import java.util.ArrayList;
 
-import Helper.BottomNavigationViewHelper;
 import Helper.VaultAdapter;
 import Model.File;
+import utils.CustomBottomNavigation;
+import utils.PortraitActivity;
 
-public class Vault extends AppCompatActivity implements View.OnLongClickListener, BottomNavigationView.OnNavigationItemSelectedListener {
+public class Vault extends PortraitActivity implements View.OnLongClickListener, BottomNavigationView.OnNavigationItemSelectedListener {
 
     private ImageView addButton;
     private BottomNavigationView navigationView;
@@ -69,30 +66,16 @@ public class Vault extends AppCompatActivity implements View.OnLongClickListener
         //customizing navigation
         navigationView = (BottomNavigationView) findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(this);
-        BottomNavigationViewHelper.disableShiftMode(navigationView);
-        BottomNavigationMenuView menuView = (BottomNavigationMenuView) navigationView.getChildAt(0);
-        for (int i = 0; i < menuView.getChildCount(); i++) {
-            final View iconView = menuView.getChildAt(i).findViewById(android.support.design.R.id.icon);
-            final ViewGroup.LayoutParams layoutParams = iconView.getLayoutParams();
-            final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-            // set your height here
-            layoutParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, displayMetrics);
-            // set your width here
-            layoutParams.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, displayMetrics);
-            iconView.setLayoutParams(layoutParams);
-        }
+        CustomBottomNavigation.disableShiftMode(navigationView);
 
         addButtonDialog = new Dialog(this);
 
         //add new button
         addButton = (ImageView) findViewById(R.id.menu_add_btn);
-        addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addButtonDialog.setContentView(R.layout.vault_add_popup);
-                addButtonDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                addButtonDialog.show();
-            }
+        addButton.setOnClickListener(v -> {
+            addButtonDialog.setContentView(R.layout.popup_vault_add);
+            addButtonDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            addButtonDialog.show();
         });
 
         //search bar
@@ -236,8 +219,8 @@ public class Vault extends AppCompatActivity implements View.OnLongClickListener
         isInActionMode = false;
         Animation topDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
         Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
-        actionMenu.startAnimation(topDown);
         navigationView.startAnimation(bottomUp);
+        actionMenu.startAnimation(topDown);
         actionMenu.setVisibility(View.GONE);
         navigationView.setVisibility(View.VISIBLE);
         addButton.setVisibility(View.VISIBLE);

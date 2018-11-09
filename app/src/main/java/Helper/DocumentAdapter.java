@@ -30,7 +30,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocVie
     @NonNull
     @Override
     public DocViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.document_item_layout, parent, false);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_document, parent, false);
         return new DocumentAdapter.DocViewHolder(itemView, activity);
     }
 

@@ -20,4 +20,6 @@
     <string name="audio_file_name">audio file name</string>
     <string name="documents">Documents</string>
     <string name="document_file_name">document file name</string>
+    <string name="text">text</string>
+    <string name="sample_text">sample text</string>
 </resources>

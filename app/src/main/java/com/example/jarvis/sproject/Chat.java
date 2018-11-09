@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -15,15 +14,16 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
 import Helper.ChatAdapter;
 import Model.Message;
+import utils.PortraitActivity;
 
-public class Chat extends AppCompatActivity implements View.OnLongClickListener{
+public class Chat extends PortraitActivity implements View.OnLongClickListener{
 
     private ArrayList<Message> messages;
     private String name;
@@ -31,7 +31,8 @@ public class Chat extends AppCompatActivity implements View.OnLongClickListener{
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
     private ChatAdapter chatAdapter;
-    private RelativeLayout messageEditContainer;
+    private LinearLayout messageEditContainer;
+    private ImageView backButton;
 
     public boolean isInActionMode = false;
     private ImageView actionMenuDeleteButton;
@@ -48,7 +49,7 @@ public class Chat extends AppCompatActivity implements View.OnLongClickListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        messageEditContainer = (RelativeLayout) findViewById(R.id.chat_edit_text);
+        messageEditContainer = (LinearLayout) findViewById(R.id.chat_edit_text);
         chatActionMenu = (ViewGroup) findViewById(R.id.chat_action_menu);
         chatActionMenu.setVisibility(View.GONE);
 
@@ -65,7 +66,7 @@ public class Chat extends AppCompatActivity implements View.OnLongClickListener{
         }
 
         //back button
-        ImageView backButton = (ImageView) findViewById(R.id.back_btn_chat);
+        backButton = (ImageView) findViewById(R.id.back_btn_chat);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,13 +115,14 @@ public class Chat extends AppCompatActivity implements View.OnLongClickListener{
 
     @Override
     public boolean onLongClick(View v) {
-        isInActionMode = true;
-        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
-        showActionMenu(bottomUp);
+        setActionMode();
         return true;
     }
 
-    public void showActionMenu(Animation bottomUp){
+    public void setActionMode(){
+        isInActionMode = true;
+        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
+        backButton.setVisibility(View.GONE);
         chatActionMenu.startAnimation(bottomUp);
         chatActionMenu.setVisibility(View.VISIBLE);
         messageEditContainer.setVisibility(View.GONE);
@@ -129,6 +131,7 @@ public class Chat extends AppCompatActivity implements View.OnLongClickListener{
 
     public void unSetActionMode() {
         isInActionMode = false;
+        backButton.setVisibility(View.VISIBLE);
         Animation topDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
         chatActionMenu.startAnimation(topDown);
         chatActionMenu.setVisibility(View.GONE);

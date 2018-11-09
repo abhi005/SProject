@@ -44,7 +44,7 @@ public class ImagesAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        convertView = LayoutInflater.from(activity).inflate(R.layout.images_item_layout, parent, false);
+        convertView = LayoutInflater.from(activity).inflate(R.layout.item_layout_images, parent, false);
         ImageView image = (ImageView) convertView.findViewById(R.id.image_thumbnail);
         CheckBox cb = (CheckBox) convertView.findViewById(R.id.image_cb);
         if(!activity.isInActionMode) {

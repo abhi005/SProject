@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,8 +22,9 @@ import java.util.List;
 
 import Helper.ImagesAdapter;
 import Model.ImageFile;
+import utils.PortraitActivity;
 
-public class Images extends AppCompatActivity {
+public class Images extends PortraitActivity {
 
     private GridView gridView;
     private ImagesAdapter adapter;

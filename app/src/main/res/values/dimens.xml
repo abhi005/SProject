@@ -1,6 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <dimen name="design_bottom_navigation_text_size" tools:override="true">10sp</dimen>
-    <dimen name="design_bottom_navigation_active_text_size" tools:override="true">10sp</dimen>
+    <dimen name="design_bottom_navigation_height" tools:override="true">48dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+
+    <!-- icon -->
+    <dimen name="icon">28dp</dimen>
+
+    <!-- checkbox -->
+    <dimen name="checkbox">18dp</dimen>
+
+    <!-- text size -->
+    <dimen name="heading">16sp</dimen>
+    <dimen name="text_field">14sp</dimen>
+    <dimen name="medium_text">14sp</dimen>
+    <dimen name="small_text">12sp</dimen>
+
+    <!-- toolbar -->
+    <dimen name="tool_bar_size">48dp</dimen>
+
+    <!-- toolbar icon -->
+    <dimen name="tool_bar_icon_padding">16dp</dimen>
+
+    <!-- action menu -->
+    <dimen name="action_menu_bottom_margin">12dp</dimen>
+    <dimen name="action_menu_height">56dp</dimen>
+    <dimen name="action_menu_icon_padding">18dp</dimen>
+
+
+    <!-- vault - add file dialogue box -->
+    <dimen name="dialogue_box_width">300dp</dimen>
+
+    <!-- home -->
+    <dimen name="home_icon">42dp</dimen>
+
+    <!-- call logs -->
+    <dimen name="call_type_icon">16dp</dimen>
+
+    <!-- chat -->
+    <!-- send button -->
+    <dimen name="chat_send_button">36dp</dimen>
+    <dimen name="chat_send_button_icon_padding">8dp</dimen>
+
+
+    <!-- audio -->
+    <!-- audio file image -->
+    <dimen name="audio_file_image">36dp</dimen>
+
 </resources>

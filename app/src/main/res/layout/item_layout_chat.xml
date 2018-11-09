@@ -9,7 +9,7 @@
     <TextView
         android:id="@+id/chat_item_message_text"
         android:maxWidth="300dp"
-        android:textSize="16sp"
+        android:textSize="@dimen/medium_text"
         android:textColor="@color/darkGrey"
         android:padding="16dp"
         android:background="@drawable/chat_edittext_white_background"
@@ -18,13 +18,13 @@
 
     <TextView
         android:id="@+id/chat_item_message_date_time"
-        android:textSize="12sp"
+        android:textSize="@dimen/small_text"
         android:layout_below="@id/chat_item_message_text"
         android:paddingStart="36dp"
         android:paddingEnd="36dp"
         android:textColor="@color/grey"
         android:paddingTop="8dp"
-        android:text="Today | 1:52 PM"
+        android:text="@string/sample_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 </RelativeLayout>

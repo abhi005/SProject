@@ -12,12 +12,12 @@
         android:background="@drawable/home_header_gradient"
         android:layout_width="match_parent"
         android:elevation="0dp"
-        android:layout_height="?attr/actionBarSize">
+        android:layout_height="@dimen/tool_bar_size">
 
         <ImageView
             android:id="@+id/back_btn_call_logs"
             android:layout_alignStart="@+id/call_type_call_log"
-            android:padding="20dp"
+            android:padding="@dimen/tool_bar_icon_padding"
             android:src="@drawable/back_arrow"
             android:scaleType="centerInside"
             android:tint="@color/white"
@@ -30,7 +30,7 @@
         <TextView
             android:id="@+id/call_type_call_log"
             android:text="@string/all_calls"
-            android:textSize="18sp"
+            android:textSize="@dimen/heading"
             android:textColor="@color/white"
             android:gravity="center"
             android:layout_width="match_parent"
@@ -41,7 +41,7 @@
             android:layout_alignEnd="@+id/call_type_call_log"
             android:id="@+id/menu_btn_call_log"
             android:tint="@color/white"
-            android:padding="20dp"
+            android:padding="@dimen/tool_bar_icon_padding"
             android:src="@drawable/three_dot_menu"
             android:layout_width="wrap_content"
             android:clickable="true"
@@ -52,7 +52,7 @@
         <ImageView
             android:visibility="gone"
             android:id="@+id/menu_select_all_btn"
-            android:padding="18dp"
+            android:padding="@dimen/tool_bar_icon_padding"
             android:layout_alignEnd="@+id/call_type_call_log"
             android:clickable="true"
             android:focusable="true"
@@ -65,10 +65,10 @@
         android:background="@drawable/home_header_gradient"
         android:id="@+id/search_bar"
         android:focusableInTouchMode="true"
-        android:paddingEnd="10dp"
-        android:paddingStart="10dp"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
         android:layout_below="@+id/call_history_toolbar"
-        android:paddingBottom="10dp"
+        android:paddingBottom="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -77,11 +77,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:textSize="16sp"
-            android:drawableStart="@drawable/ic_search_white_24dp"
+            android:textSize="@dimen/text_field"
+            android:drawableStart="@drawable/ic_search_black_18dp"
             android:textColor="@color/grey"
             android:textColorHint="@color/lightGrey"
-            android:drawablePadding="6dp"
+            android:drawablePadding="8dp"
             android:background="@drawable/edittext_rounded_corner"
             android:inputType="textPersonName"
             android:hint="@string/search" />
@@ -107,8 +107,8 @@
             android:id="@+id/call_history_action_menu"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:layout_marginBottom="12dp"
-            layout="@layout/call_logs_action_menu" />
+            android:layout_marginBottom="@dimen/action_menu_bottom_margin"
+            layout="@layout/action_menu_call_logs" />
 
     </RelativeLayout>
 

@@ -4,7 +4,7 @@
     app:cardCornerRadius="5dp"
     android:background="@color/white"
     android:layout_gravity="center_horizontal"
-    android:layout_width="300dp"
+    android:layout_width="@dimen/dialogue_box_width"
     android:layout_height="wrap_content">
 
     <LinearLayout
@@ -23,23 +23,22 @@
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
             android:orientation="horizontal"
-            android:background="?attr/selectableItemBackground"
             android:layout_width="match_parent"
             android:gravity="center_vertical"
             android:layout_height="match_parent">
 
             <ImageView
                 android:src="@drawable/home_doc"
-                android:layout_width="36dp"
+                android:layout_width="@dimen/icon"
                 android:scaleType="centerInside"
-                android:layout_height="36dp" />
+                android:layout_height="@dimen/icon" />
 
             <TextView
                 android:text="Select from device"
                 android:textColor="@color/darkGrey"
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp"
-                android:textSize="14sp"
+                android:textSize="@dimen/medium_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>
@@ -49,7 +48,6 @@
             android:focusable="true"
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
-            android:background="?attr/selectableItemBackground"
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:gravity="center_vertical"
@@ -57,16 +55,16 @@
 
             <ImageView
                 android:src="@drawable/home_image"
-                android:layout_width="36dp"
+                android:layout_width="@dimen/icon"
                 android:scaleType="centerInside"
-                android:layout_height="36dp" />
+                android:layout_height="@dimen/icon" />
 
             <TextView
                 android:text="Add image"
                 android:textColor="@color/darkGrey"
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp"
-                android:textSize="14sp"
+                android:textSize="@dimen/medium_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>

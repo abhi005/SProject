@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -24,8 +23,9 @@ import java.util.ArrayList;
 
 import Helper.VideoAdapter;
 import Model.VideoFile;
+import utils.PortraitActivity;
 
-public class Video extends AppCompatActivity implements View.OnLongClickListener {
+public class Video extends PortraitActivity implements View.OnLongClickListener {
 
 
 
@@ -151,6 +151,16 @@ public class Video extends AppCompatActivity implements View.OnLongClickListener
 
     private void prepareData() {
         videoFiles = new ArrayList<>();
+        videoFiles.add(new VideoFile(1, "The Chainsmoker - closer", 10.48, "00:18", R.drawable.image1));
+        videoFiles.add(new VideoFile(2, "Cheap thrills", 9.08, "00:25", R.drawable.image2));
+        videoFiles.add(new VideoFile(3, "Mera Intekam Dekhegi", 11.95, "01:38", R.drawable.image3));
+        videoFiles.add(new VideoFile(4, "Tu hi hai aashiqui", 6.53, "25:38", R.drawable.image4));
+        videoFiles.add(new VideoFile(5, "Girls like you", 12.53,"05:06", R.drawable.image5));
+        videoFiles.add(new VideoFile(1, "The Chainsmoker - closer", 10.48, "00:18", R.drawable.image1));
+        videoFiles.add(new VideoFile(2, "Cheap thrills", 9.08, "00:25", R.drawable.image2));
+        videoFiles.add(new VideoFile(3, "Mera Intekam Dekhegi", 11.95, "01:38", R.drawable.image3));
+        videoFiles.add(new VideoFile(4, "Tu hi hai aashiqui", 6.53, "25:38", R.drawable.image4));
+        videoFiles.add(new VideoFile(5, "Girls like you", 12.53,"05:06", R.drawable.image5));
         videoFiles.add(new VideoFile(1, "The Chainsmoker - closer", 10.48, "00:18", R.drawable.image1));
         videoFiles.add(new VideoFile(2, "Cheap thrills", 9.08, "00:25", R.drawable.image2));
         videoFiles.add(new VideoFile(3, "Mera Intekam Dekhegi", 11.95, "01:38", R.drawable.image3));

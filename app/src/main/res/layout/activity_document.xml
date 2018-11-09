@@ -104,7 +104,7 @@ tools:context=".Document">
 
         <include
             android:id="@+id/document_action_menu"
-            layout="@layout/document_action_menu"
+            layout="@layout/action_menu_document"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"

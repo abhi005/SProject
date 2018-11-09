@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -24,8 +23,9 @@ import java.util.ArrayList;
 
 import Helper.AudioAdapter;
 import Model.AudioFile;
+import utils.PortraitActivity;
 
-public class Audio extends AppCompatActivity implements View.OnLongClickListener {
+public class Audio extends PortraitActivity implements View.OnLongClickListener {
 
     public boolean isInActionMode = false;
     public boolean isAllSelected = false;
