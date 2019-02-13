@@ -29,7 +29,7 @@
 
         <TextView
             android:id="@+id/heading_tv"
-            android:text="Audio"
+            android:text="@string/audio"
             android:textSize="@dimen/heading"
             android:textColor="@color/white"
             android:gravity="center"

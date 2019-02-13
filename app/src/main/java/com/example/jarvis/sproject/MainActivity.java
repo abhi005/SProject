@@ -99,6 +99,7 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
                 break;
 
             case R.id.bottom_nav_folder :
+                startActivity(new Intent(MainActivity.this, FileManager.class));
                 break;
 
             case R.id.bottom_nav_vault :

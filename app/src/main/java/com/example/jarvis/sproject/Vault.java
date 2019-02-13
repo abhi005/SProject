@@ -85,7 +85,7 @@ public class Vault extends PortraitActivity implements View.OnLongClickListener,
         prepareData();
 
         //recycler view - adapter
-        recyclerView = (RecyclerView) findViewById(R.id.vault_recyclerview);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         vaultAdapter = new VaultAdapter(files, this);
         layoutManager = new LinearLayoutManager(this);
@@ -148,7 +148,7 @@ public class Vault extends PortraitActivity implements View.OnLongClickListener,
         });
 
         //action menu
-        actionMenu = (ViewGroup) findViewById(R.id.vault_action_menu);
+        actionMenu = (ViewGroup) findViewById(R.id.action_menu);
         actionMenu.setVisibility(View.GONE);
 
         //action menu back button
@@ -272,7 +272,6 @@ public class Vault extends PortraitActivity implements View.OnLongClickListener,
     @Override
     public boolean onLongClick(View v) {
         setActionMode();
-
         return true;
     }
 
@@ -319,6 +318,7 @@ public class Vault extends PortraitActivity implements View.OnLongClickListener,
                 break;
 
             case R.id.bottom_nav_folder :
+                startActivity(new Intent(Vault.this, FileManager.class));
                 break;
 
             case R.id.bottom_nav_vault :

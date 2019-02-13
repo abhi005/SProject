@@ -57,7 +57,7 @@ public class CallLogs extends PortraitActivity implements View.OnLongClickListen
         setContentView(R.layout.activity_call_logs);
 
         //back button
-        backButton = (ImageView) findViewById(R.id.back_btn_call_logs);
+        backButton = (ImageView) findViewById(R.id.back_btn);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -65,10 +65,10 @@ public class CallLogs extends PortraitActivity implements View.OnLongClickListen
             }
         });
 
-        callType = (TextView) findViewById(R.id.call_type_call_log);
+        callType = (TextView) findViewById(R.id.call_type_tv);
 
         //call type menu
-        menuButton = (ImageView) findViewById(R.id.menu_btn_call_log);
+        menuButton = (ImageView) findViewById(R.id.menu_btn);
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -105,7 +105,7 @@ public class CallLogs extends PortraitActivity implements View.OnLongClickListen
         prepareCallData();
 
         //adapter
-        recyclerView = (RecyclerView) findViewById(R.id.call_history_main_container);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         callLogsAdapter = new CallLogsAdapter(callHistory, this);
         layoutManager = new LinearLayoutManager(this);
@@ -131,7 +131,7 @@ public class CallLogs extends PortraitActivity implements View.OnLongClickListen
         });
 
         //action mode menu
-        callHistoryActionMenu = (ViewGroup) findViewById(R.id.call_history_action_menu);
+        callHistoryActionMenu = (ViewGroup) findViewById(R.id.action_menu);
         callHistoryActionMenu.setVisibility(View.GONE);
 
         //action menu counter text

@@ -7,15 +7,15 @@
     tools:context=".Chat">
 
     <RelativeLayout
-        android:id="@+id/chat_toolbar"
+        android:id="@+id/app_titlebar"
         android:background="@color/white"
         android:layout_width="match_parent"
         android:elevation="0dp"
         android:layout_height="@dimen/tool_bar_size">
 
         <ImageView
-            android:id="@+id/back_btn_chat"
-            android:layout_alignStart="@+id/person_name_chat"
+            android:id="@+id/back_btn"
+            android:layout_alignStart="@+id/person_name_tv"
             android:padding="@dimen/tool_bar_icon_padding"
             android:src="@drawable/back_arrow"
             android:scaleType="centerInside"
@@ -28,7 +28,7 @@
 
         <TextView
             android:text="@string/sample_text"
-            android:id="@+id/person_name_chat"
+            android:id="@+id/person_name_tv"
             android:textSize="@dimen/heading"
             android:ellipsize="end"
             android:textColor="@color/darkGrey"
@@ -40,16 +40,16 @@
 
     <android.support.v7.widget.RecyclerView
         android:scrollbars="vertical"
-        android:layout_below="@+id/chat_toolbar"
-        android:layout_above="@+id/chat_bottom_bar"
-        android:id="@+id/chat_main_container"
+        android:layout_below="@+id/app_titlebar"
+        android:layout_above="@+id/bottom_bar"
+        android:id="@+id/recyclerview"
         android:background="@color/white"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
     <RelativeLayout
         android:layout_alignParentBottom="true"
-        android:id="@+id/chat_bottom_bar"
+        android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -58,13 +58,13 @@
         <LinearLayout
             android:orientation="horizontal"
             android:weightSum="10"
-            android:id="@+id/chat_edit_text"
+            android:id="@+id/edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp">
 
             <EditText
-                android:id="@+id/chat_message_text"
+                android:id="@+id/message_text"
                 android:layout_weight="10"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -83,7 +83,7 @@
                 android:textSize="@dimen/text_field" />
 
             <ImageView
-                android:id="@+id/chat_send_btn"
+                android:id="@+id/send_btn"
                 android:layout_width="@dimen/chat_send_button"
                 android:layout_height="@dimen/chat_send_button"
                 android:background="@drawable/round_button_background"
@@ -96,7 +96,7 @@
         </LinearLayout>
 
         <include
-            android:id="@+id/chat_action_menu"
+            android:id="@+id/action_menu"
             layout="@layout/action_menu_chat"
             android:layout_marginBottom="@dimen/action_menu_bottom_margin"
             android:layout_width="wrap_content"

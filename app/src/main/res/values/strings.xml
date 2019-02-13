@@ -22,4 +22,8 @@
     <string name="document_file_name">document file name</string>
     <string name="text">text</string>
     <string name="sample_text">sample text</string>
+    <string name="file_manager">File Manager</string>
+    <string name="audio">Audio</string>
+    <string name="internal_storage">Internal Storage</string>
+
 </resources>

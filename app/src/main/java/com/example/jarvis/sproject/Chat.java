@@ -49,8 +49,8 @@ public class Chat extends PortraitActivity implements View.OnLongClickListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        messageEditContainer = (LinearLayout) findViewById(R.id.chat_edit_text);
-        chatActionMenu = (ViewGroup) findViewById(R.id.chat_action_menu);
+        messageEditContainer = (LinearLayout) findViewById(R.id.edit_text);
+        chatActionMenu = (ViewGroup) findViewById(R.id.action_menu);
         chatActionMenu.setVisibility(View.GONE);
 
         Intent i = getIntent();
@@ -58,7 +58,7 @@ public class Chat extends PortraitActivity implements View.OnLongClickListener{
         name = (String) i.getStringExtra("PERSON_NAME");
         contact = (String) i.getStringExtra("PERSON_CONTACT");
 
-        TextView title = (TextView) findViewById(R.id.person_name_chat);
+        TextView title = (TextView) findViewById(R.id.person_name_tv);
         if (name.length() != 0) {
             title.setText(name);
         } else {
@@ -66,7 +66,7 @@ public class Chat extends PortraitActivity implements View.OnLongClickListener{
         }
 
         //back button
-        backButton = (ImageView) findViewById(R.id.back_btn_chat);
+        backButton = (ImageView) findViewById(R.id.back_btn);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -75,7 +75,7 @@ public class Chat extends PortraitActivity implements View.OnLongClickListener{
         });
 
         //adapter
-        recyclerView = (RecyclerView) findViewById(R.id.chat_main_container);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         chatAdapter = new ChatAdapter(messages, this);
         layoutManager = new LinearLayoutManager(this);

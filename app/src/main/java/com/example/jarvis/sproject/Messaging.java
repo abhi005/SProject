@@ -56,7 +56,7 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
         setContentView(R.layout.activity_messaging);
 
         //back button
-        backButton = (ImageView) findViewById(R.id.back_btn_messaging);
+        backButton = (ImageView) findViewById(R.id.back_btn);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -68,9 +68,9 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
         prepareConversationData();
 
         //menu button
-        menuButton = (ImageView) findViewById(R.id.menu_btn_messaging);
+        menuButton = (ImageView) findViewById(R.id.menu_btn);
 
-        recyclerView = (RecyclerView) findViewById(R.id.messaging_main_container);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         messagingAdapter = new MessagingAdapter(conversations, this);
         layoutManager = new LinearLayoutManager(this);
@@ -98,7 +98,7 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
 
 
         //action mode menu
-        messagingActionMenu = (ViewGroup) findViewById(R.id.messaging_action_menu);
+        messagingActionMenu = (ViewGroup) findViewById(R.id.action_menu);
         messagingActionMenu.setVisibility(View.GONE);
 
         //action menu counter text
