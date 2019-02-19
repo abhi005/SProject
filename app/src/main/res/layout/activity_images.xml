@@ -8,13 +8,13 @@
     tools:context=".Images">
 
     <RelativeLayout
-        android:id="@+id/images_toolbar"
+        android:id="@+id/app_titlebar"
         android:background="@color/white"
         android:layout_width="match_parent"
         android:layout_height="@dimen/tool_bar_size">
 
         <ImageView
-            android:id="@+id/back_btn_images"
+            android:id="@+id/back_btn"
             android:padding="@dimen/tool_bar_icon_padding"
             android:src="@drawable/back_arrow"
             android:scaleType="centerInside"
@@ -36,7 +36,7 @@
             android:layout_height="match_parent" />
 
         <ImageView
-            android:id="@+id/menu_btn_images"
+            android:id="@+id/menu_btn"
             android:tint="@color/grey"
             android:padding="@dimen/tool_bar_icon_padding"
             android:src="@drawable/three_dot_menu"
@@ -60,8 +60,8 @@
     </RelativeLayout>
 
     <GridView
-        android:id="@+id/images_gridview"
-        android:layout_below="@+id/images_toolbar"
+        android:id="@+id/gridview"
+        android:layout_below="@+id/app_titlebar"
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
         android:numColumns="auto_fit"
@@ -75,14 +75,14 @@
         android:layout_height="match_parent" />
 
     <RelativeLayout
-        android:id="@+id/images_bottom_bar"
+        android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
         android:gravity="center_horizontal"
         android:layout_alignParentBottom="true"
         android:layout_height="wrap_content">
 
         <include
-            android:id="@+id/images_action_menu"
+            android:id="@+id/action_menu"
             layout="@layout/action_menu_images"
             android:layout_marginBottom="@dimen/action_menu_bottom_margin"
             android:layout_width="wrap_content"

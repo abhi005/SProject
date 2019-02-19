@@ -5,56 +5,65 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class Conversation implements Serializable {
-    private final int conversationID;
-    private String personName;
-    private String personContact;
+public class Conversation {
+
+    private int conversationID;
+    private String address;
     private String lastMessage;
     private String latestDate;
-    private String latestTime;
-    private ArrayList<Message> messages;
-    private int messageCount;
+    private int read;
 
-    public Conversation( int conversationID, String personName, String personContact, ArrayList<Message> messages) {
+    public Conversation() {}
+
+    public Conversation( int conversationID, String address, String lastMessage, String latestDate, int read) {
         this.conversationID = conversationID;
-        this.personName = personName;
-        this.personContact = personContact;
-        this.messages = messages;
-        this.lastMessage = messages.get(messages.size() - 1).getMessageText();
-        this.latestDate = messages.get(messages.size() - 1).getDate();
-        this.latestTime = messages.get(messages.size() - 1).getTime();
-        this.messageCount = messages.size();
+        this.address = address;
+        this.lastMessage = lastMessage;
+        this.latestDate = latestDate;
+        this.read = read;
     }
 
-    public String getPersonName() {
-        return personName;
-    }
-
-    public String getPersonContact() {
-        return personContact;
-    }
-
-    public String getLastMessage() {
-        return lastMessage;
-    }
-
-    public String getLatestDate() {
-        return latestDate;
-    }
-
-    public List<Message> getMessages() {
-        return messages;
-    }
-
-    public int getMessageCount() {
-        return messageCount;
+    public void setConversationID(int conversationID) {
+        this.conversationID = conversationID;
     }
 
     public int getConversationID() {
         return conversationID;
     }
 
-    public String getLatestTime() {
-        return latestTime;
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getLastMessage() {
+        return lastMessage;
+    }
+
+    public void setLastMessage(String lastMessage) {
+        this.lastMessage = lastMessage;
+    }
+
+    public String getLatestDate() {
+        return latestDate;
+    }
+
+    public void setLatestDate(String latestDate) {
+        this.latestDate = latestDate;
+    }
+
+    public int getRead() {
+        return read;
+    }
+
+    public void setRead(int read) {
+        this.read = read;
+    }
+
+    public String toString() {
+        return "thread: " + conversationID + " message: " + lastMessage + " seen: " + read + " number: " + address;
     }
 }

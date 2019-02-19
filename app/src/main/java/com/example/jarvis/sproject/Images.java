@@ -50,7 +50,7 @@ public class Images extends PortraitActivity {
         setContentView(R.layout.activity_images);
 
         //back button
-        ImageView backButton = (ImageView) findViewById(R.id.back_btn_images);
+        ImageView backButton = (ImageView) findViewById(R.id.back_btn);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -58,7 +58,7 @@ public class Images extends PortraitActivity {
             }
         });
 
-        gridView = (GridView) findViewById(R.id.images_gridview);
+        gridView = (GridView) findViewById(R.id.gridview);
         prepareData();
 
         int iDisplayWidth = getResources().getDisplayMetrics().widthPixels;
@@ -74,11 +74,11 @@ public class Images extends PortraitActivity {
         gridView.setAdapter(adapter);
 
         //action menu
-        actionMenu = (ViewGroup) findViewById(R.id.images_action_menu);
+        actionMenu = (ViewGroup) findViewById(R.id.action_menu);
         actionMenu.setVisibility(View.GONE);
 
         //menu button
-        menuButton = (ImageView) findViewById(R.id.menu_btn_images);
+        menuButton = (ImageView) findViewById(R.id.menu_btn);
         menuButton.setVisibility(View.VISIBLE);
 
         //select all button

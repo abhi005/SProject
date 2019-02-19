@@ -1,26 +1,43 @@
 package com.example.jarvis.sproject;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Telephony;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
+import Helper.Global;
 import Helper.HomeMenuAdapter;
+import Services.SMSEncryptionService;
 import utils.CustomBottomNavigation;
 import utils.PortraitActivity;
 
 public class MainActivity extends PortraitActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
+
+    Intent smsServiceIntent;
+    private SMSEncryptionService smsService;
+    Context context;
 
     private GridView homeMenu;
     private BottomNavigationView navigationView;
@@ -31,8 +48,11 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
     protected void onCreate(Bundle savedInstanceState) {
         setStatusBarGradient(this);
         super.onCreate(savedInstanceState);
+        context = getApplicationContext();
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        checkPermissionSms(this);
 
         // gridview
         homeMenu = (GridView) findViewById(R.id.grid_view_menu);
@@ -65,6 +85,40 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
         navigationView = (BottomNavigationView) findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(this);
         CustomBottomNavigation.disableShiftMode(navigationView);
+
+        //sms service
+        smsService = new SMSEncryptionService(getApplicationContext());
+        smsServiceIntent = new Intent(getContext(), smsService.getClass());
+        if (!isSMSServiceRunning(smsService.getClass())) {
+            startService(smsServiceIntent);
+        }
+    }
+
+    //storage permission
+    public void checkPermissionSms(Activity activity){
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED
+        || ContextCompat.checkSelfPermission(activity, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED
+        || ContextCompat.checkSelfPermission(activity, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED
+        || ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS, Manifest.permission.SEND_SMS, Manifest.permission.READ_CONTACTS}, Global.MY_PERMISSIONS_REQUEST_READ_STORAGE);
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case Global.MY_PERMISSIONS_REQUEST_READ_STORAGE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    finish();
+                    overridePendingTransition(0, 0);
+                    startActivity(getIntent());
+                    overridePendingTransition(0, 0);
+                } else {
+                    Toast.makeText(this, "application needs data access to work properly", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -79,6 +133,17 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
         }
     }
 
+    private boolean isSMSServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        assert manager != null;
+        for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -89,6 +154,12 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
     protected void onPause() {
         super.onPause();
         overridePendingTransition(0, 0);
+    }
+
+    @Override
+    protected void onDestroy() {
+        stopService(smsServiceIntent);
+        super.onDestroy();
     }
 
     @Override
@@ -120,5 +191,9 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
     private void updateNavigationBarState() {
         MenuItem menuItem = navigationView.getMenu().getItem(0);
         menuItem.setChecked(true);
+    }
+
+    public Context getContext() {
+        return context;
     }
 }

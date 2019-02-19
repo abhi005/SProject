@@ -2,45 +2,46 @@ package com.example.jarvis.sproject;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Telephony;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import Helper.ChatAdapter;
-import Model.Message;
+import Helper.SmsHelper;
+import Helper.SqliteDatabaseHandler;
+import Model.LocalSms;
 import utils.PortraitActivity;
 
-public class Chat extends PortraitActivity implements View.OnLongClickListener{
+public class Chat extends PortraitActivity {
 
-    private ArrayList<Message> messages;
-    private String name;
-    private String contact;
+    private List<LocalSms> smses;
+    private String address;
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
     private ChatAdapter chatAdapter;
     private LinearLayout messageEditContainer;
+    private ImageView sendButton;
     private ImageView backButton;
+    private EditText smsContent;
 
-    public boolean isInActionMode = false;
-    private ImageView actionMenuDeleteButton;
-    private ImageView actionMenuBackButton;
-    private ImageView actionMenuCopyButton;
-    private ImageView actionMenuForwardButton;
-    private ImageView actionMenuDetailsButton;
-    private ViewGroup chatActionMenu;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -50,47 +51,57 @@ public class Chat extends PortraitActivity implements View.OnLongClickListener{
         setContentView(R.layout.activity_chat);
 
         messageEditContainer = (LinearLayout) findViewById(R.id.edit_text);
-        chatActionMenu = (ViewGroup) findViewById(R.id.action_menu);
-        chatActionMenu.setVisibility(View.GONE);
 
         Intent i = getIntent();
-        messages = (ArrayList<Message>) i.getSerializableExtra("MESSAGES");
-        name = (String) i.getStringExtra("PERSON_NAME");
-        contact = (String) i.getStringExtra("PERSON_CONTACT");
+        address = Objects.requireNonNull(i.getExtras()).getString("ADDRESS");
 
         TextView title = (TextView) findViewById(R.id.person_name_tv);
-        if (name.length() != 0) {
-            title.setText(name);
+
+        // geting contact name
+        String contactName = SmsHelper.getContactName(this, address);
+        if (contactName == null || contactName.equals("")) {
+            title.setText(address);
         } else {
-            title.setText(contact);
+            title.setText(contactName);
         }
 
+        //fetching all sms
+        getAllSms();
+
+        //edit text - sms content
+        smsContent = (EditText) findViewById(R.id.message_text);
         //back button
         backButton = (ImageView) findViewById(R.id.back_btn);
-        backButton.setOnClickListener(new View.OnClickListener() {
+        backButton.setOnClickListener(v -> Chat.super.onBackPressed());
+
+        //send button
+        sendButton = (ImageView) findViewById(R.id.send_btn);
+        sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Chat.super.onBackPressed();
+            public void onClick(View view) {
+                String msg = smsContent.getText().toString();
+                if (msg.equals("")) {
+                    Toast.makeText(getApplicationContext(), "message can't be empty", Toast.LENGTH_LONG).show();
+                } else {
+                    SmsHelper.sendSms(getApplicationContext(), msg, address);
+                    recreate();
+                }
             }
         });
 
         //adapter
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
-        chatAdapter = new ChatAdapter(messages, this);
+        chatAdapter = new ChatAdapter(smses, this);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(chatAdapter);
+    }
 
-        //action menu back button
-        actionMenuBackButton = (ImageView) findViewById(R.id.chat_action_menu_back_btn);
-        actionMenuBackButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                unSetActionMode();
-                chatAdapter.notifyDataSetChanged();
-            }
-        });
+    private void getAllSms() {
+        SqliteDatabaseHandler db = new SqliteDatabaseHandler(getApplicationContext());
+        smses = db.getSmsByAddress(address);
+        db.close();
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -101,40 +112,5 @@ public class Chat extends PortraitActivity implements View.OnLongClickListener{
             window.setStatusBarColor(activity.getResources().getColor(android.R.color.white));
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if(isInActionMode) {
-            unSetActionMode();
-            chatAdapter.notifyDataSetChanged();
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        setActionMode();
-        return true;
-    }
-
-    public void setActionMode(){
-        isInActionMode = true;
-        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
-        backButton.setVisibility(View.GONE);
-        chatActionMenu.startAnimation(bottomUp);
-        chatActionMenu.setVisibility(View.VISIBLE);
-        messageEditContainer.setVisibility(View.GONE);
-        chatAdapter.notifyDataSetChanged();
-    }
-
-    public void unSetActionMode() {
-        isInActionMode = false;
-        backButton.setVisibility(View.VISIBLE);
-        Animation topDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
-        chatActionMenu.startAnimation(topDown);
-        chatActionMenu.setVisibility(View.GONE);
-        messageEditContainer.setVisibility(View.VISIBLE);
     }
 }

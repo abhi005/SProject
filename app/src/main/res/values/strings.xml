@@ -25,5 +25,7 @@
     <string name="file_manager">File Manager</string>
     <string name="audio">Audio</string>
     <string name="internal_storage">Internal Storage</string>
+    <string name="sd_card">SD Card</string>
+    <string name="encrypt">Encrypt</string>
 
 </resources>

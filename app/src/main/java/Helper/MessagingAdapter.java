@@ -1,7 +1,9 @@
 package Helper;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +17,10 @@ import com.example.jarvis.sproject.Messaging;
 import com.example.jarvis.sproject.R;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import Model.Conversation;
@@ -40,8 +46,23 @@ public class MessagingAdapter extends RecyclerView.Adapter<MessagingAdapter.Mess
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         Conversation conversation = conversations.get(position);
 
-        holder.tv1.setText(conversation.getPersonName());
-        holder.tv2.setText(conversation.getLatestTime());
+        String dateStr = conversation.getLatestDate();
+        Date dateFormat= new Date(Long.valueOf(dateStr));
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        String finalDate = formatter.format(dateFormat);
+
+        if (conversation.getRead() == 0) {
+            holder.seenFlag.setAlpha(Float.valueOf("1.0"));
+        } else {
+            holder.seenFlag.setAlpha(Float.valueOf("0.0"));
+        }
+
+        String contactName = SmsHelper.getContactName(messaging, conversation.getAddress());
+        if (contactName == null || contactName.equals("")) {
+            contactName = conversation.getAddress();
+        }
+        holder.tv1.setText(contactName);
+        holder.tv2.setText(finalDate);
         holder.tv3.setText(conversation.getLastMessage());
 
         //checking for action mode status
@@ -56,6 +77,18 @@ public class MessagingAdapter extends RecyclerView.Adapter<MessagingAdapter.Mess
                 holder.checkBox.setChecked(false);
             }
         }
+
+        holder.itemView.setOnClickListener(view -> {
+            if (messaging.isInActionMode) {
+                CheckBox cb = (CheckBox) view.findViewById(R.id.cb);
+                messaging.prepareSelection(cb, position);
+            } else {
+                messaging.isAllSelected = false;
+                Intent intent = new Intent(messaging, Chat.class);
+                intent.putExtra("ADDRESS", conversation.getAddress());
+                messaging.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -63,39 +96,24 @@ public class MessagingAdapter extends RecyclerView.Adapter<MessagingAdapter.Mess
         return conversations.size();
     }
 
-    public class MessageViewHolder extends RecyclerView.ViewHolder{
+    class MessageViewHolder extends RecyclerView.ViewHolder{
         TextView tv1, tv2, tv3;
         CheckBox checkBox;
         ImageView personBtn;
+        ImageView seenFlag;
 
         Messaging messaging;
         MessageViewHolder(View itemView, Messaging messaging) {
             super(itemView);
-            tv1 = (TextView) itemView.findViewById(R.id.messaging_item_tv1);
-            tv2 = (TextView) itemView.findViewById(R.id.messaging_item_tv2);
-            tv3 = (TextView) itemView.findViewById(R.id.messaging_item_tv3);
-            checkBox = (CheckBox) itemView.findViewById(R.id.messaging_item_cb);
-            personBtn = (ImageView) itemView.findViewById(R.id.messaging_item_person_btn);
+            tv1 = (TextView) itemView.findViewById(R.id.tv1);
+            tv2 = (TextView) itemView.findViewById(R.id.tv2);
+            tv3 = (TextView) itemView.findViewById(R.id.tv3);
+            checkBox = (CheckBox) itemView.findViewById(R.id.cb);
+            personBtn = (ImageView) itemView.findViewById(R.id.person_btn);
+            seenFlag = (ImageView) itemView.findViewById(R.id.seen_flag);
             this.messaging = messaging;
 
             itemView.setOnLongClickListener(messaging);
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (messaging.isInActionMode) {
-                        CheckBox cb = (CheckBox) v.findViewById(R.id.messaging_item_cb);
-                        messaging.prepareSelection(cb, getAdapterPosition());
-                    } else {
-                        messaging.isAllSelected = false;
-                        Intent intent = new Intent(messaging, Chat.class);
-                        intent.putExtra("MESSAGES", (Serializable) conversations.get(getAdapterPosition()).getMessages());
-                        intent.putExtra("PERSON_NAME", conversations.get(getAdapterPosition()).getPersonName());
-                        intent.putExtra("PERSON_CONTACT", conversations.get(getAdapterPosition()).getPersonContact());
-                        messaging.startActivity(intent);
-                    }
-                }
-            });
         }
     }
 

@@ -21,19 +21,20 @@
             android:focusable="true"
             android:paddingTop="24dp"
             android:paddingBottom="18dp"
+            android:background="?attr/selectableItemBackground"
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:gravity="center_vertical"
             android:layout_height="match_parent">
 
             <ImageView
-                android:src="@drawable/home_doc"
+                android:src="@drawable/storage"
                 android:layout_width="@dimen/icon"
                 android:scaleType="centerInside"
                 android:layout_height="@dimen/icon" />
 
             <TextView
-                android:text="Internal Storage"
+                android:text="@string/internal_storage"
                 android:textColor="@color/darkGrey"
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp"
@@ -50,19 +51,20 @@
             android:paddingEnd="24dp"
             android:paddingTop="18dp"
             android:paddingBottom="24dp"
+            android:background="?attr/selectableItemBackground"
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:gravity="center_vertical"
             android:layout_height="match_parent">
 
             <ImageView
-                android:src="@drawable/home_image"
+                android:src="@drawable/sd_card"
                 android:layout_width="@dimen/icon"
                 android:scaleType="centerInside"
                 android:layout_height="@dimen/icon" />
 
             <TextView
-                android:text="SD Card"
+                android:text="@string/sd_card"
                 android:textColor="@color/darkGrey"
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp"

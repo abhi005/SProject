@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/chat_message_item_container"
     android:padding="12dp"
+    android:background="?attr/selectableItemBackground"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -11,7 +12,10 @@
         android:maxWidth="300dp"
         android:textSize="@dimen/medium_text"
         android:textColor="@color/darkGrey"
-        android:padding="16dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:background="@drawable/chat_edittext_white_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
@@ -20,8 +24,8 @@
         android:id="@+id/chat_item_message_date_time"
         android:textSize="@dimen/small_text"
         android:layout_below="@id/chat_item_message_text"
-        android:paddingStart="36dp"
-        android:paddingEnd="36dp"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
         android:textColor="@color/grey"
         android:paddingTop="8dp"
         android:text="@string/sample_text"

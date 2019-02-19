@@ -1,5 +1,9 @@
 package Helper;
 
+import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -8,21 +12,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.jarvis.sproject.Chat;
 import com.example.jarvis.sproject.R;
 
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
-import Model.Message;
+import Model.LocalSms;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageHolder> {
 
-    private ArrayList<Message> messages;
+    private List<LocalSms> smses;
     private Chat chat;
 
-    public ChatAdapter(ArrayList<Message> messages, Chat context) {
-        this.messages = messages;
+    public ChatAdapter(List<LocalSms> smses, Chat context) {
+        this.smses = smses;
         this.chat = context;
     }
     @NonNull
@@ -34,14 +41,17 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageHolder>
 
     @Override
     public void onBindViewHolder(@NonNull MessageHolder holder, int position) {
-        Message message = messages.get(position);
+        LocalSms sms = smses.get(position);
         RelativeLayout layout = holder.container;
-        holder.messageText.setText(message.getMessageText());
-        String temp = message.getDate() + " | " + message.getTime();
-        holder.timeDate.setText(temp);
-        String sender = message.getSender();
+        holder.messageText.setText(sms.getBody());
+        String temp = sms.getDate();
+        Date dateFormat= new Date(Long.valueOf(temp));
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        String finalDate = formatter.format(dateFormat);
+        holder.timeDate.setText(finalDate);
+        int type = sms.getType();
 
-        if (sender.equals("self")) {
+        if (type == 2) {
             RelativeLayout.LayoutParams lp1 = (RelativeLayout.LayoutParams) holder.messageText.getLayoutParams();
             RelativeLayout.LayoutParams lp2 = (RelativeLayout.LayoutParams) holder.timeDate.getLayoutParams();
 
@@ -55,33 +65,40 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageHolder>
 
             Drawable bg = chat.getDrawable(R.drawable.chat_edittext_blue_background);
             holder.messageText.setBackground(bg);
-            holder.messageText.setPadding(32, 32, 32, 32);
+            holder.messageText.setPadding(32, 24, 32, 24);
             holder.messageText.setTextColor(chat.getResources().getColor(R.color.white));
             lp2.addRule(RelativeLayout.ALIGN_PARENT_START);
         }
+
+        holder.itemView.setOnLongClickListener(view -> {
+            ClipboardManager clipboardManager = (ClipboardManager) chat.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clipData = ClipData.newPlainText("copied_sms", sms.getBody());
+            assert clipboardManager != null;
+            clipboardManager.setPrimaryClip(clipData);
+            Toast.makeText(chat, "copied!", Toast.LENGTH_SHORT).show();
+            return false;
+        });
     }
 
     @Override
     public int getItemCount() {
-        return messages.size();
+        return smses.size();
     }
 
-    public class MessageHolder extends RecyclerView.ViewHolder {
+    class MessageHolder extends RecyclerView.ViewHolder {
         RelativeLayout container;
         TextView messageText;
         TextView timeDate;
 
         Chat chat;
 
-        public MessageHolder(View itemView, Chat chat) {
+        MessageHolder(View itemView, Chat chat) {
             super(itemView);
 
             this.container = (RelativeLayout) itemView.findViewById(R.id.chat_message_item_container);
             this.messageText = (TextView) itemView.findViewById(R.id.chat_item_message_text);
             this.timeDate = (TextView) itemView.findViewById(R.id.chat_item_message_date_time);
             this.chat = chat;
-
-            itemView.setOnLongClickListener(chat);
         }
     }
 }

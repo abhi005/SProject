@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Helper.MessagingAdapter;
+import Helper.SqliteDatabaseHandler;
 import Model.Conversation;
-import Model.Message;
 import utils.PortraitActivity;
 
 public class Messaging extends PortraitActivity implements View.OnLongClickListener {
@@ -42,6 +42,7 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
     private MessagingAdapter messagingAdapter;
     private LinearLayoutManager layoutManager;
 
+    private SqliteDatabaseHandler db;
     private TextView actionMenuCounterText;
     private ImageView actionMenuDeleteButton;
     private ImageView actionMenuBackButton;
@@ -65,7 +66,8 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
         });
 
         //preparing conversations data
-        prepareConversationData();
+        db = new SqliteDatabaseHandler(getApplicationContext());
+        getAllConversations();
 
         //menu button
         menuButton = (ImageView) findViewById(R.id.menu_btn);
@@ -150,6 +152,10 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
         });
     }
 
+    public void getAllConversations() {
+        conversations = db.getAllThreads();
+    }
+
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setStatusBarGradient(Activity activity) {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -161,15 +167,6 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
             window.setBackgroundDrawable(background);
         }
     }
-
-    public void prepareConversationData() {
-        conversations = new ArrayList<>();
-        ArrayList<Message> list = new ArrayList<>();
-        list.add(new Message(1, "Your airtel mobile has been registered for Fully Blocked category in NDNC registry.", "8:23 PM", "28 Sep", "self", "1909"));
-        list.add(new Message(1, "amount of rs. 17.7 is debited from A/C XXXX5284 on date 08-10-2018 Available Clear Bal is Rs. 1687.85", "8:23 PM", "28 Sep", "1909", "self"));
-        conversations.add(new Conversation(1, "1909", "1909", list ));
-    }
-
 
     public void prepareSelection(View view, int position) {
 
@@ -226,7 +223,7 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
         if(query.length() != 0) {
             List<Conversation> resultList = new ArrayList<>();
             for(Conversation c : conversations) {
-                String name = c.getPersonName();
+                String name = c.getAddress();
                 String messageText = c.getLastMessage();
                 if(name.toLowerCase().contains(query.toLowerCase())) {
                     resultList.add(c);

@@ -54,7 +54,7 @@ public class Audio extends PortraitActivity implements View.OnLongClickListener 
         setContentView(R.layout.activity_audio);
 
         //back button
-        backButton = (ImageView) findViewById(R.id.back_btn_audio);
+        backButton = (ImageView) findViewById(R.id.back_btn);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -67,9 +67,9 @@ public class Audio extends PortraitActivity implements View.OnLongClickListener 
 
 
         //menu button
-        menuButton = (ImageView) findViewById(R.id.menu_btn_audio);
+        menuButton = (ImageView) findViewById(R.id.menu_btn);
 
-        recyclerView = (RecyclerView) findViewById(R.id.audio_main_container);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         audioAdapter = new AudioAdapter(audioFiles, this);
         layoutManager = new LinearLayoutManager(this);
@@ -116,7 +116,7 @@ public class Audio extends PortraitActivity implements View.OnLongClickListener 
 
 
         //action menu
-        audioActionMenu = (ViewGroup) findViewById(R.id.audio_action_menu);
+        audioActionMenu = (ViewGroup) findViewById(R.id.action_menu);
         audioActionMenu.setVisibility(View.GONE);
 
 

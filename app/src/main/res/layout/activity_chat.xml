@@ -95,13 +95,6 @@
                 android:src="@drawable/ic_send_white_24dp" />
         </LinearLayout>
 
-        <include
-            android:id="@+id/action_menu"
-            layout="@layout/action_menu_chat"
-            android:layout_marginBottom="@dimen/action_menu_bottom_margin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone" />
     </RelativeLayout>
 
 </RelativeLayout>

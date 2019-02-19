@@ -40,8 +40,8 @@
             android:visibility="visible"
             android:id="@+id/menu_storage_btn"
             android:tint="@color/white"
-            android:padding="@dimen/tool_bar_icon_padding"
-            android:src="@drawable/add"
+            android:padding="14dp"
+            android:src="@drawable/storage"
             android:layout_alignEnd="@+id/heading_tv"
             android:layout_width="wrap_content"
             android:clickable="true"
@@ -129,7 +129,7 @@
 
         <include
             android:id="@+id/action_menu"
-            layout="@layout/action_menu_vault"
+            layout="@layout/action_menu_manager"
             android:layout_marginBottom="@dimen/action_menu_bottom_margin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

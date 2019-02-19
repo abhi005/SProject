@@ -1,14 +1,17 @@
 package com.example.jarvis.sproject;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -64,9 +67,9 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
     private ImageView selectAllButton;
     private ImageView backButton;
     private RecyclerView.LayoutManager layoutManager;
+    private LinearLayout actionMenuEncryptButton;
     private ImageView actionMenuBackButton;
     private ImageView actionMenuDeleteButton;
-    private ImageView actionMenuRenameButton;
     private ImageView actionMenuInfoButton;
 
 
@@ -105,6 +108,10 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
+
+        //setting file adapter
+        adapter = new FileManagerAdapter(directories, this);
+        recyclerView.setAdapter(adapter);
 
         //storage type button
         storageButton = (ImageView) findViewById(R.id.menu_storage_btn);
@@ -145,9 +152,7 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         searchField = (EditText) findViewById(R.id.search_field);
         searchField.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -199,7 +204,7 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         actionMenu.setVisibility(View.GONE);
 
         //action menu back button
-        actionMenuBackButton = (ImageView) findViewById(R.id.vault_action_menu_back_btn);
+        actionMenuBackButton = (ImageView) findViewById(R.id.action_menu_back_btn);
         actionMenuBackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -210,7 +215,7 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
 
 
         //action menu delete button
-        actionMenuDeleteButton = (ImageView) findViewById(R.id.vault_action_menu_delete_btn);
+        actionMenuDeleteButton = (ImageView) findViewById(R.id.action_menu_delete_btn);
         actionMenuDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -221,21 +226,85 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         });
 
 
-        //action menu rename button
-        actionMenuRenameButton = (ImageView) findViewById(R.id.vault_action_menu_rename_btn);
-        actionMenuRenameButton.setAlpha(Float.valueOf("0.5"));
-
+        //action menu encrypt button
+        actionMenuEncryptButton = (LinearLayout) findViewById(R.id.action_menu_encryption_btn);
+        actionMenuEncryptButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(FileManager.this, "encryption clicked", Toast.LENGTH_LONG).show();
+            }
+        });
 
         //action menu info button
-        actionMenuInfoButton = (ImageView) findViewById(R.id.vault_action_menu_details_btn);
+        actionMenuInfoButton = (ImageView) findViewById(R.id.action_menu_details_btn);
         actionMenuInfoButton.setAlpha(Float.valueOf("0.5"));
+    }
+
+
+    @SuppressLint("StaticFieldLeak")
+    class FetchFilesList extends AsyncTask<Void, Void, Void> {
+
+        private FileManager activity;
+
+        FetchFilesList(Context context) {
+            this.activity = (FileManager) context;
+        }
+
+        @Override
+        protected Void doInBackground(Void... paramss) {
+            directories.clear();
+            files.clear();
+            File[] dirs = currentDir.listFiles();
+
+            try {
+                for(File f : dirs) {
+                    Date lastModDate = new Date(f.lastModified());
+                    DateFormat formater = DateFormat.getDateInstance();
+                    String dateModify = formater.format(lastModDate);
+
+                    if(f.isDirectory()) {
+                        File[] fBuffer = f.listFiles();
+                        int buf = 0;
+                        if(fBuffer != null) {
+                            buf = fBuffer.length;
+                        } else {
+                            buf = 0;
+                        }
+                        String numOfItems = String.valueOf(buf);
+                        if (buf == 0) {
+                            numOfItems += " item";
+                        } else {
+                            numOfItems += " items";
+                        }
+
+                        directories.add(new FileManagerItem(f.getName(), f.getAbsolutePath(), numOfItems, dateModify, "dir", null));
+                    } else {
+                        String dataSize = FileHelper.getReadableFileSize(f.length());
+                        String ext = FileHelper.getFileExtension(f);
+                        files.add(new FileManagerItem(f.getName(), f.getAbsolutePath(), dataSize, dateModify, "file", ext));
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("file_access_exception", e.getMessage());
+            }
+            Collections.sort(directories);
+            Collections.sort(files);
+            directories.addAll(files);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+            adapter.notifyDataSetChanged();
+        }
     }
 
     public void forwardDirectory(String path) {
         currentPath.setText(path);
         currentDir = new File(path);
         paths.add(path);
-        fillList(currentDir);
+        FetchFilesList obj = new FetchFilesList(this);
+        obj.execute();
     }
 
     public void backwardDirectory() {
@@ -243,7 +312,8 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         String newPath = paths.peek();
         currentPath.setText(newPath);
         currentDir = new File(newPath);
-        fillList(currentDir);
+        FetchFilesList obj = new FetchFilesList(this);
+        obj.execute();
     }
 
     public List<String> getExternalStorageDirectories() {
@@ -303,63 +373,20 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
                     startActivity(getIntent());
                     overridePendingTransition(0, 0);
                 } else {
-                    //request denied
+                    Toast.makeText(this, "application needs storage access to work properly", Toast.LENGTH_LONG).show();
                 }
                 return;
             }
         }
     }
 
-    private void fillList(File currentDir) {
-        directories.clear();
-        files.clear();
-        File[] dirs = currentDir.listFiles();
-
-        try {
-            for(File f : dirs) {
-                Date lastModDate = new Date(f.lastModified());
-                DateFormat formater = DateFormat.getDateInstance();
-                String dateModify = formater.format(lastModDate);
-
-                if(f.isDirectory()) {
-                    File[] fBuffer = f.listFiles();
-                    int buf = 0;
-                    if(fBuffer != null) {
-                        buf = fBuffer.length;
-                    } else {
-                        buf = 0;
-                    }
-                    String numOfItems = String.valueOf(buf);
-                    if (buf == 0) {
-                        numOfItems += " item";
-                    } else {
-                        numOfItems += " items";
-                    }
-
-                    directories.add(new FileManagerItem(f.getName(), f.getAbsolutePath(), numOfItems, dateModify, "dir", null));
-                } else {
-                    String dataSize = FileHelper.getReadableFileSize(f.length());
-                    String ext = FileHelper.getFileExtension(f);
-                    files.add(new FileManagerItem(f.getName(), f.getAbsolutePath(), dataSize, dateModify, "file", ext));
-                }
-            }
-        } catch (Exception e) {
-            Log.e("file_access_exception", e.getMessage());
-        }
-        Collections.sort(directories);
-        Collections.sort(files);
-        directories.addAll(files);
-
-        //setting file adapter
-        adapter = new FileManagerAdapter(directories,this);
-        recyclerView.setAdapter(adapter);
-    }
-
     private void changeStorageType(int index) {
         if(index == 0) {
             currentStorageType = 0;
+            storageButton.setImageResource(R.drawable.storage);
         } else {
             currentStorageType = 1;
+            storageButton.setImageResource(R.drawable.sd_card);
         }
     }
 
@@ -470,11 +497,14 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
 
         }
         if (selectionCounter == 1) {
-            actionMenuRenameButton.setAlpha(Float.valueOf("1.0"));
             actionMenuInfoButton.setAlpha(Float.valueOf("1.0"));
         } else {
-            actionMenuRenameButton.setAlpha(Float.valueOf("0.5"));
             actionMenuInfoButton.setAlpha(Float.valueOf("0.5"));
+        }
+        if (selectionCounter > 0) {
+            actionMenuDeleteButton.setAlpha(Float.valueOf("1.0"));
+        } else {
+            actionMenuDeleteButton.setAlpha(Float.valueOf("0.5  "));
         }
     }
 

@@ -60,6 +60,8 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
         String date = file.getDate();
         holder.itemDetails.setText(size + " | " + date);
 
+        holder.itemView.setTag(position);
+
         //action mode
         if(!activity.isInActionMode) {
             holder.checkBox.setVisibility(View.GONE);
@@ -79,13 +81,13 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
         return files.size();
     }
 
-    public class ItemViewHolder extends RecyclerView.ViewHolder {
+    class ItemViewHolder extends RecyclerView.ViewHolder {
         TextView itemName, itemDetails;
         ImageView icon;
         FileManager activity;
         CheckBox checkBox;
 
-        public ItemViewHolder(View itemView, FileManager context) {
+        ItemViewHolder(View itemView, FileManager context) {
             super(itemView);
 
             this.itemName = (TextView) itemView.findViewById(R.id.vault_item_name);
@@ -99,11 +101,11 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
             itemView.setOnClickListener(v -> {
                 if (activity.isInActionMode) {
                     CheckBox cb = v.findViewById(R.id.vault_item_cb);
-                    activity.prepareSelection(cb, getAdapterPosition());
+                    activity.prepareSelection(cb, (int) v.getTag());
                 } else {
                     FileManagerItem item = getItem(getAdapterPosition());
                     if(item.getType().toLowerCase().equals("dir")) {
-                         activity.forwardDirectory(item.getPath());
+                        activity.forwardDirectory(item.getPath());
                     } else {
                         onFileClick(item);
                     }
@@ -113,10 +115,10 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
     }
 
     private void onFileClick(FileManagerItem item) {
-
+        FileHelper.openFile(activity, item.getPath());
     }
 
-    public FileManagerItem getItem(int position) {
+    private FileManagerItem getItem(int position) {
         return files.get(position);
     }
 
