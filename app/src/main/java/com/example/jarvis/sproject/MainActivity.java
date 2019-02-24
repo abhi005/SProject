@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import Helper.Global;
 import Helper.HomeMenuAdapter;
+import Helper.SqliteDatabaseHandler;
 import Services.SMSEncryptionService;
 import utils.CustomBottomNavigation;
 import utils.PortraitActivity;
@@ -53,6 +54,8 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         checkPermissionSms(this);
+        SqliteDatabaseHandler db = new SqliteDatabaseHandler(this);
+        db.addUserKey("12345678");
 
         // gridview
         homeMenu = (GridView) findViewById(R.id.grid_view_menu);

@@ -27,5 +27,14 @@
     <string name="internal_storage">Internal Storage</string>
     <string name="sd_card">SD Card</string>
     <string name="encrypt">Encrypt</string>
+    <string name="encrypt_file">Encrypt file</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="are_you_sure_you_want_to_delete">Are you sure you want to delete?</string>
+    <string name="folder_name">folder name</string>
+    <string name="location">Location:</string>
+    <string name="size">Size:</string>
+    <string name="last_modified">Last modified:</string>
+    <string name="type">Type:</string>
 
 </resources>

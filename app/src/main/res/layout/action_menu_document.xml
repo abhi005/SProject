@@ -11,61 +11,61 @@
         android:orientation="horizontal"
         android:background="@color/white"
         android:layout_width="wrap_content"
-        android:layout_height="56dp">
+        android:layout_height="@dimen/action_menu_height">
 
         <ImageView
-            android:id="@+id/document_action_menu_back_btn"
+            android:id="@+id/action_menu_back_btn"
             android:src="@drawable/action_menu_cancel"
             android:clickable="true"
             android:focusable="true"
-            android:padding="16dp"
+            android:padding="@dimen/action_menu_icon_padding"
             android:tint="@color/white"
             android:background="@color/primaryBlue"
-            android:layout_width="56dp"
+            android:layout_width="@dimen/action_menu_height"
             android:layout_height="match_parent" />
 
         <ImageView
-            android:id="@+id/document_action_menu_send_btn"
+            android:id="@+id/action_menu_send_btn"
             android:src="@drawable/action_menu_forward"
             android:tint="@color/grey"
             android:clickable="true"
             android:focusable="true"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="16dp"
-            android:layout_width="56dp"
+            android:padding="@dimen/action_menu_icon_padding"
+            android:layout_width="@dimen/action_menu_height"
             android:layout_height="match_parent" />
 
         <ImageView
-            android:id="@+id/document_action_menu_delete_btn"
+            android:id="@+id/action_menu_delete_btn"
             android:src="@drawable/action_menu_delete"
             android:tint="@color/grey"
             android:clickable="true"
             android:focusable="true"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="16dp"
-            android:layout_width="56dp"
+            android:padding="@dimen/action_menu_icon_padding"
+            android:layout_width="@dimen/action_menu_height"
             android:layout_height="match_parent" />
 
         <ImageView
-            android:id="@+id/document_action_menu_rename_btn"
+            android:id="@+id/action_menu_rename_btn"
             android:src="@drawable/action_menu_copy"
             android:tint="@color/grey"
             android:clickable="true"
             android:focusable="true"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="16dp"
-            android:layout_width="56dp"
+            android:padding="@dimen/action_menu_icon_padding"
+            android:layout_width="@dimen/action_menu_height"
             android:layout_height="match_parent" />
 
         <ImageView
-            android:id="@+id/document_action_menu_details_btn"
+            android:id="@+id/action_menu_details_btn"
             android:src="@drawable/action_menu_info"
             android:tint="@color/grey"
             android:clickable="true"
             android:focusable="true"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="16dp"
-            android:layout_width="56dp"
+            android:padding="@dimen/action_menu_icon_padding"
+            android:layout_width="@dimen/action_menu_height"
             android:layout_height="match_parent" />
 
     </LinearLayout>

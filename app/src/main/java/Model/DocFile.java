@@ -3,17 +3,21 @@ package Model;
 public class DocFile {
 
     private int id;
-    private String name;
-    private double size;
-    private String lastModifiedDate;
-    private String lastModifiedTime;
+    private String originalPath;
+    private String newPath;
+    private String originalExt;
+    private String date;
+    private String size;
 
-    public DocFile(int id, String name, double size, String lastModifiedDate, String lastModifiedTime) {
-        this.id = id;
-        this.name = name;
+    public DocFile() {
+    }
+
+    public DocFile(String originalPath, String newPath, String originalExt, String date, String size) {
+        this.originalPath = originalPath;
+        this.newPath = newPath;
+        this.originalExt = originalExt;
+        this.date = date;
         this.size = size;
-        this.lastModifiedDate = lastModifiedDate;
-        this.lastModifiedTime = lastModifiedTime;
     }
 
     public int getId() {
@@ -24,35 +28,43 @@ public class DocFile {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getOriginalPath() {
+        return originalPath;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setOriginalPath(String originalPath) {
+        this.originalPath = originalPath;
     }
 
-    public double getSize() {
+    public String getNewPath() {
+        return newPath;
+    }
+
+    public void setNewPath(String newPath) {
+        this.newPath = newPath;
+    }
+
+    public String getOriginalExt() {
+        return originalExt;
+    }
+
+    public void setOriginalExt(String originalExt) {
+        this.originalExt = originalExt;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getSize() {
         return size;
     }
 
-    public void setSize(double size) {
+    public void setSize(String size) {
         this.size = size;
-    }
-
-    public String getLastModifiedDate() {
-        return lastModifiedDate;
-    }
-
-    public void setLastModifiedDate(String lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
-    }
-
-    public String getLastModifiedTime() {
-        return lastModifiedTime;
-    }
-
-    public void setLastModifiedTime(String lastModifiedTime) {
-        this.lastModifiedTime = lastModifiedTime;
     }
 }

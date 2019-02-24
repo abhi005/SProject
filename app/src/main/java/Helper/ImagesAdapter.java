@@ -1,6 +1,10 @@
 package Helper;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +17,7 @@ import android.widget.ImageView;
 import com.example.jarvis.sproject.Images;
 import com.example.jarvis.sproject.R;
 
+import java.io.InputStream;
 import java.util.List;
 
 import Model.ImageFile;
@@ -20,21 +25,21 @@ import Model.ImageFile;
 public class ImagesAdapter extends BaseAdapter {
 
     private Images activity;
-    private List<ImageFile> thumbnails;
+    private List<ImageFile> images;
 
-    public ImagesAdapter(Context context, List<ImageFile> thumbnails) {
+    public ImagesAdapter(Context context, List<ImageFile> images) {
         this.activity = (Images) context;
-        this.thumbnails = thumbnails;
+        this.images = images;
     }
 
     @Override
     public int getCount() {
-        return thumbnails.size();
+        return images.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return thumbnails.get(position);
+        return images.get(position);
     }
 
     @Override
@@ -42,10 +47,11 @@ public class ImagesAdapter extends BaseAdapter {
         return position;
     }
 
+    @SuppressLint("ViewHolder")
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         convertView = LayoutInflater.from(activity).inflate(R.layout.item_layout_images, parent, false);
-        ImageView image = (ImageView) convertView.findViewById(R.id.image_thumbnail);
+        ImageView thumbnail = (ImageView) convertView.findViewById(R.id.image_thumbnail);
         CheckBox cb = (CheckBox) convertView.findViewById(R.id.image_cb);
         if(!activity.isInActionMode) {
             cb.setVisibility(View.GONE);
@@ -58,32 +64,32 @@ public class ImagesAdapter extends BaseAdapter {
                 cb.setChecked(false);
             }
         }
-        image.setImageResource(thumbnails.get(position).getId());
+        try {
+            byte[] imageData = images.get(position).getThumbnail();
+            Bitmap bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+            thumbnail.setImageBitmap(bitmap);
+        } catch (Exception e) {
+            Log.i("image_trace", "error: " + e.getMessage());
+        }
 
-        convertView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(activity.isInActionMode) {
-                    activity.prepareSelection(v, position);
-                }
+        convertView.setOnClickListener(v -> {
+            if(activity.isInActionMode) {
+                activity.prepareSelection(v, position);
             }
         });
 
-        convertView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                activity.isInActionMode = true;
-                Animation bottomUp = AnimationUtils.loadAnimation(activity, R.anim.bottom_up);
-                activity.setActionMode(bottomUp);
-                return true;
-            }
+        convertView.setOnLongClickListener(v -> {
+            activity.isInActionMode = true;
+            Animation bottomUp = AnimationUtils.loadAnimation(activity, R.anim.bottom_up);
+            activity.setActionMode(bottomUp);
+            return true;
         });
         return convertView;
     }
 
     public void updateAdapter(List<ImageFile> list) {
         for(ImageFile c : list) {
-            thumbnails.remove(c);
+            images.remove(c);
         }
         this.notifyDataSetChanged();
     }

@@ -8,7 +8,7 @@ public class FileManagerItem implements Comparable<FileManagerItem>{
     private String path;
     private String data;
     private String date;
-    private String type;
+    private String type; //values "dir", "file"
     private String ext = null;
 
     public FileManagerItem(String name, String path, String data, String date, String type, String ext) {

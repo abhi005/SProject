@@ -84,6 +84,7 @@ public class Chat extends PortraitActivity {
                     Toast.makeText(getApplicationContext(), "message can't be empty", Toast.LENGTH_LONG).show();
                 } else {
                     SmsHelper.sendSms(getApplicationContext(), msg, address);
+                    smsContent.setText("");
                     recreate();
                 }
             }

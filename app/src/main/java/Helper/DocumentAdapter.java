@@ -12,16 +12,17 @@ import com.example.jarvis.sproject.Document;
 import com.example.jarvis.sproject.R;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import Model.DocFile;
 
 public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocViewHolder> {
 
 
-    private ArrayList<DocFile> files;
+    private List<DocFile> files;
     private Document activity;
 
-    public DocumentAdapter(ArrayList<DocFile> files, Document context) {
+    public DocumentAdapter(List<DocFile> files, Document context) {
         this.files = files;
         this.activity = context;
     }
@@ -38,18 +39,11 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocVie
     public void onBindViewHolder(@NonNull DocViewHolder holder, int position) {
         DocFile docFile = files.get(position);
 
-        holder.name.setText(docFile.getName());
-        double temp = docFile.getSize();
-        String mode = "MB";
-        if (temp > 1024) {
-            temp /= 1024;
-            mode = "GB";
-        }
+        String originalPath = docFile.getOriginalPath();
+        String name = FileHelper.getFileName(originalPath);
+        holder.name.setText(name);
 
-        String size = temp + " " + mode;
-        String date = docFile.getLastModifiedDate();
-        String time = docFile.getLastModifiedTime();
-        String details = size + " | " + date + " " + time;
+        String details = docFile.getSize() + " | " + docFile.getDate();
         holder.details.setText(details);
 
 
@@ -65,6 +59,22 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocVie
                 holder.cb.setChecked(false);
             }
         }
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                activity.setActionMode();
+                return false;
+            }
+        });
+
+        holder.itemView.setOnClickListener(v -> {
+            if (activity.isInActionMode) {
+                CheckBox cb = (CheckBox) v.findViewById(R.id.item_cb);
+                activity.prepareSelection(cb, position);
+            } else {
+            }
+        });
     }
 
     @Override
@@ -84,31 +94,20 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocVie
             super(itemView);
 
 
-            name = (TextView) itemView.findViewById(R.id.document_item_name_tv);
-            details = (TextView) itemView.findViewById(R.id.document_item_details_tv);
-            cb = (CheckBox) itemView.findViewById(R.id.document_item_cb);
+            name = (TextView) itemView.findViewById(R.id.item_name);
+            details = (TextView) itemView.findViewById(R.id.item_details);
+            cb = (CheckBox) itemView.findViewById(R.id.item_cb);
             this.activity = activity;
-
-
-            itemView.setOnLongClickListener(activity);
-
-            itemView.setOnClickListener(v -> {
-                if (activity.isInActionMode) {
-                    CheckBox cb = (CheckBox) v.findViewById(R.id.document_item_cb);
-                    activity.prepareSelection(cb, getAdapterPosition());
-                } else {
-                }
-            });
         }
     }
 
 
-    public void filterList(ArrayList<DocFile> filteredList) {
+    public void filterList(List<DocFile> filteredList) {
         files = filteredList;
         notifyDataSetChanged();
     }
 
-    public void updateAdapter(ArrayList<DocFile> list) {
+    public void updateAdapter(List<DocFile> list) {
         for(DocFile f : list) {
             files.remove(f);
         }

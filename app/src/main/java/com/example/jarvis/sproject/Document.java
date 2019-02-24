@@ -3,12 +3,14 @@ package com.example.jarvis.sproject;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -20,12 +22,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import Helper.DocumentAdapter;
+import Helper.SqliteDatabaseHandler;
 import Model.DocFile;
 import utils.PortraitActivity;
 
-public class Document extends PortraitActivity implements View.OnLongClickListener {
+public class Document extends PortraitActivity {
 
 
     public boolean isInActionMode = false;
@@ -36,17 +40,18 @@ public class Document extends PortraitActivity implements View.OnLongClickListen
     private ImageView selectAllButton;
     private EditText searchField;
     private RecyclerView recyclerView;
-    private DocumentAdapter documentAdapter;
+    private DocumentAdapter adapter;
     private LinearLayoutManager layoutManager;
 
-    private ViewGroup documentActionMenu;
+    private ViewGroup actionMenu;
     private ImageView actionMenuDeleteButton;
     private ImageView actionMenuBackButton;
     private ImageView actionMenuRenameButton;
     private ImageView actionMenuInfoButton;
-    private ArrayList<DocFile> documentFiles;
-    private ArrayList<DocFile> selectionList = new ArrayList<>();
+    private List<DocFile> docFiles;
+    private List<DocFile> selectionList = new ArrayList<>();
     private int selectionCounter = 0;
+    private SqliteDatabaseHandler db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +60,7 @@ public class Document extends PortraitActivity implements View.OnLongClickListen
         setContentView(R.layout.activity_document);
 
         //back button
-        backButton = (ImageView) findViewById(R.id.back_btn_document);
+        backButton = (ImageView) findViewById(R.id.back_btn);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -63,19 +68,21 @@ public class Document extends PortraitActivity implements View.OnLongClickListen
             }
         });
 
-        //preparing conversations data
-        prepareData();
+        // fetching all encrypted doc files
+        docFiles = new ArrayList<>();
+        db = new SqliteDatabaseHandler(getApplicationContext());
+        fetchDocFiles();
 
 
         //menu button
-        menuButton = (ImageView) findViewById(R.id.menu_btn_document);
+        menuButton = (ImageView) findViewById(R.id.menu_btn);
 
-        recyclerView = (RecyclerView) findViewById(R.id.document_main_container);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
-        documentAdapter = new DocumentAdapter(documentFiles, this);
+        adapter = new DocumentAdapter(docFiles, this);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(documentAdapter);
+        recyclerView.setAdapter(adapter);
 
 
         //search bar
@@ -102,9 +109,9 @@ public class Document extends PortraitActivity implements View.OnLongClickListen
         selectAllButton.setOnClickListener(v -> {
             if(!isAllSelected) {
                 selectAllButton.setImageResource(R.drawable.checkbox_checked);
-                selectionCounter = documentFiles.size();
+                selectionCounter = docFiles.size();
                 selectionList.clear();
-                selectionList.addAll(documentFiles);
+                selectionList.addAll(docFiles);
                 isAllSelected = true;
             } else {
                 selectAllButton.setImageResource(R.drawable.checkbox_unchecked);
@@ -112,49 +119,43 @@ public class Document extends PortraitActivity implements View.OnLongClickListen
                 selectionList.clear();
                 isAllSelected = false;
             }
-            documentAdapter.notifyDataSetChanged();
+            adapter.notifyDataSetChanged();
         });
 
 
         //action menu
-        documentActionMenu = (ViewGroup) findViewById(R.id.document_action_menu);
-        documentActionMenu.setVisibility(View.GONE);
+        actionMenu = (ViewGroup) findViewById(R.id.action_menu);
+        actionMenu.setVisibility(View.GONE);
 
 
         //action menu delete button
-        actionMenuDeleteButton = (ImageView) findViewById(R.id.document_action_menu_delete_btn);
+        actionMenuDeleteButton = (ImageView) findViewById(R.id.action_menu_delete_btn);
         actionMenuDeleteButton.setOnClickListener(v -> {
-            documentAdapter.updateAdapter(selectionList);
+            adapter.updateAdapter(selectionList);
             unSetActionMode();
-            documentAdapter.notifyDataSetChanged();
+            adapter.notifyDataSetChanged();
         });
 
         //action menu back button
-        actionMenuBackButton = (ImageView) findViewById(R.id.document_action_menu_back_btn);
+        actionMenuBackButton = (ImageView) findViewById(R.id.action_menu_back_btn);
         actionMenuBackButton.setOnClickListener(v -> {
             unSetActionMode();
-            documentAdapter.notifyDataSetChanged();
+            adapter.notifyDataSetChanged();
         });
 
 
         //action menu rename button
-        actionMenuRenameButton = (ImageView) findViewById(R.id.document_action_menu_rename_btn);
+        actionMenuRenameButton = (ImageView) findViewById(R.id.action_menu_rename_btn);
         actionMenuRenameButton.setAlpha(Float.valueOf("0.5"));
 
 
         //action menu info button
-        actionMenuInfoButton = (ImageView) findViewById(R.id.document_action_menu_details_btn);
+        actionMenuInfoButton = (ImageView) findViewById(R.id.action_menu_details_btn);
         actionMenuInfoButton.setAlpha(Float.valueOf("0.5"));
     }
 
-
-    public void prepareData() {
-        documentFiles = new ArrayList<>();
-        documentFiles.add(new DocFile(1, "resume.docx", 10.48, "17/11/2017", "12.24 pm"));
-        documentFiles.add(new DocFile(2, "development.pptx", 9.08, "17/11/2017", "12.25 pm"));
-        documentFiles.add(new DocFile(3, "resume.pdf", 11.95, "17/11/2017", "12.23 pm"));
-        documentFiles.add(new DocFile(4, "project brief.pdf", 6.53, "17/11/2017", "12.23 pm"));
-        documentFiles.add(new DocFile(5, "hhh.pdf", 12.53, "25/08/2018", "1.05 am"));
+    public void fetchDocFiles() {
+        docFiles = db.getAllDocFiles();
     }
 
 
@@ -162,12 +163,12 @@ public class Document extends PortraitActivity implements View.OnLongClickListen
 
         CheckBox cb = (CheckBox) view;
         if (!cb.isChecked()) {
-            selectionList.add(documentFiles.get(position));
+            selectionList.add(docFiles.get(position));
             cb.setChecked(true);
             selectionCounter++;
         } else {
             cb.setChecked(false);
-            selectionList.remove(documentFiles.get(position));
+            selectionList.remove(docFiles.get(position));
             selectionCounter--;
         }
 
@@ -184,19 +185,19 @@ public class Document extends PortraitActivity implements View.OnLongClickListen
         isInActionMode = true;
         backButton.setVisibility(View.GONE);
         Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
-        documentActionMenu.startAnimation(bottomUp);
-        documentActionMenu.setVisibility(View.VISIBLE);
+        actionMenu.startAnimation(bottomUp);
+        actionMenu.setVisibility(View.VISIBLE);
         selectAllButton.setVisibility(View.VISIBLE);
         menuButton.setVisibility(View.GONE);
-        documentAdapter.notifyDataSetChanged();
+        adapter.notifyDataSetChanged();
     }
 
     public void unSetActionMode() {
         isInActionMode = false;
         backButton.setVisibility(View.VISIBLE);
         Animation topDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
-        documentActionMenu.startAnimation(topDown);
-        documentActionMenu.setVisibility(View.GONE);
+        actionMenu.startAnimation(topDown);
+        actionMenu.setVisibility(View.GONE);
         selectAllButton.setVisibility(View.GONE);
         menuButton.setVisibility(View.VISIBLE);
         selectionCounter = 0;
@@ -207,15 +208,15 @@ public class Document extends PortraitActivity implements View.OnLongClickListen
     private void searchQueryFilter(String query) {
         if(query.length() != 0) {
             ArrayList<DocFile> resultList = new ArrayList<>();
-            for(DocFile f : documentFiles) {
-                String name = f.getName();
+            for(DocFile f : docFiles) {
+                String name = f.getOriginalPath();
                 if(name.toLowerCase().contains(query.toLowerCase())) {
                     resultList.add(f);
                 }
             }
-            documentAdapter.filterList(resultList);
+            adapter.filterList(resultList);
         } else {
-            documentAdapter.filterList(documentFiles);
+            adapter.filterList(docFiles);
         }
     }
 
@@ -223,7 +224,7 @@ public class Document extends PortraitActivity implements View.OnLongClickListen
     public void onBackPressed() {
         if(isInActionMode) {
             unSetActionMode();
-            documentAdapter.notifyDataSetChanged();
+            adapter.notifyDataSetChanged();
         } else {
             super.onBackPressed();
         }
@@ -241,9 +242,9 @@ public class Document extends PortraitActivity implements View.OnLongClickListen
         }
     }
 
-    @Override
+    /*@Override
     public boolean onLongClick(View v) {
         setActionMode();
         return true;
-    }
+    }*/
 }

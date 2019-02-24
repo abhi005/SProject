@@ -1,12 +1,15 @@
 package com.example.jarvis.sproject;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -21,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Helper.ImagesAdapter;
+import Helper.SqliteDatabaseHandler;
 import Model.ImageFile;
 import utils.PortraitActivity;
 
@@ -33,7 +37,7 @@ public class Images extends PortraitActivity {
     public boolean isAllSelected = false;
     private List<ImageFile> selectionList = new ArrayList<>();
     private int selectionCounter = 0;
-    private List<ImageFile> thumbnails;
+    private List<ImageFile> images;
 
     private ViewGroup actionMenu;
     private ImageView menuButton;
@@ -42,6 +46,7 @@ public class Images extends PortraitActivity {
     private ImageView actionMenuRenameButton;
     private ImageView actionMenuInfoButton;
     private ImageView actionMenuDeleteButton;
+    private SqliteDatabaseHandler db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,15 +56,9 @@ public class Images extends PortraitActivity {
 
         //back button
         ImageView backButton = (ImageView) findViewById(R.id.back_btn);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Images.super.onBackPressed();
-            }
-        });
+        backButton.setOnClickListener(v -> Images.super.onBackPressed());
 
         gridView = (GridView) findViewById(R.id.gridview);
-        prepareData();
 
         int iDisplayWidth = getResources().getDisplayMetrics().widthPixels;
         Resources resources = getApplicationContext().getResources();
@@ -70,7 +69,13 @@ public class Images extends PortraitActivity {
             float px = convertDpToPixel(dp, getApplicationContext());
             gridView.setColumnWidth(Math.round(px));
         }
-        adapter = new ImagesAdapter(Images.this, thumbnails);
+
+        //retriving all images from database
+        db = new SqliteDatabaseHandler(getApplicationContext());
+        fetchImageFiles();
+
+        images = new ArrayList<>();
+        adapter = new ImagesAdapter(Images.this, images);
         gridView.setAdapter(adapter);
 
         //action menu
@@ -87,12 +92,9 @@ public class Images extends PortraitActivity {
 
         //action menu back button
         actionMenuBackButton = (ImageView) findViewById(R.id.images_action_menu_back_btn);
-        actionMenuBackButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                unSetActionMode();
-                adapter.notifyDataSetChanged();
-            }
+        actionMenuBackButton.setOnClickListener(v -> {
+            unSetActionMode();
+            adapter.notifyDataSetChanged();
         });
 
         //action menu rename button
@@ -115,24 +117,25 @@ public class Images extends PortraitActivity {
         });
 
         //select all button
-        selectAllButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!isAllSelected) {
-                    selectAllButton.setImageResource(R.drawable.checkbox_checked);
-                    selectionCounter = thumbnails.size();
-                    selectionList.clear();
-                    selectionList.addAll(thumbnails);
-                    isAllSelected = true;
-                } else {
-                    selectAllButton.setImageResource(R.drawable.checkbox_unchecked);
-                    selectionCounter = 0;
-                    selectionList.clear();
-                    isAllSelected = false;
-                }
-                adapter.notifyDataSetChanged();
+        selectAllButton.setOnClickListener(v -> {
+            if(!isAllSelected) {
+                selectAllButton.setImageResource(R.drawable.checkbox_checked);
+                selectionCounter = images.size();
+                selectionList.clear();
+                selectionList.addAll(images);
+                isAllSelected = true;
+            } else {
+                selectAllButton.setImageResource(R.drawable.checkbox_unchecked);
+                selectionCounter = 0;
+                selectionList.clear();
+                isAllSelected = false;
             }
+            adapter.notifyDataSetChanged();
         });
+    }
+
+    public void fetchImageFiles() {
+        images = db.getAllImages();
     }
 
     @Override
@@ -174,15 +177,6 @@ public class Images extends PortraitActivity {
         adapter.notifyDataSetChanged();
     }
 
-    private void prepareData() {
-        thumbnails = new ArrayList<>();
-        thumbnails.add(new ImageFile(R.drawable.image1));
-        thumbnails.add(new ImageFile(R.drawable.image2));
-        thumbnails.add(new ImageFile(R.drawable.image3));
-        thumbnails.add(new ImageFile(R.drawable.image4));
-        thumbnails.add(new ImageFile(R.drawable.image5));
-    }
-
     private float convertDpToPixel(float dp, Context context) {
         Resources resource = context.getResources();
         DisplayMetrics metrics = resource.getDisplayMetrics();
@@ -192,12 +186,12 @@ public class Images extends PortraitActivity {
     public void prepareSelection(View view, int position) {
         CheckBox cb = (CheckBox) view.findViewById(R.id.image_cb);
         if (!cb.isChecked()) {
-            selectionList.add(thumbnails.get(position));
+            selectionList.add(images.get(position));
             cb.setChecked(true);
             selectionCounter++;
         } else {
             cb.setChecked(false);
-            selectionList.remove(thumbnails.get(position));
+            selectionList.remove(images.get(position));
             selectionCounter--;
 
         }
