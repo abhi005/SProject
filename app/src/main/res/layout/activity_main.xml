@@ -30,8 +30,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_alignBottom="@id/header_bg"
-                android:scaleType="fitXY"
-                app:srcCompat="@drawable/wave_pattern" />
+                android:scaleType="fitCenter"
+                android:layout_marginBottom="-24dp"
+                android:background="@drawable/wave_animation_list" />
 
             <LinearLayout
                 android:id="@+id/header_linear_layout"

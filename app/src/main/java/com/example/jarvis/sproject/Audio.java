@@ -20,12 +20,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import Helper.AudioAdapter;
+import Helper.SqliteDatabaseHandler;
 import Model.AudioFile;
 import utils.PortraitActivity;
 
-public class Audio extends PortraitActivity implements View.OnLongClickListener {
+public class Audio extends PortraitActivity {
 
     public boolean isInActionMode = false;
     public boolean isAllSelected = false;
@@ -37,14 +39,15 @@ public class Audio extends PortraitActivity implements View.OnLongClickListener 
     private RecyclerView recyclerView;
     private AudioAdapter audioAdapter;
     private LinearLayoutManager layoutManager;
+    private SqliteDatabaseHandler db;
 
     private ViewGroup audioActionMenu;
     private ImageView actionMenuDeleteButton;
     private ImageView actionMenuBackButton;
     private ImageView actionMenuRenameButton;
     private ImageView actionMenuInfoButton;
-    private ArrayList<AudioFile> audioFiles;
-    private ArrayList<AudioFile> selectionList = new ArrayList<>();
+    private List<AudioFile> audioFiles;
+    private List<AudioFile> selectionList = new ArrayList<>();
     private int selectionCounter = 0;
 
     @Override
@@ -62,8 +65,10 @@ public class Audio extends PortraitActivity implements View.OnLongClickListener 
             }
         });
 
-        //preparing conversations data
-        prepareData();
+        //fetching all encrypted audio files
+        audioFiles = new ArrayList<>();
+        db = new SqliteDatabaseHandler(this);
+        fetchAudioFiles();
 
 
         //menu button
@@ -146,13 +151,8 @@ public class Audio extends PortraitActivity implements View.OnLongClickListener 
         actionMenuInfoButton.setAlpha(Float.valueOf("0.5"));
     }
 
-    private void prepareData() {
-        audioFiles = new ArrayList<>();
-        audioFiles.add(new AudioFile(1, "The Chainsmoker - closer", 10.48, "17/11/2017", "12.24 pm", R.drawable.image1));
-        audioFiles.add(new AudioFile(2, "Cheap thrills", 9.08, "17/11/2017", "12.25 pm", R.drawable.image2));
-        audioFiles.add(new AudioFile(3, "Mera Intekam Dekhegi", 11.95, "17/11/2017", "12.23 pm", R.drawable.image3));
-        audioFiles.add(new AudioFile(4, "Tu hi hai aashiqui", 6.53, "17/11/2017", "12.23 pm", R.drawable.image4));
-        audioFiles.add(new AudioFile(5, "Girls like you", 12.53, "25/08/2018", "1.05 am",R.drawable.image5));
+    private void fetchAudioFiles() {
+        audioFiles = db.getAllAudioFiles();
     }
 
     public void prepareSelection(View view, int position) {
@@ -203,9 +203,9 @@ public class Audio extends PortraitActivity implements View.OnLongClickListener 
     //search query filter method
     private void searchQueryFilter(String query) {
         if(query.length() != 0) {
-            ArrayList<AudioFile> resultList = new ArrayList<>();
+            List<AudioFile> resultList = new ArrayList<>();
             for(AudioFile f : audioFiles) {
-                String name = f.getName();
+                String name = f.getOriginalPath();
                 if(name.toLowerCase().contains(query.toLowerCase())) {
                     resultList.add(f);
                 }
@@ -236,11 +236,5 @@ public class Audio extends PortraitActivity implements View.OnLongClickListener 
             window.setNavigationBarColor(activity.getResources().getColor(android.R.color.transparent));
             window.setBackgroundDrawable(background);
         }
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        setActionMode();
-        return true;
     }
 }

@@ -1,17 +1,19 @@
 package Model;
 
+import android.support.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class Conversation {
+public class Conversation{
 
     private int conversationID;
     private String address;
     private String lastMessage;
     private String latestDate;
-    private int read;
+    private int read; // 1 = seen, 0 = not seen
 
     public Conversation() {}
 

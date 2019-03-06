@@ -13,15 +13,16 @@ import com.example.jarvis.sproject.R;
 import com.example.jarvis.sproject.Video;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import Model.VideoFile;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHolder> {
 
-    private ArrayList<VideoFile> files;
+    private List<VideoFile> files;
     private Video activity;
 
-    public VideoAdapter(ArrayList<VideoFile> files, Video context) {
+    public VideoAdapter(List<VideoFile> files, Video context) {
         this.files = files;
         this.activity = context;
     }
@@ -37,20 +38,12 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     public void onBindViewHolder(@NonNull VideoViewHolder holder, int position) {
         VideoFile videoFile = files.get(position);
 
-        holder.name.setText(videoFile.getName());
-        double temp = videoFile.getSize();
-        String mode = "MB";
-        if (temp > 1024) {
-            temp /= 1024;
-            mode = "GB";
-        }
+        String originalPath = videoFile.getOriginalPath();
+        String name = FileHelper.getFileName(originalPath);
+        holder.name.setText(name);
 
-        String size = temp + " " + mode;
-        String duration = videoFile.getDuration();
-        String details = size + " | " + duration;
+        String details = videoFile.getDuration() + " | " + videoFile.getDate();
         holder.details.setText(details);
-        holder.image.setImageResource(videoFile.getImage());
-
 
         //checking for action mode status
         if(!activity.isInActionMode) {
@@ -64,6 +57,20 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                 holder.cb.setChecked(false);
             }
         }
+
+
+        holder.itemView.setOnLongClickListener(view -> {
+            activity.setActionMode();
+            return false;
+        });
+
+        holder.itemView.setOnClickListener(v -> {
+            if (activity.isInActionMode) {
+                CheckBox cb = (CheckBox) v.findViewById(R.id.item_cb);
+                activity.prepareSelection(cb, position);
+            } else {
+            }
+        });
     }
 
     @Override
@@ -73,7 +80,6 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
     public class VideoViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView image;
         TextView name;
         TextView details;
         CheckBox cb;
@@ -83,33 +89,19 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         public VideoViewHolder(View itemView, Video context) {
             super(itemView);
 
-
-            image = (ImageView) itemView.findViewById(R.id.video_item_image);
-            name = (TextView) itemView.findViewById(R.id.video_item_name_tv);
-            details = (TextView) itemView.findViewById(R.id.video_item_details_tv);
-            cb = (CheckBox) itemView.findViewById(R.id.video_item_cb);
+            name = (TextView) itemView.findViewById(R.id.item_name);
+            details = (TextView) itemView.findViewById(R.id.item_details);
+            cb = (CheckBox) itemView.findViewById(R.id.item_cb);
             this.activity = context;
-
-
-            itemView.setOnLongClickListener(activity);
-
-            itemView.setOnClickListener(v -> {
-                if (activity.isInActionMode) {
-                    CheckBox cb = (CheckBox) v.findViewById(R.id.video_item_cb);
-                    activity.prepareSelection(cb, getAdapterPosition());
-                } else {
-                }
-            });
         }
     }
 
-
-    public void filterList(ArrayList<VideoFile> filteredList) {
+    public void filterList(List<VideoFile> filteredList) {
         files = filteredList;
         notifyDataSetChanged();
     }
 
-    public void updateAdapter(ArrayList<VideoFile> list) {
+    public void updateAdapter(List<VideoFile> list) {
         for(VideoFile f : list) {
             files.remove(f);
         }

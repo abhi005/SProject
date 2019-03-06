@@ -13,10 +13,13 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import Model.AudioFile;
 import Model.Conversation;
 import Model.DocFile;
 import Model.ImageFile;
 import Model.LocalSms;
+import Model.VideoFile;
+import Model.ZipFile;
 
 public class SqliteDatabaseHandler extends SQLiteOpenHelper {
 
@@ -32,13 +35,11 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
     private static final String SMS_KEY_SENT_DATE = "sentDate";
     private static final String SMS_KEY_BODY = "body";
     private static final String SMS_KEY_ADDRESS = "address";
-    private static final String[] SMS_COLUMNS = {SMS_KEY_THREAD_ID, SMS_KEY_TYPE, SMS_KEY_READ, SMS_KEY_DATE, SMS_KEY_SENT_DATE, SMS_KEY_BODY, SMS_KEY_ADDRESS};
 
     // secret key table attributes
     private static final String TABLE_SECRET = "secret";
     private static final String SECRET_KEY_ID = "id";
     private static final String SECRET_KEY_USERKEY = "userkey";
-    private static final String[] SECRET_COLUMNS = {SECRET_KEY_ID, SECRET_KEY_USERKEY};
 
 
     //encrypted file tabels
@@ -46,7 +47,6 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
     private static final String TABLE_AUDIO = "audio";
     private static final String TABLE_VIDEO = "video";
     private static final String TABLE_DOCS = "docs";
-    private static final String TABLE_DIRECTORY = "directory";
     private static final String TABLE_ZIP = "zip";
     private static final String FILE_KEY_ID = "id";
     private static final String FILE_KEY_ORIGINAL_PATH = "originalPath";
@@ -77,22 +77,22 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
                 + FILE_KEY_SIZE + " TEXT, " + FILE_KEY_THUMBNAIL + " BLOB )";
 
         String CREATION_TABLE_VIDEO = "CREATE TABLE " + TABLE_VIDEO + " ( "
-                + FILE_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + FILE_KEY_ORIGINAL_PATH + " TEXT, "
+                + FILE_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + FILE_KEY_ORIGINAL_PATH + " TEXT NOT NULL UNIQUE, "
                 + FILE_KEY_NEW_PATH + " TEXT, " + FILE_KEY_ORIGINAL_EXT + " TEXT, " + FILE_KEY_DATE + " TEXT, "
-                + FILE_KEY_SIZE + " TEXT, " + FILE_KEY_DURATION + " TEXT, " + FILE_KEY_THUMBNAIL + " BLOB )";
+                + FILE_KEY_SIZE + " TEXT, " + FILE_KEY_DURATION + " TEXT )";
 
         String CREATION_TABLE_AUDIO = "CREATE TABLE " + TABLE_AUDIO + " ( "
-                + FILE_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + FILE_KEY_ORIGINAL_PATH + " TEXT, "
+                + FILE_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + FILE_KEY_ORIGINAL_PATH + " TEXT NOT NULL UNIQUE, "
                 + FILE_KEY_NEW_PATH + " TEXT, " + FILE_KEY_ORIGINAL_EXT + " TEXT, " + FILE_KEY_DATE + " TEXT, "
                 + FILE_KEY_SIZE + " TEXT )";
 
         String CREATION_TABLE_DOCS = "CREATE TABLE " + TABLE_DOCS + " ( "
-                + FILE_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + FILE_KEY_ORIGINAL_PATH + " TEXT, "
+                + FILE_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + FILE_KEY_ORIGINAL_PATH + " TEXT NOT NULL UNIQUE, "
                 + FILE_KEY_NEW_PATH + " TEXT, " + FILE_KEY_ORIGINAL_EXT + " TEXT, " + FILE_KEY_DATE + " TEXT, "
                 + FILE_KEY_SIZE + " TEXT )";
 
         String CREATION_TABEL_ZIP = "CREATE TABLE " + TABLE_ZIP + " ( "
-                + FILE_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + FILE_KEY_ORIGINAL_PATH + " TEXT, "
+                + FILE_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + FILE_KEY_ORIGINAL_PATH + " TEXT NOT NULL UNIQUE, "
                 + FILE_KEY_NEW_PATH + " TEXT, " + FILE_KEY_ORIGINAL_EXT + " TEXT, " + FILE_KEY_DATE + " TEXT, "
                 + FILE_KEY_SIZE + " TEXT )";
 
@@ -187,6 +187,14 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         values.put(SMS_KEY_ADDRESS, sms.getAddress());
         db.insert(TABLE_SMS,null, values);
         db.close();
+    }
+
+    void readSms(String address) {
+        ContentValues values = new ContentValues();
+        values.put(SMS_KEY_READ, 1);
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.update(TABLE_SMS, values, SMS_KEY_ADDRESS + " = ?", new String[] {address});
     }
 
     public List<Conversation> getAllThreads() {
@@ -293,6 +301,116 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
     }
 
 
+    // AUDIO FILE
+    void addAudio(AudioFile f) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(FILE_KEY_ORIGINAL_PATH, f.getOriginalPath());
+        values.put(FILE_KEY_NEW_PATH, f.getNewPath());
+        values.put(FILE_KEY_ORIGINAL_EXT, f.getOriginalExt());
+        values.put(FILE_KEY_DATE, f.getDate());
+        values.put(FILE_KEY_SIZE, f.getSize());
+        db.insert(TABLE_AUDIO, null, values);
+        db.close();
+    }
+
+    public List<AudioFile> getAllAudioFiles() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        List<AudioFile> list = new ArrayList<>();
+
+        String query = "SELECT * FROM " + TABLE_AUDIO;
+        @SuppressLint("Recycle") Cursor c = db.rawQuery(query, null);
+        if (c.moveToFirst()) {
+            do {
+                AudioFile f = new AudioFile();
+                f.setId(Integer.parseInt(c.getString(0)));
+                f.setOriginalPath(c.getString(1));
+                f.setNewPath(c.getString(2));
+                f.setOriginalExt(c.getString(3));
+                f.setDate(c.getString(4));
+                f.setSize(c.getString(5));
+                list.add(f);
+            } while (c.moveToNext());
+        }
+        db.close();
+        return list;
+    }
+
+
+    // VIDEO FILE
+    void addVideo(VideoFile f) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(FILE_KEY_ORIGINAL_PATH, f.getOriginalPath());
+        values.put(FILE_KEY_NEW_PATH, f.getNewPath());
+        values.put(FILE_KEY_ORIGINAL_EXT, f.getOriginalExt());
+        values.put(FILE_KEY_DATE, f.getDate());
+        values.put(FILE_KEY_SIZE, f.getSize());
+        values.put(FILE_KEY_DURATION, f.getDuration());
+        db.insert(TABLE_VIDEO, null, values);
+        db.close();
+    }
+
+    public List<VideoFile> getAllVideoFiles() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        List<VideoFile> list = new ArrayList<>();
+
+        String query = "SELECT * FROM " + TABLE_VIDEO;
+        @SuppressLint("Recycle") Cursor c = db.rawQuery(query, null);
+        if (c.moveToFirst()) {
+            do {
+                VideoFile f = new VideoFile();
+                f.setId(Integer.parseInt(c.getString(0)));
+                f.setOriginalPath(c.getString(1));
+                f.setNewPath(c.getString(2));
+                f.setOriginalExt(c.getString(3));
+                f.setDate(c.getString(4));
+                f.setSize(c.getString(5));
+                f.setDuration(c.getString(6));
+                list.add(f);
+            } while (c.moveToNext());
+        }
+        db.close();
+        return list;
+    }
+
+
+    // ZIP FILE
+
+    void addZip(ZipFile f) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(FILE_KEY_ORIGINAL_PATH, f.getOriginalPath());
+        values.put(FILE_KEY_NEW_PATH, f.getNewPath());
+        values.put(FILE_KEY_ORIGINAL_EXT, f.getOriginalExt());
+        values.put(FILE_KEY_DATE, f.getDate());
+        values.put(FILE_KEY_SIZE, f.getSize());
+        db.insert(TABLE_ZIP, null, values);
+        db.close();
+    }
+
+    public List<ZipFile> getAllZipFiles() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        List<ZipFile> list = new ArrayList<>();
+
+        String query = "SELECT * FROM " + TABLE_ZIP;
+        @SuppressLint("Recycle") Cursor c = db.rawQuery(query, null);
+        if (c.moveToFirst()) {
+            do {
+                ZipFile f = new ZipFile();
+                f.setId(Integer.parseInt(c.getString(0)));
+                f.setOriginalPath(c.getString(1));
+                f.setNewPath(c.getString(2));
+                f.setOriginalExt(c.getString(3));
+                f.setDate(c.getString(4));
+                f.setSize(c.getString(5));
+                list.add(f);
+            } while (c.moveToNext());
+        }
+        db.close();
+        return list;
+    }
+
     // secret key methods
     public void addUserKey(String key) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -308,11 +426,11 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         db.close();
     }
 
-    private int updateUserKey(String key) {
+    private void updateUserKey(String key) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(SECRET_KEY_USERKEY, key);
-        return db.update(TABLE_SECRET, values, null, null);
+        db.update(TABLE_SECRET, values, null, null);
     }
 
     String getUserKey() {

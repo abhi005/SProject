@@ -6,12 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.ThumbnailUtils;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.support.v4.content.FileProvider;
-import android.support.v4.content.MimeTypeFilter;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
@@ -24,7 +23,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.security.Key;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -34,10 +32,11 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.spec.SecretKeySpec;
 
+import Model.AudioFile;
 import Model.DocFile;
 import Model.ImageFile;
-
-import static Helper.Global.thumbSize;
+import Model.VideoFile;
+import Model.ZipFile;
 
 public class FileHelper {
 
@@ -79,7 +78,7 @@ public class FileHelper {
         else return "";
     }
 
-    public static String getFileExtension(String path) {
+    private static String getFileExtension(String path) {
         String[] temp = path.split("/");
         String fileName = temp[temp.length - 1];
         if(fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
@@ -87,7 +86,7 @@ public class FileHelper {
         else return "";
     }
 
-    public static void openFile(Context context, String path) {
+    static void openFile(Context context, String path) {
         Uri uriForFile;
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             uriForFile = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".my.package.name.provider", new File(path));
@@ -155,7 +154,7 @@ public class FileHelper {
     }
 
 
-    public static void encryptFile(Context context, String path, String sdCardPath) {
+    static void encryptFile(Context context, String path, String sdCardPath) {
 
         SqliteDatabaseHandler db = new SqliteDatabaseHandler(context);
 
@@ -190,9 +189,22 @@ public class FileHelper {
                 ImageFile f = new ImageFile(path, newPath + ".serg", ext, dateModify, getReadableFileSize(file.length()), thumbnail);
                 db.addImage(f);
                 baos.close();
-            } else if(Global.docFileTypes.contains(ext.toLowerCase())) {
+            } else if (Global.docFileTypes.contains(ext.toLowerCase())) {
                 DocFile f = new DocFile(path, newPath + ".serg", ext, dateModify, getReadableFileSize(file.length()));
                 db.addDoc(f);
+            } else if (Global.audioFileTypes.contains(ext.toLowerCase())) {
+                AudioFile f = new AudioFile(path, newPath + ".serg", ext, dateModify, getReadableFileSize(file.length()));
+                db.addAudio(f);
+            } else if (Global.videoFileTypes.contains(ext.toLowerCase())) {
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(file.getAbsolutePath());
+                String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                retriever.release();
+                VideoFile f = new VideoFile(path, newPath + ".serg", ext, dateModify, getReadableFileSize(file.length()), time);
+                db.addVideo(f);
+            } else if (Global.zipFileTypes.contains((ext.toLowerCase()))) {
+                ZipFile f = new ZipFile(path, newPath + ".serg", ext, dateModify, getReadableFileSize(file.length()));
+                db.addZip(f);
             }
             db.close();
             //file.delete();

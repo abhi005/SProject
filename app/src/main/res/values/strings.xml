@@ -12,11 +12,10 @@
     <string name="messaging">Messaging</string>
     <string name="message_text">message text</string>
     <string name="title_activity_person">person</string>
-    <string name="enter_text">Enter text...</string>
+    <string name="enter_text">Enter text&#8230;</string>
     <string name="_0_item_selected">0 item selected</string>
     <string name="images">Images</string>
     <string name="vault">Vault</string>
-    <string name="video_file_name">video file name</string>
     <string name="audio_file_name">audio file name</string>
     <string name="documents">Documents</string>
     <string name="document_file_name">document file name</string>
@@ -36,5 +35,7 @@
     <string name="size">Size:</string>
     <string name="last_modified">Last modified:</string>
     <string name="type">Type:</string>
+    <string name="zip">Zip</string>
+    <string name="video">Video</string>
 
 </resources>

@@ -137,34 +137,29 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         storageButtonDialog = new Dialog(this);
         storageButton.setOnClickListener(v -> {
             storageButtonDialog.setContentView(R.layout.popup_storage_type);
+            Objects.requireNonNull(storageButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
             Objects.requireNonNull(storageButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             storageButtonDialog.show();
 
             //storage type popup on click listeners
             LinearLayout internalStorageBtn = (LinearLayout) storageButtonDialog.findViewById(R.id.internal_storage_btn);
             LinearLayout sdcardStorageBtn = (LinearLayout) storageButtonDialog.findViewById(R.id.sd_card_btn);
-            internalStorageBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //internal storage
-                    changeStorageType(0);
-                    String path = Environment.getExternalStorageDirectory().getPath();
-                    paths.clear();
-                    forwardDirectory(path);
-                    storageButtonDialog.dismiss();
-                }
+            internalStorageBtn.setOnClickListener(view -> {
+                //internal storage
+                changeStorageType(0);
+                String path = Environment.getExternalStorageDirectory().getPath();
+                paths.clear();
+                forwardDirectory(path);
+                storageButtonDialog.dismiss();
             });
-            sdcardStorageBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //sd card
-                    changeStorageType(1);
-                    List<String> tempList = getExternalStorageDirectories();
-                    String path = tempList.get(0);
-                    paths.clear();
-                    forwardDirectory(path);
-                    storageButtonDialog.dismiss();
-                }
+            sdcardStorageBtn.setOnClickListener(view -> {
+                //sd card
+                changeStorageType(1);
+                List<String> tempList1 = getExternalStorageDirectories();
+                String path = tempList1.get(0);
+                paths.clear();
+                forwardDirectory(path);
+                storageButtonDialog.dismiss();
             });
         });
 

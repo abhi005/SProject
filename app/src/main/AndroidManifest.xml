@@ -12,7 +12,6 @@
     <uses-permission android:name="android.permission.RECEIVE_MMS" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -20,7 +19,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FileManager"></activity>
+        <activity android:name=".Zip"></activity>
+        <activity android:name=".FileManager" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -43,10 +43,10 @@
         <activity android:name=".Audio" />
         <activity android:name=".Video" />
         <activity android:name=".Document" />
-        
+
         <provider
-            android:authorities="${applicationId}.my.package.name.provider"
             android:name="android.support.v4.content.FileProvider"
+            android:authorities="${applicationId}.my.package.name.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -55,18 +55,15 @@
         </provider>
 
         <service
-            android:process=":SMSEncryptionService"
             android:name="Services.SMSEncryptionService"
-            android:enabled="true">
-        </service>
+            android:enabled="true"
+            android:process=":SMSEncryptionService"></service>
 
         <receiver
             android:name="Services.SMSEncryptionRestarterBroadcastReceiver"
             android:enabled="true"
             android:exported="true"
-            android:label="RestartServiceWhenStopped">
-        </receiver>
-
+            android:label="RestartServiceWhenStopped"></receiver>
     </application>
 
 </manifest>

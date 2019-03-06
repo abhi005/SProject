@@ -8,44 +8,40 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import com.example.jarvis.sproject.Document;
 import com.example.jarvis.sproject.R;
+import com.example.jarvis.sproject.Zip;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import Model.DocFile;
+import Model.ZipFile;
 
-public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocViewHolder> {
+public class ZipAdapter extends RecyclerView.Adapter<ZipAdapter.ViewHolder>{
 
+    private List<ZipFile> files;
+    private Zip activity;
 
-    private List<DocFile> files;
-    private Document activity;
-
-    public DocumentAdapter(List<DocFile> files, Document context) {
+    public ZipAdapter(List<ZipFile> files, Zip context) {
         this.files = files;
         this.activity = context;
     }
 
-
     @NonNull
     @Override
-    public DocViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_document, parent, false);
-        return new DocumentAdapter.DocViewHolder(itemView, activity);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_zip, parent, false);
+        return new ZipAdapter.ViewHolder(itemView, activity);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull DocViewHolder holder, int position) {
-        DocFile docFile = files.get(position);
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        ZipFile zipFile = files.get(position);
 
-        String originalPath = docFile.getOriginalPath();
+        String originalPath = zipFile.getOriginalPath();
         String name = FileHelper.getFileName(originalPath);
         holder.name.setText(name);
 
-        String details = docFile.getSize() + " | " + docFile.getDate();
+        String details = zipFile.getSize() + " | " + zipFile.getDate();
         holder.details.setText(details);
-
 
         //checking for action mode status
         if(!activity.isInActionMode) {
@@ -79,17 +75,16 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocVie
         return files.size();
     }
 
-    public class DocViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder{
 
         TextView name;
         TextView details;
         CheckBox cb;
 
-        Document activity;
+        Zip activity;
 
-        public DocViewHolder(View itemView, Document activity) {
+        public ViewHolder(View itemView, Zip activity) {
             super(itemView);
-
 
             name = (TextView) itemView.findViewById(R.id.item_name);
             details = (TextView) itemView.findViewById(R.id.item_details);
@@ -98,14 +93,13 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocVie
         }
     }
 
-
-    public void filterList(List<DocFile> filteredList) {
+    public void filterList(List<ZipFile> filteredList) {
         files = filteredList;
         notifyDataSetChanged();
     }
 
-    public void updateAdapter(List<DocFile> list) {
-        for(DocFile f : list) {
+    public void updateAdapter(List<ZipFile> list) {
+        for(ZipFile f : list) {
             files.remove(f);
         }
         notifyDataSetChanged();

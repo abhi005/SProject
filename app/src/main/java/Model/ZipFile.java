@@ -1,6 +1,6 @@
 package Model;
 
-public class VideoFile {
+public class ZipFile {
 
     private int id;
     private String originalPath;
@@ -8,18 +8,15 @@ public class VideoFile {
     private String originalExt;
     private String date;
     private String size;
-    private String duration;
 
-    public VideoFile() {
-    }
+    public ZipFile() {}
 
-    public VideoFile(String originalPath, String newPath, String originalExt, String date, String size, String duration) {
+    public ZipFile(String originalPath, String newPath, String originalExt, String date, String size) {
         this.originalPath = originalPath;
         this.newPath = newPath;
         this.originalExt = originalExt;
         this.date = date;
         this.size = size;
-        this.duration = duration;
     }
 
     public int getId() {
@@ -68,13 +65,5 @@ public class VideoFile {
 
     public void setSize(String size) {
         this.size = size;
-    }
-
-    public String getDuration() {
-        return duration;
-    }
-
-    public void setDuration(String duration) {
-        this.duration = duration;
     }
 }

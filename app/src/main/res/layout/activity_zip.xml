@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    tools:context=".Video">
+    tools:context=".Zip">
 
     <RelativeLayout
         android:id="@+id/app_titlebar"
@@ -17,7 +16,7 @@
         <ImageView
             android:id="@+id/back_btn"
             android:layout_alignStart="@+id/heading_tv"
-            android:padding="16dp"
+            android:padding="@dimen/tool_bar_icon_padding"
             android:src="@drawable/back_arrow"
             android:scaleType="centerInside"
             android:tint="@color/white"
@@ -29,7 +28,7 @@
 
         <TextView
             android:id="@+id/heading_tv"
-            android:text="@string/video"
+            android:text="@string/zip"
             android:textSize="@dimen/heading"
             android:textColor="@color/white"
             android:gravity="center"
@@ -80,7 +79,7 @@
             android:drawableStart="@drawable/ic_search_black_18dp"
             android:textColor="@color/grey"
             android:textColorHint="@color/lightGrey"
-            android:drawablePadding="6dp"
+            android:drawablePadding="8dp"
             android:background="@drawable/edittext_rounded_corner"
             android:inputType="textPersonName"
             android:hint="@string/search" />
@@ -108,7 +107,8 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:layout_marginBottom="@dimen/action_menu_bottom_margin"
-            layout="@layout/action_menu_video" />
+            layout="@layout/action_menu_audio" />
 
     </RelativeLayout>
+
 </RelativeLayout>

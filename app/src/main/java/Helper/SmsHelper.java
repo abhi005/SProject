@@ -31,4 +31,9 @@ public class SmsHelper {
         smsManager.sendTextMessage(address, null, msg, null, null);
         Toast.makeText(context, "Message sent", Toast.LENGTH_LONG).show();
     }
+
+    public static void readSms(Context context, String address) {
+        SqliteDatabaseHandler db = new SqliteDatabaseHandler(context);
+        db.readSms(address);
+    }
 }

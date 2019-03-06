@@ -13,15 +13,16 @@ import com.example.jarvis.sproject.Audio;
 import com.example.jarvis.sproject.R;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import Model.AudioFile;
 
 public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.AudioViewHolder> {
 
-    private ArrayList<AudioFile> files;
+    private List<AudioFile> files;
     private Audio activity;
 
-    public AudioAdapter(ArrayList<AudioFile> files, Audio context) {
+    public AudioAdapter(List<AudioFile> files, Audio context) {
         this.files = files;
         this.activity = context;
     }
@@ -37,21 +38,12 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.AudioViewHol
     public void onBindViewHolder(@NonNull AudioViewHolder holder, int position) {
         AudioFile audioFile = files.get(position);
 
-        holder.name.setText(audioFile.getName());
-        double temp = audioFile.getSize();
-        String mode = "MB";
-        if (temp > 1024) {
-            temp /= 1024;
-            mode = "GB";
-        }
+        String originalPath = audioFile.getOriginalPath();
+        String name = FileHelper.getFileName(originalPath);
+        holder.name.setText(name);
 
-        String size = temp + " " + mode;
-        String date = audioFile.getLastModifiedDate();
-        String time = audioFile.getLastModifiedTime();
-        String details = size + " | " + date + " " + time;
+        String details = audioFile.getSize() + " | " + audioFile.getDate();
         holder.details.setText(details);
-        holder.image.setImageResource(audioFile.getImage());
-
 
         //checking for action mode status
         if(!activity.isInActionMode) {
@@ -65,6 +57,19 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.AudioViewHol
                 holder.cb.setChecked(false);
             }
         }
+
+        holder.itemView.setOnLongClickListener(view -> {
+            activity.setActionMode();
+            return false;
+        });
+
+        holder.itemView.setOnClickListener(v -> {
+            if (activity.isInActionMode) {
+                CheckBox cb = (CheckBox) v.findViewById(R.id.item_cb);
+                activity.prepareSelection(cb, position);
+            } else {
+            }
+        });
     }
 
     @Override
@@ -72,43 +77,30 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.AudioViewHol
         return files.size();
     }
 
-    public class AudioViewHolder extends RecyclerView.ViewHolder {
+    class AudioViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView image;
         TextView name;
         TextView details;
         CheckBox cb;
 
         Audio activity;
 
-        public AudioViewHolder(View itemView, Audio activity) {
+        AudioViewHolder(View itemView, Audio activity) {
             super(itemView);
 
-            image = (ImageView) itemView.findViewById(R.id.audio_item_image);
-            name = (TextView) itemView.findViewById(R.id.audio_item_name_tv);
-            details = (TextView) itemView.findViewById(R.id.audio_item_details_tv);
-            cb = (CheckBox) itemView.findViewById(R.id.audio_item_cb);
+            name = (TextView) itemView.findViewById(R.id.item_name);
+            details = (TextView) itemView.findViewById(R.id.item_details);
+            cb = (CheckBox) itemView.findViewById(R.id.item_cb);
             this.activity = activity;
-
-
-            itemView.setOnLongClickListener(activity);
-
-            itemView.setOnClickListener(v -> {
-                if (activity.isInActionMode) {
-                    CheckBox cb = (CheckBox) v.findViewById(R.id.audio_item_cb);
-                    activity.prepareSelection(cb, getAdapterPosition());
-                } else {
-                }
-            });
         }
     }
 
-    public void filterList(ArrayList<AudioFile> filteredList) {
+    public void filterList(List<AudioFile> filteredList) {
         files = filteredList;
         notifyDataSetChanged();
     }
 
-    public void updateAdapter(ArrayList<AudioFile> list) {
+    public void updateAdapter(List<AudioFile> list) {
         for(AudioFile f : list) {
             files.remove(f);
         }

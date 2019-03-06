@@ -3,7 +3,6 @@ package Helper;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,9 +15,6 @@ import com.example.jarvis.sproject.Chat;
 import com.example.jarvis.sproject.Messaging;
 import com.example.jarvis.sproject.R;
 
-import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -84,6 +80,10 @@ public class MessagingAdapter extends RecyclerView.Adapter<MessagingAdapter.Mess
                 messaging.prepareSelection(cb, position);
             } else {
                 messaging.isAllSelected = false;
+                if(conversation.getRead() == 0) {
+                    SmsHelper.readSms(messaging, conversation.getAddress());
+                    notifyDataSetChanged();
+                }
                 Intent intent = new Intent(messaging, Chat.class);
                 intent.putExtra("ADDRESS", conversation.getAddress());
                 messaging.startActivity(intent);

@@ -4,27 +4,24 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Telephony;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import Helper.Global;
@@ -41,6 +38,7 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
     Context context;
 
     private GridView homeMenu;
+    private ImageView waveAnimation;
     private BottomNavigationView navigationView;
     int[] homeIcons = {R.drawable.home_call, R.drawable.home_message, R.drawable.home_image, R.drawable.home_audio, R.drawable.home_video, R.drawable.home_doc, R.drawable.home_zip};
     String[] homeIconsTitle = {"Phone", "Messaging", "Images", "Audios", "Videos", "Docs", "Zip"};
@@ -61,33 +59,36 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
         homeMenu = (GridView) findViewById(R.id.grid_view_menu);
         HomeMenuAdapter homeMenuAdapter = new HomeMenuAdapter(this, homeIcons, homeIconsTitle);
         homeMenu.setAdapter(homeMenuAdapter);
-        homeMenu.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent;
-                if(position == 0) {
-                    intent = new Intent(MainActivity.this, CallLogs.class);
-                } else if (position == 1) {
-                    intent = new Intent(MainActivity.this, Messaging.class);
-                } else if (position == 2) {
-                    intent = new Intent(MainActivity.this, Images.class);
-                } else if (position == 3) {
-                    intent = new Intent(MainActivity.this, Audio.class);
-                } else if (position == 4) {
-                    intent = new Intent(MainActivity.this, Video.class);
-                } else if (position == 5) {
-                    intent = new Intent(MainActivity.this, Document.class);
-                } else {
-                    intent = new Intent(MainActivity.this, MainActivity.class);
-                }
-                startActivity(intent);
+        homeMenu.setOnItemClickListener((parent, view, position, id) -> {
+            Intent intent;
+            if(position == 0) {
+                intent = new Intent(MainActivity.this, CallLogs.class);
+            } else if (position == 1) {
+                intent = new Intent(MainActivity.this, Messaging.class);
+            } else if (position == 2) {
+                intent = new Intent(MainActivity.this, Images.class);
+            } else if (position == 3) {
+                intent = new Intent(MainActivity.this, Audio.class);
+            } else if (position == 4) {
+                intent = new Intent(MainActivity.this, Video.class);
+            } else if (position == 5) {
+                intent = new Intent(MainActivity.this, Document.class);
+            } else if (position == 6) {
+                intent = new Intent(MainActivity.this, Zip.class);
+            } else {
+                intent = new Intent(MainActivity.this, MainActivity.class);
             }
+            startActivity(intent);
         });
 
         //customizing navigation
         navigationView = (BottomNavigationView) findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(this);
         CustomBottomNavigation.disableShiftMode(navigationView);
+
+        //wave animation
+        /*waveAnimation = (ImageView) findViewById(R.id.header_wave_pattern);
+        ((AnimationDrawable) waveAnimation.getBackground()).start();*/
 
         //sms service
         smsService = new SMSEncryptionService(getApplicationContext());

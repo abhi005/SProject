@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,14 +23,13 @@ import android.widget.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 
+import Helper.AudioAdapter;
 import Helper.SqliteDatabaseHandler;
-import Helper.VideoAdapter;
-import Model.VideoFile;
-import utils.PortraitActivity;
+import Helper.ZipAdapter;
+import Model.AudioFile;
+import Model.ZipFile;
 
-public class Video extends PortraitActivity {
-
-
+public class Zip extends AppCompatActivity {
 
     public boolean isInActionMode = false;
     public boolean isAllSelected = false;
@@ -39,33 +39,33 @@ public class Video extends PortraitActivity {
     private ImageView selectAllButton;
     private EditText searchField;
     private RecyclerView recyclerView;
-    private VideoAdapter videoAdapter;
+    private ZipAdapter adapter;
     private LinearLayoutManager layoutManager;
-
     private SqliteDatabaseHandler db;
-    private ViewGroup videoActionMenu;
+
+    private ViewGroup actionMenu;
     private ImageView actionMenuDeleteButton;
     private ImageView actionMenuBackButton;
     private ImageView actionMenuRenameButton;
     private ImageView actionMenuInfoButton;
-    private List<VideoFile> videoFiles;
-    private List<VideoFile> selectionList = new ArrayList<>();
+    private List<ZipFile> zipFiles;
+    private List<ZipFile> selectionList = new ArrayList<>();
     private int selectionCounter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setStatusBarGradient(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_video);
+        setContentView(R.layout.activity_zip);
 
         //back button
         backButton = (ImageView) findViewById(R.id.back_btn);
-        backButton.setOnClickListener(v -> Video.super.onBackPressed());
+        backButton.setOnClickListener(v -> Zip.super.onBackPressed());
 
-        // fetching all video files
-        videoFiles = new ArrayList<>();
+        //fetching all encrypted zip files
+        zipFiles = new ArrayList<>();
         db = new SqliteDatabaseHandler(this);
-        fetchVideoFiles();
+        fetchZipFiles();
 
 
         //menu button
@@ -73,20 +73,23 @@ public class Video extends PortraitActivity {
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
-        videoAdapter = new VideoAdapter(videoFiles, this);
+        adapter = new ZipAdapter(zipFiles, this);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(videoAdapter);
+        recyclerView.setAdapter(adapter);
 
 
         //search bar
         searchField = (EditText) findViewById(R.id.search_field);
         searchField.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -100,9 +103,9 @@ public class Video extends PortraitActivity {
         selectAllButton.setOnClickListener(v -> {
             if(!isAllSelected) {
                 selectAllButton.setImageResource(R.drawable.checkbox_checked);
-                selectionCounter = videoFiles.size();
+                selectionCounter = zipFiles.size();
                 selectionList.clear();
-                selectionList.addAll(videoFiles);
+                selectionList.addAll(zipFiles);
                 isAllSelected = true;
             } else {
                 selectAllButton.setImageResource(R.drawable.checkbox_unchecked);
@@ -110,56 +113,56 @@ public class Video extends PortraitActivity {
                 selectionList.clear();
                 isAllSelected = false;
             }
-            videoAdapter.notifyDataSetChanged();
+            adapter.notifyDataSetChanged();
         });
 
 
         //action menu
-        videoActionMenu = (ViewGroup) findViewById(R.id.action_menu);
-        videoActionMenu.setVisibility(View.GONE);
+        actionMenu = (ViewGroup) findViewById(R.id.action_menu);
+        actionMenu.setVisibility(View.GONE);
 
 
         //action menu delete button
-        actionMenuDeleteButton = (ImageView) findViewById(R.id.video_action_menu_delete_btn);
+        actionMenuDeleteButton = (ImageView) findViewById(R.id.audio_action_menu_delete_btn);
         actionMenuDeleteButton.setOnClickListener(v -> {
-            videoAdapter.updateAdapter(selectionList);
+            adapter.updateAdapter(selectionList);
             unSetActionMode();
-            videoAdapter.notifyDataSetChanged();
+            adapter.notifyDataSetChanged();
         });
 
         //action menu back button
-        actionMenuBackButton = (ImageView) findViewById(R.id.video_action_menu_back_btn);
+        actionMenuBackButton = (ImageView) findViewById(R.id.audio_action_menu_back_btn);
         actionMenuBackButton.setOnClickListener(v -> {
             unSetActionMode();
-            videoAdapter.notifyDataSetChanged();
+            adapter.notifyDataSetChanged();
         });
 
 
         //action menu rename button
-        actionMenuRenameButton = (ImageView) findViewById(R.id.video_action_menu_rename_btn);
+        actionMenuRenameButton = (ImageView) findViewById(R.id.audio_action_menu_rename_btn);
         actionMenuRenameButton.setAlpha(Float.valueOf("0.5"));
 
 
         //action menu info button
-        actionMenuInfoButton = (ImageView) findViewById(R.id.video_action_menu_details_btn);
+        actionMenuInfoButton = (ImageView) findViewById(R.id.audio_action_menu_details_btn);
         actionMenuInfoButton.setAlpha(Float.valueOf("0.5"));
     }
 
 
-    private void fetchVideoFiles() {
-        videoFiles = db.getAllVideoFiles();
+    private void fetchZipFiles() {
+        zipFiles = db.getAllZipFiles();
     }
 
     public void prepareSelection(View view, int position) {
 
         CheckBox cb = (CheckBox) view;
         if (!cb.isChecked()) {
-            selectionList.add(videoFiles.get(position));
+            selectionList.add(zipFiles.get(position));
             cb.setChecked(true);
             selectionCounter++;
         } else {
             cb.setChecked(false);
-            selectionList.remove(videoFiles.get(position));
+            selectionList.remove(zipFiles.get(position));
             selectionCounter--;
         }
 
@@ -176,19 +179,19 @@ public class Video extends PortraitActivity {
         isInActionMode = true;
         backButton.setVisibility(View.GONE);
         Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
-        videoActionMenu.startAnimation(bottomUp);
-        videoActionMenu.setVisibility(View.VISIBLE);
+        actionMenu.startAnimation(bottomUp);
+        actionMenu.setVisibility(View.VISIBLE);
         selectAllButton.setVisibility(View.VISIBLE);
         menuButton.setVisibility(View.GONE);
-        videoAdapter.notifyDataSetChanged();
+        adapter.notifyDataSetChanged();
     }
 
     public void unSetActionMode() {
         isInActionMode = false;
         backButton.setVisibility(View.VISIBLE);
         Animation topDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
-        videoActionMenu.startAnimation(topDown);
-        videoActionMenu.setVisibility(View.GONE);
+        actionMenu.startAnimation(topDown);
+        actionMenu.setVisibility(View.GONE);
         selectAllButton.setVisibility(View.GONE);
         menuButton.setVisibility(View.VISIBLE);
         selectionCounter = 0;
@@ -198,24 +201,25 @@ public class Video extends PortraitActivity {
     //search query filter method
     private void searchQueryFilter(String query) {
         if(query.length() != 0) {
-            ArrayList<VideoFile> resultList = new ArrayList<>();
-            for(VideoFile f : videoFiles) {
+            List<ZipFile> resultList = new ArrayList<>();
+            for(ZipFile f : zipFiles) {
                 String name = f.getOriginalPath();
                 if(name.toLowerCase().contains(query.toLowerCase())) {
                     resultList.add(f);
                 }
             }
-            videoAdapter.filterList(resultList);
+            adapter.filterList(resultList);
         } else {
-            videoAdapter.filterList(videoFiles);
+            adapter.filterList(zipFiles);
         }
     }
+
 
     @Override
     public void onBackPressed() {
         if(isInActionMode) {
             unSetActionMode();
-            videoAdapter.notifyDataSetChanged();
+            adapter.notifyDataSetChanged();
         } else {
             super.onBackPressed();
         }
