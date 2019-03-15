@@ -2,7 +2,6 @@ package Helper;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,26 +16,27 @@ import android.widget.Toast;
 import com.example.jarvis.sproject.FileManager;
 import com.example.jarvis.sproject.R;
 
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import Model.File;
 import Model.FileManagerItem;
 
 public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.ItemViewHolder> {
 
     private List<FileManagerItem> files;
     private FileManager activity;
-    private String sdCardPath;
+    //private String sdCardPath;
 
-    public FileManagerAdapter(List<FileManagerItem> files, FileManager context, String sdCardPath) {
+    /*public FileManagerAdapter(List<FileManagerItem> files, FileManager context, String sdCardPath) {
         this.files = files;
         this.activity = context;
         this.sdCardPath = sdCardPath;
-    }
+    }*/
 
+    public FileManagerAdapter(List<FileManagerItem> files, FileManager activity) {
+        this.files = files;
+        this.activity = activity;
+    }
 
     @NonNull
     @Override
@@ -75,18 +75,15 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
             }
         }
 
-
-
         holder.itemView.setOnClickListener(v -> {
             if (activity.isInActionMode) {
                 CheckBox cb = v.findViewById(R.id.vault_item_cb);
                 activity.prepareSelection(cb, (int) v.getTag());
             } else {
-                FileManagerItem item = getItem(position);
-                if(item.getType().toLowerCase().equals("dir")) {
-                    activity.forwardDirectory(item.getPath());
+                if (file.getType().toLowerCase().equals("dir")) {
+                    activity.forwardDirectory(file.getPath());
                 } else {
-                    onFileClick(item);
+                    onFileClick(file);
                 }
             }
         });
@@ -122,26 +119,22 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
         activity.fileClickDialog.show();
 
         //file click popup on click listeners
-        LinearLayout internalStorageBtn = (LinearLayout) activity.fileClickDialog.findViewById(R.id.encrypt_btn);
-        LinearLayout sdcardStorageBtn = (LinearLayout) activity.fileClickDialog.findViewById(R.id.open_btn);
-        internalStorageBtn.setOnClickListener(view -> {
+        LinearLayout encryptBtn = activity.fileClickDialog.findViewById(R.id.encrypt_btn);
+        LinearLayout openBtn = activity.fileClickDialog.findViewById(R.id.open_btn);
+        encryptBtn.setOnClickListener(view -> {
             //encrypt file
-            FileHelper.encryptFile(activity, item.getPath(), sdCardPath);
+            //FileHelper.encryptFile(activity, item.getPath(), sdCardPath);
+            FileHelper.encryptFile(activity, item.getPath());
             activity.fileClickDialog.dismiss();
             Toast.makeText(activity, "file encrypted", Toast.LENGTH_LONG).show();
             activity.forwardDirectory(activity.currentDir.getPath());
         });
-        sdcardStorageBtn.setOnClickListener(view -> {
+        openBtn.setOnClickListener(view -> {
             //open file
             FileHelper.openFile(activity, item.getPath());
             activity.fileClickDialog.dismiss();
         });
     }
-
-    private FileManagerItem getItem(int position) {
-        return files.get(position);
-    }
-
 
     public void filterList(List<FileManagerItem> filteredList) {
         files = filteredList;

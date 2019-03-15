@@ -1,7 +1,11 @@
 package com.example.jarvis.sproject;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,16 +22,19 @@ import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import Helper.AudioAdapter;
+import Helper.FileHelper;
 import Helper.SqliteDatabaseHandler;
 import Model.AudioFile;
 import utils.PortraitActivity;
 
-public class Audio extends PortraitActivity {
+public class Audio extends PortraitActivity implements View.OnLongClickListener {
 
     public boolean isInActionMode = false;
     public boolean isAllSelected = false;
@@ -39,12 +46,13 @@ public class Audio extends PortraitActivity {
     private RecyclerView recyclerView;
     private AudioAdapter audioAdapter;
     private LinearLayoutManager layoutManager;
+    public Dialog fileClickDialog;
     private SqliteDatabaseHandler db;
 
     private ViewGroup audioActionMenu;
     private ImageView actionMenuDeleteButton;
     private ImageView actionMenuBackButton;
-    private ImageView actionMenuRenameButton;
+    private TextView counterText;
     private ImageView actionMenuInfoButton;
     private List<AudioFile> audioFiles;
     private List<AudioFile> selectionList = new ArrayList<>();
@@ -57,24 +65,22 @@ public class Audio extends PortraitActivity {
         setContentView(R.layout.activity_audio);
 
         //back button
-        backButton = (ImageView) findViewById(R.id.back_btn);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Audio.super.onBackPressed();
-            }
-        });
+        backButton = findViewById(R.id.back_btn);
+        backButton.setOnClickListener(v -> Audio.super.onBackPressed());
 
         //fetching all encrypted audio files
         audioFiles = new ArrayList<>();
         db = new SqliteDatabaseHandler(this);
-        fetchAudioFiles();
+        audioFiles = fetchAudioFiles();
 
+        //file click dialogue box
+        fileClickDialog = new Dialog(this);
+        fileClickDialog.setContentView(R.layout.popup_encrypted_file_click);
 
         //menu button
-        menuButton = (ImageView) findViewById(R.id.menu_btn);
+        menuButton = findViewById(R.id.menu_btn);
 
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+        recyclerView = findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         audioAdapter = new AudioAdapter(audioFiles, this);
         layoutManager = new LinearLayoutManager(this);
@@ -83,7 +89,7 @@ public class Audio extends PortraitActivity {
 
 
         //search bar
-        searchField = (EditText) findViewById(R.id.search_field);
+        searchField = findViewById(R.id.search_field);
         searchField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -101,7 +107,7 @@ public class Audio extends PortraitActivity {
         });
 
         //select all button
-        selectAllButton = (ImageView) findViewById(R.id.menu_select_all_btn);
+        selectAllButton = findViewById(R.id.menu_select_all_btn);
         selectAllButton.setVisibility(View.GONE);
         selectAllButton.setOnClickListener(v -> {
             if(!isAllSelected) {
@@ -121,38 +127,74 @@ public class Audio extends PortraitActivity {
 
 
         //action menu
-        audioActionMenu = (ViewGroup) findViewById(R.id.action_menu);
+        audioActionMenu = findViewById(R.id.action_menu);
         audioActionMenu.setVisibility(View.GONE);
 
+        //counter text
+        counterText = findViewById(R.id.action_menu_item_count);
 
         //action menu delete button
-        actionMenuDeleteButton = (ImageView) findViewById(R.id.audio_action_menu_delete_btn);
+        actionMenuDeleteButton = findViewById(R.id.action_menu_delete_btn);
         actionMenuDeleteButton.setOnClickListener(v -> {
-            audioAdapter.updateAdapter(selectionList);
-            unSetActionMode();
-            audioAdapter.notifyDataSetChanged();
+            Dialog deleteButtonDialog = new Dialog(this);
+            deleteButtonDialog.setContentView(R.layout.popup_file_delete);
+            Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+            Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            deleteButtonDialog.show();
+
+            // delete confirmation listener
+            TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
+            TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
+            cancelBtn.setOnClickListener(view -> {
+                //cancel btn
+                deleteButtonDialog.dismiss();
+            });
+            deleteBtn.setOnClickListener(view -> {
+                //delete btn
+                audioAdapter.deleteItems(selectionList, db);
+                unSetActionMode();
+                deleteButtonDialog.dismiss();
+                audioAdapter.updateAdapter(audioFiles = fetchAudioFiles());
+            });
         });
 
         //action menu back button
-        actionMenuBackButton = (ImageView) findViewById(R.id.audio_action_menu_back_btn);
+        actionMenuBackButton = findViewById(R.id.action_menu_back_btn);
         actionMenuBackButton.setOnClickListener(v -> {
             unSetActionMode();
             audioAdapter.notifyDataSetChanged();
         });
 
-
-        //action menu rename button
-        actionMenuRenameButton = (ImageView) findViewById(R.id.audio_action_menu_rename_btn);
-        actionMenuRenameButton.setAlpha(Float.valueOf("0.5"));
-
-
         //action menu info button
-        actionMenuInfoButton = (ImageView) findViewById(R.id.audio_action_menu_details_btn);
+        actionMenuInfoButton = findViewById(R.id.action_menu_info_btn);
         actionMenuInfoButton.setAlpha(Float.valueOf("0.5"));
+        actionMenuInfoButton.setOnClickListener(view -> {
+            if (selectionList.size() == 1) {
+                AudioFile f = selectionList.get(0);
+                Dialog infoButtonDialog = new Dialog(Audio.this);
+                infoButtonDialog.setContentView(R.layout.popup_file_info);
+                Objects.requireNonNull(infoButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+                Objects.requireNonNull(infoButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+                ImageView icon = infoButtonDialog.findViewById(R.id.icon);
+                TextView name = infoButtonDialog.findViewById(R.id.name);
+                TextView path = infoButtonDialog.findViewById(R.id.path);
+                TextView size = infoButtonDialog.findViewById(R.id.size);
+                TextView date = infoButtonDialog.findViewById(R.id.date);
+                TextView type = infoButtonDialog.findViewById(R.id.type);
+                icon.setImageResource(R.drawable.audio);
+                name.setText(FileHelper.getFileName(f.getNewPath()));
+                path.setText(f.getNewPath());
+                size.setText(f.getSize());
+                date.setText(f.getDate());
+                type.setText(R.string.file);
+                infoButtonDialog.show();
+            }
+        });
     }
 
-    private void fetchAudioFiles() {
-        audioFiles = db.getAllAudioFiles();
+    public List<AudioFile> fetchAudioFiles() {
+        return db.getAllAudioFiles();
     }
 
     public void prepareSelection(View view, int position) {
@@ -169,11 +211,26 @@ public class Audio extends PortraitActivity {
         }
 
         if (selectionCounter == 1) {
-            actionMenuRenameButton.setAlpha(Float.valueOf("1.0"));
             actionMenuInfoButton.setAlpha(Float.valueOf("1.0"));
         } else {
-            actionMenuRenameButton.setAlpha(Float.valueOf("0.5"));
             actionMenuInfoButton.setAlpha(Float.valueOf("0.5"));
+        }
+        if (selectionCounter > 0) {
+            actionMenuDeleteButton.setAlpha(Float.valueOf("1.0"));
+        } else {
+            actionMenuDeleteButton.setAlpha(Float.valueOf("0.5"));
+        }
+        updateSelectionCounterText(selectionCounter);
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateSelectionCounterText(int counter) {
+        if (counter == 0) {
+            counterText.setText(R.string.no_item_selected);
+        } else if (counter == 1) {
+            counterText.setText(R.string.one_item_selected);
+        } else {
+            counterText.setText(counter + getString(R.string.items_selected));
         }
     }
 
@@ -217,6 +274,12 @@ public class Audio extends PortraitActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        FileHelper.deleteTempFile();
+        super.onDestroy();
+    }
+
+    @Override
     public void onBackPressed() {
         if(isInActionMode) {
             unSetActionMode();
@@ -236,5 +299,11 @@ public class Audio extends PortraitActivity {
             window.setNavigationBarColor(activity.getResources().getColor(android.R.color.transparent));
             window.setBackgroundDrawable(background);
         }
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        setActionMode();
+        return true;
     }
 }

@@ -1,19 +1,21 @@
 package Helper;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.jarvis.sproject.R;
 import com.example.jarvis.sproject.Video;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import Model.VideoFile;
 
@@ -42,7 +44,9 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         String name = FileHelper.getFileName(originalPath);
         holder.name.setText(name);
 
-        String details = videoFile.getDuration() + " | " + videoFile.getDate();
+        String duration = FileHelper.getReadableVideoDuration(Long.parseLong(videoFile.getDuration()));
+
+        String details = duration + " | " + videoFile.getDate();
         holder.details.setText(details);
 
         //checking for action mode status
@@ -58,18 +62,34 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             }
         }
 
-
-        holder.itemView.setOnLongClickListener(view -> {
-            activity.setActionMode();
-            return false;
-        });
-
         holder.itemView.setOnClickListener(v -> {
             if (activity.isInActionMode) {
-                CheckBox cb = (CheckBox) v.findViewById(R.id.item_cb);
+                CheckBox cb = v.findViewById(R.id.item_cb);
                 activity.prepareSelection(cb, position);
             } else {
+                onFileClick(videoFile);
             }
+        });
+    }
+
+    private void onFileClick(VideoFile item) {
+        Objects.requireNonNull(activity.fileClickDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+        Objects.requireNonNull(activity.fileClickDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        activity.fileClickDialog.show();
+
+        //file click popup on click listeners
+        LinearLayout decryptBtn = activity.fileClickDialog.findViewById(R.id.decrypt_btn);
+        LinearLayout openBtn = activity.fileClickDialog.findViewById(R.id.open_btn);
+        decryptBtn.setOnClickListener(view -> {
+            //decrypt file
+            FileHelper.decryptVideoFile(activity, item);
+            updateAdapter(activity.fetchVideoFiles());
+            activity.fileClickDialog.dismiss();
+        });
+        openBtn.setOnClickListener(view -> {
+            //open file
+            FileHelper.openEncryptedFile(activity, item.getNewPath(), item.getOriginalPath());
+            activity.fileClickDialog.dismiss();
         });
     }
 
@@ -78,22 +98,10 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         return files.size();
     }
 
-    public class VideoViewHolder extends RecyclerView.ViewHolder {
-
-        TextView name;
-        TextView details;
-        CheckBox cb;
-
-        Video activity;
-
-        public VideoViewHolder(View itemView, Video context) {
-            super(itemView);
-
-            name = (TextView) itemView.findViewById(R.id.item_name);
-            details = (TextView) itemView.findViewById(R.id.item_details);
-            cb = (CheckBox) itemView.findViewById(R.id.item_cb);
-            this.activity = context;
-        }
+    public void updateAdapter(List<VideoFile> list) {
+        files.clear();
+        files.addAll(list);
+        notifyDataSetChanged();
     }
 
     public void filterList(List<VideoFile> filteredList) {
@@ -101,10 +109,31 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         notifyDataSetChanged();
     }
 
-    public void updateAdapter(List<VideoFile> list) {
-        for(VideoFile f : list) {
-            files.remove(f);
+    public void deleteItems(List<VideoFile> list, SqliteDatabaseHandler db) {
+        for (VideoFile f : list) {
+            String path = f.getNewPath();
+            FileHelper.deleteFile(path);
+            db.deleteVideo(f);
         }
-        notifyDataSetChanged();
+    }
+
+    class VideoViewHolder extends RecyclerView.ViewHolder {
+
+        TextView name;
+        TextView details;
+        CheckBox cb;
+
+        Video activity;
+
+        VideoViewHolder(View itemView, Video context) {
+            super(itemView);
+
+            name = itemView.findViewById(R.id.item_name);
+            details = itemView.findViewById(R.id.item_details);
+            cb = itemView.findViewById(R.id.item_cb);
+            this.activity = context;
+
+            itemView.setOnLongClickListener(activity);
+        }
     }
 }

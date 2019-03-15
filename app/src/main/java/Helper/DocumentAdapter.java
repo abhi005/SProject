@@ -1,18 +1,21 @@
 package Helper;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.jarvis.sproject.Document;
 import com.example.jarvis.sproject.R;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import Model.DocFile;
 
@@ -60,17 +63,34 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocVie
             }
         }
 
-        holder.itemView.setOnLongClickListener(view -> {
-            activity.setActionMode();
-            return false;
-        });
-
         holder.itemView.setOnClickListener(v -> {
             if (activity.isInActionMode) {
-                CheckBox cb = (CheckBox) v.findViewById(R.id.item_cb);
+                CheckBox cb = v.findViewById(R.id.item_cb);
                 activity.prepareSelection(cb, position);
             } else {
+                onFileClick(docFile);
             }
+        });
+    }
+
+    private void onFileClick(DocFile item) {
+        Objects.requireNonNull(activity.fileClickDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+        Objects.requireNonNull(activity.fileClickDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        activity.fileClickDialog.show();
+
+        //file click popup on click listeners
+        LinearLayout decryptBtn = activity.fileClickDialog.findViewById(R.id.decrypt_btn);
+        LinearLayout openBtn = activity.fileClickDialog.findViewById(R.id.open_btn);
+        decryptBtn.setOnClickListener(view -> {
+            //decrypt file
+            FileHelper.decryptDocFile(activity, item);
+            updateAdapter(activity.fetchDocFiles());
+            activity.fileClickDialog.dismiss();
+        });
+        openBtn.setOnClickListener(view -> {
+            //open file
+            FileHelper.openEncryptedFile(activity, item.getNewPath(), item.getOriginalPath());
+            activity.fileClickDialog.dismiss();
         });
     }
 
@@ -79,23 +99,10 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocVie
         return files.size();
     }
 
-    public class DocViewHolder extends RecyclerView.ViewHolder {
-
-        TextView name;
-        TextView details;
-        CheckBox cb;
-
-        Document activity;
-
-        public DocViewHolder(View itemView, Document activity) {
-            super(itemView);
-
-
-            name = (TextView) itemView.findViewById(R.id.item_name);
-            details = (TextView) itemView.findViewById(R.id.item_details);
-            cb = (CheckBox) itemView.findViewById(R.id.item_cb);
-            this.activity = activity;
-        }
+    public void updateAdapter(List<DocFile> list) {
+        files.clear();
+        files.addAll(list);
+        notifyDataSetChanged();
     }
 
 
@@ -104,10 +111,32 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocVie
         notifyDataSetChanged();
     }
 
-    public void updateAdapter(List<DocFile> list) {
-        for(DocFile f : list) {
-            files.remove(f);
+    public void deleteItems(List<DocFile> list, SqliteDatabaseHandler db) {
+        for (DocFile f : list) {
+            String path = f.getNewPath();
+            FileHelper.deleteFile(path);
+            db.deleteDoc(f);
         }
-        notifyDataSetChanged();
+    }
+
+    class DocViewHolder extends RecyclerView.ViewHolder {
+
+        TextView name;
+        TextView details;
+        CheckBox cb;
+
+        Document activity;
+
+        DocViewHolder(View itemView, Document activity) {
+            super(itemView);
+
+
+            name = itemView.findViewById(R.id.item_name);
+            details = itemView.findViewById(R.id.item_details);
+            cb = itemView.findViewById(R.id.item_cb);
+            this.activity = activity;
+
+            itemView.setOnLongClickListener(activity);
+        }
     }
 }

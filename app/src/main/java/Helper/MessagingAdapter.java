@@ -76,13 +76,13 @@ public class MessagingAdapter extends RecyclerView.Adapter<MessagingAdapter.Mess
 
         holder.itemView.setOnClickListener(view -> {
             if (messaging.isInActionMode) {
-                CheckBox cb = (CheckBox) view.findViewById(R.id.cb);
+                CheckBox cb = view.findViewById(R.id.cb);
                 messaging.prepareSelection(cb, position);
             } else {
                 messaging.isAllSelected = false;
                 if(conversation.getRead() == 0) {
                     SmsHelper.readSms(messaging, conversation.getAddress());
-                    notifyDataSetChanged();
+                    holder.seenFlag.setAlpha(Float.valueOf("0.0"));
                 }
                 Intent intent = new Intent(messaging, Chat.class);
                 intent.putExtra("ADDRESS", conversation.getAddress());
@@ -96,25 +96,10 @@ public class MessagingAdapter extends RecyclerView.Adapter<MessagingAdapter.Mess
         return conversations.size();
     }
 
-    class MessageViewHolder extends RecyclerView.ViewHolder{
-        TextView tv1, tv2, tv3;
-        CheckBox checkBox;
-        ImageView personBtn;
-        ImageView seenFlag;
-
-        Messaging messaging;
-        MessageViewHolder(View itemView, Messaging messaging) {
-            super(itemView);
-            tv1 = (TextView) itemView.findViewById(R.id.tv1);
-            tv2 = (TextView) itemView.findViewById(R.id.tv2);
-            tv3 = (TextView) itemView.findViewById(R.id.tv3);
-            checkBox = (CheckBox) itemView.findViewById(R.id.cb);
-            personBtn = (ImageView) itemView.findViewById(R.id.person_btn);
-            seenFlag = (ImageView) itemView.findViewById(R.id.seen_flag);
-            this.messaging = messaging;
-
-            itemView.setOnLongClickListener(messaging);
-        }
+    public void updateAdapter(List<Conversation> list) {
+        conversations.clear();
+        conversations.addAll(list);
+        notifyDataSetChanged();
     }
 
     public void filterList(List<Conversation> filteredList) {
@@ -122,10 +107,26 @@ public class MessagingAdapter extends RecyclerView.Adapter<MessagingAdapter.Mess
         notifyDataSetChanged();
     }
 
-    public void updateAdapter(List<Conversation> list) {
-        for(Conversation c : list) {
-            conversations.remove(c);
+    class MessageViewHolder extends RecyclerView.ViewHolder{
+        TextView tv1;
+        TextView tv2;
+        TextView tv3;
+        CheckBox checkBox;
+        ImageView personBtn;
+        ImageView seenFlag;
+
+        Messaging messaging;
+        MessageViewHolder(View itemView, Messaging messaging) {
+            super(itemView);
+            tv1 = itemView.findViewById(R.id.tv1);
+            tv2 = itemView.findViewById(R.id.tv2);
+            tv3 = itemView.findViewById(R.id.tv3);
+            checkBox = itemView.findViewById(R.id.cb);
+            personBtn = itemView.findViewById(R.id.person_btn);
+            seenFlag = itemView.findViewById(R.id.seen_flag);
+            this.messaging = messaging;
+
+            itemView.setOnLongClickListener(messaging);
         }
-        notifyDataSetChanged();
     }
 }

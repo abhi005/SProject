@@ -25,14 +25,32 @@
                 android:layout_height="180dp"
                 android:background="@drawable/home_header_gradient" />
 
-            <ImageView
+            <!--<ImageView
                 android:id="@+id/header_wave_pattern"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_alignBottom="@id/header_bg"
                 android:scaleType="fitCenter"
                 android:layout_marginBottom="-24dp"
-                android:background="@drawable/wave_animation_list" />
+                android:background="@drawable/wave_animation_list" />-->
+
+            <com.scwang.wave.MultiWaveHeader
+                android:id="@+id/header_wave_pattern"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_alignBottom="@+id/header_bg"
+                android:scaleY="-1"
+                app:mwhCloseColor="@color/white"
+                app:mwhColorAlpha="0.5"
+                app:mwhGradientAngle="45"
+                app:mwhIsRunning="true"
+                app:mwhProgress="1"
+                app:mwhStartColor="@color/white"
+                app:mwhVelocity="4"
+                app:mwhWaveHeight="50dp"
+                app:mwhWaves="MultiWave">
+
+            </com.scwang.wave.MultiWaveHeader>
 
             <LinearLayout
                 android:id="@+id/header_linear_layout"

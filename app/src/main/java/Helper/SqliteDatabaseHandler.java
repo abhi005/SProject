@@ -6,10 +6,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,7 +36,6 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
 
     // secret key table attributes
     private static final String TABLE_SECRET = "secret";
-    private static final String SECRET_KEY_ID = "id";
     private static final String SECRET_KEY_USERKEY = "userkey";
 
 
@@ -238,7 +235,13 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         values.put(FILE_KEY_DATE, f.getDate());
         values.put(FILE_KEY_SIZE, f.getSize());
         values.put(FILE_KEY_THUMBNAIL, f.getThumbnail());
-        db.insert(TABLE_IMAGE, null, values);
+        long i = db.insert(TABLE_IMAGE, null, values);
+        db.close();
+    }
+
+    void deleteImage(ImageFile f) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_IMAGE, FILE_KEY_ID + " = ?", new String[]{String.valueOf(f.getId())});
         db.close();
     }
 
@@ -278,6 +281,12 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    void deleteDoc(DocFile f) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_DOCS, FILE_KEY_ID + " = ?", new String[]{String.valueOf(f.getId())});
+        db.close();
+    }
+
     public List<DocFile> getAllDocFiles() {
         SQLiteDatabase db = this.getReadableDatabase();
         List<DocFile> list = new ArrayList<>();
@@ -314,6 +323,11 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    void deleteAudio(AudioFile f) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_AUDIO, FILE_KEY_ID + " = ?", new String[]{String.valueOf(f.getId())});
+        db.close();
+    }
     public List<AudioFile> getAllAudioFiles() {
         SQLiteDatabase db = this.getReadableDatabase();
         List<AudioFile> list = new ArrayList<>();
@@ -348,6 +362,12 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         values.put(FILE_KEY_SIZE, f.getSize());
         values.put(FILE_KEY_DURATION, f.getDuration());
         db.insert(TABLE_VIDEO, null, values);
+        db.close();
+    }
+
+    void deleteVideo(VideoFile f) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_VIDEO, FILE_KEY_ID + " = ?", new String[]{String.valueOf(f.getId())});
         db.close();
     }
 
@@ -386,6 +406,12 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         values.put(FILE_KEY_DATE, f.getDate());
         values.put(FILE_KEY_SIZE, f.getSize());
         db.insert(TABLE_ZIP, null, values);
+        db.close();
+    }
+
+    void deleteZip(ZipFile f) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_ZIP, FILE_KEY_ID + " = ?", new String[]{String.valueOf(f.getId())});
         db.close();
     }
 

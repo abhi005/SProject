@@ -2,15 +2,16 @@ package com.example.jarvis.sproject;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -20,16 +21,19 @@ import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import Helper.DocumentAdapter;
+import Helper.FileHelper;
 import Helper.SqliteDatabaseHandler;
 import Model.DocFile;
 import utils.PortraitActivity;
 
-public class Document extends PortraitActivity {
+public class Document extends PortraitActivity implements View.OnLongClickListener {
 
 
     public boolean isInActionMode = false;
@@ -42,11 +46,12 @@ public class Document extends PortraitActivity {
     private RecyclerView recyclerView;
     private DocumentAdapter adapter;
     private LinearLayoutManager layoutManager;
+    public Dialog fileClickDialog;
 
     private ViewGroup actionMenu;
+    private TextView counterText;
     private ImageView actionMenuDeleteButton;
     private ImageView actionMenuBackButton;
-    private ImageView actionMenuRenameButton;
     private ImageView actionMenuInfoButton;
     private List<DocFile> docFiles;
     private List<DocFile> selectionList = new ArrayList<>();
@@ -60,24 +65,22 @@ public class Document extends PortraitActivity {
         setContentView(R.layout.activity_document);
 
         //back button
-        backButton = (ImageView) findViewById(R.id.back_btn);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Document.super.onBackPressed();
-            }
-        });
+        backButton = findViewById(R.id.back_btn);
+        backButton.setOnClickListener(v -> Document.super.onBackPressed());
 
         // fetching all encrypted doc files
         docFiles = new ArrayList<>();
         db = new SqliteDatabaseHandler(getApplicationContext());
-        fetchDocFiles();
+        docFiles = fetchDocFiles();
 
+        //file click dialogue box
+        fileClickDialog = new Dialog(this);
+        fileClickDialog.setContentView(R.layout.popup_encrypted_file_click);
 
         //menu button
-        menuButton = (ImageView) findViewById(R.id.menu_btn);
+        menuButton = findViewById(R.id.menu_btn);
 
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+        recyclerView = findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         adapter = new DocumentAdapter(docFiles, this);
         layoutManager = new LinearLayoutManager(this);
@@ -86,7 +89,7 @@ public class Document extends PortraitActivity {
 
 
         //search bar
-        searchField = (EditText) findViewById(R.id.search_field);
+        searchField = findViewById(R.id.search_field);
         searchField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -104,7 +107,7 @@ public class Document extends PortraitActivity {
         });
 
         //select all button
-        selectAllButton = (ImageView) findViewById(R.id.menu_select_all_btn);
+        selectAllButton = findViewById(R.id.menu_select_all_btn);
         selectAllButton.setVisibility(View.GONE);
         selectAllButton.setOnClickListener(v -> {
             if(!isAllSelected) {
@@ -124,40 +127,75 @@ public class Document extends PortraitActivity {
 
 
         //action menu
-        actionMenu = (ViewGroup) findViewById(R.id.action_menu);
+        actionMenu = findViewById(R.id.action_menu);
         actionMenu.setVisibility(View.GONE);
 
+        //counter text
+        counterText = findViewById(R.id.action_menu_item_count);
 
         //action menu delete button
-        actionMenuDeleteButton = (ImageView) findViewById(R.id.action_menu_delete_btn);
+        actionMenuDeleteButton = findViewById(R.id.action_menu_delete_btn);
         actionMenuDeleteButton.setOnClickListener(v -> {
-            adapter.updateAdapter(selectionList);
-            unSetActionMode();
-            adapter.notifyDataSetChanged();
+            Dialog deleteButtonDialog = new Dialog(this);
+            deleteButtonDialog.setContentView(R.layout.popup_file_delete);
+            Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+            Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            deleteButtonDialog.show();
+
+            // delete confirmation listener
+            TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
+            TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
+            cancelBtn.setOnClickListener(view -> {
+                //cancel btn
+                deleteButtonDialog.dismiss();
+            });
+            deleteBtn.setOnClickListener(view -> {
+                //delete btn
+                adapter.deleteItems(selectionList, db);
+                unSetActionMode();
+                deleteButtonDialog.dismiss();
+                adapter.updateAdapter(docFiles = fetchDocFiles());
+            });
         });
 
         //action menu back button
-        actionMenuBackButton = (ImageView) findViewById(R.id.action_menu_back_btn);
+        actionMenuBackButton = findViewById(R.id.action_menu_back_btn);
         actionMenuBackButton.setOnClickListener(v -> {
             unSetActionMode();
             adapter.notifyDataSetChanged();
         });
 
-
-        //action menu rename button
-        actionMenuRenameButton = (ImageView) findViewById(R.id.action_menu_rename_btn);
-        actionMenuRenameButton.setAlpha(Float.valueOf("0.5"));
-
-
         //action menu info button
-        actionMenuInfoButton = (ImageView) findViewById(R.id.action_menu_details_btn);
+        actionMenuInfoButton = findViewById(R.id.action_menu_info_btn);
         actionMenuInfoButton.setAlpha(Float.valueOf("0.5"));
+        actionMenuInfoButton.setOnClickListener(view -> {
+            if (selectionList.size() == 1) {
+                DocFile f = selectionList.get(0);
+                Dialog infoButtonDialog = new Dialog(Document.this);
+                infoButtonDialog.setContentView(R.layout.popup_file_info);
+                Objects.requireNonNull(infoButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+                Objects.requireNonNull(infoButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+                ImageView icon = infoButtonDialog.findViewById(R.id.icon);
+                TextView name = infoButtonDialog.findViewById(R.id.name);
+                TextView path = infoButtonDialog.findViewById(R.id.path);
+                TextView size = infoButtonDialog.findViewById(R.id.size);
+                TextView date = infoButtonDialog.findViewById(R.id.date);
+                TextView type = infoButtonDialog.findViewById(R.id.type);
+                icon.setImageResource(R.drawable.audio);
+                name.setText(FileHelper.getFileName(f.getNewPath()));
+                path.setText(f.getNewPath());
+                size.setText(f.getSize());
+                date.setText(f.getDate());
+                type.setText(R.string.file);
+                infoButtonDialog.show();
+            }
+        });
     }
 
-    public void fetchDocFiles() {
-        docFiles = db.getAllDocFiles();
+    public List<DocFile> fetchDocFiles() {
+        return db.getAllDocFiles();
     }
-
 
     public void prepareSelection(View view, int position) {
 
@@ -173,11 +211,25 @@ public class Document extends PortraitActivity {
         }
 
         if (selectionCounter == 1) {
-            actionMenuRenameButton.setAlpha(Float.valueOf("1.0"));
             actionMenuInfoButton.setAlpha(Float.valueOf("1.0"));
         } else {
-            actionMenuRenameButton.setAlpha(Float.valueOf("0.5"));
             actionMenuInfoButton.setAlpha(Float.valueOf("0.5"));
+        }
+        if (selectionCounter > 0) {
+            actionMenuDeleteButton.setAlpha(Float.valueOf("1.0"));
+        } else {
+            actionMenuDeleteButton.setAlpha(Float.valueOf("0.5"));
+        }
+        updateSelectionCounterText(selectionCounter);
+    }
+
+    private void updateSelectionCounterText(int counter) {
+        if (counter == 0) {
+            counterText.setText(R.string.no_item_selected);
+        } else if (counter == 1) {
+            counterText.setText(R.string.one_item_selected);
+        } else {
+            counterText.setText(counter + R.string.items_selected);
         }
     }
 
@@ -230,6 +282,12 @@ public class Document extends PortraitActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        FileHelper.deleteTempFile();
+        super.onDestroy();
+    }
+
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setStatusBarGradient(Activity activity) {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -242,9 +300,9 @@ public class Document extends PortraitActivity {
         }
     }
 
-    /*@Override
-    public boolean onLongClick(View v) {
+    @Override
+    public boolean onLongClick(View view) {
         setActionMode();
         return true;
-    }*/
+    }
 }

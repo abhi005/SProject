@@ -37,5 +37,10 @@
     <string name="type">Type:</string>
     <string name="zip">Zip</string>
     <string name="video">Video</string>
+    <string name="file">file</string>
+    <string name="no_item_selected">0 item selected</string>
+    <string name="one_item_selected">1 item selected</string>
+    <string name="items_selected">items selected</string>
+    <string name="decrypt_file">Decrypt file</string>
 
 </resources>

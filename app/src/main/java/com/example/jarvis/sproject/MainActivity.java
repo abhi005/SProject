@@ -16,13 +16,12 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.scwang.wave.MultiWaveHeader;
 
 import Helper.Global;
 import Helper.HomeMenuAdapter;
@@ -38,7 +37,7 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
     Context context;
 
     private GridView homeMenu;
-    private ImageView waveAnimation;
+    private MultiWaveHeader waveAnimation;
     private BottomNavigationView navigationView;
     int[] homeIcons = {R.drawable.home_call, R.drawable.home_message, R.drawable.home_image, R.drawable.home_audio, R.drawable.home_video, R.drawable.home_doc, R.drawable.home_zip};
     String[] homeIconsTitle = {"Phone", "Messaging", "Images", "Audios", "Videos", "Docs", "Zip"};
@@ -87,8 +86,9 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
         CustomBottomNavigation.disableShiftMode(navigationView);
 
         //wave animation
-        /*waveAnimation = (ImageView) findViewById(R.id.header_wave_pattern);
-        ((AnimationDrawable) waveAnimation.getBackground()).start();*/
+        //waveAnimation = findViewById(R.id.header_wave_pattern);
+        //waveAnimation.start();
+        //((AnimationDrawable) waveAnimation.getBackground()).start();
 
         //sms service
         smsService = new SMSEncryptionService(getApplicationContext());

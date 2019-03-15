@@ -1,14 +1,14 @@
 package com.example.jarvis.sproject;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.Context;
-import android.content.res.Resources;
-import android.os.AsyncTask;
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,21 +17,24 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
-import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import Helper.FileHelper;
 import Helper.ImagesAdapter;
 import Helper.SqliteDatabaseHandler;
 import Model.ImageFile;
 import utils.PortraitActivity;
 
-public class Images extends PortraitActivity {
+public class Images extends PortraitActivity implements View.OnLongClickListener {
 
-    private GridView gridView;
+    private RecyclerView recyclerView;
     private ImagesAdapter adapter;
+    private RecyclerView.LayoutManager layoutManager;
 
     public boolean isInActionMode = false;
     public boolean isAllSelected = false;
@@ -40,10 +43,11 @@ public class Images extends PortraitActivity {
     private List<ImageFile> images;
 
     private ViewGroup actionMenu;
+    private TextView counterText;
     private ImageView menuButton;
+    private ImageView backButton;
     private ImageView selectAllButton;
     private ImageView actionMenuBackButton;
-    private ImageView actionMenuRenameButton;
     private ImageView actionMenuInfoButton;
     private ImageView actionMenuDeleteButton;
     private SqliteDatabaseHandler db;
@@ -55,68 +59,95 @@ public class Images extends PortraitActivity {
         setContentView(R.layout.activity_images);
 
         //back button
-        ImageView backButton = (ImageView) findViewById(R.id.back_btn);
+        backButton = findViewById(R.id.back_btn);
         backButton.setOnClickListener(v -> Images.super.onBackPressed());
 
-        gridView = (GridView) findViewById(R.id.gridview);
-
-        int iDisplayWidth = getResources().getDisplayMetrics().widthPixels;
-        Resources resources = getApplicationContext().getResources();
-        DisplayMetrics metrics = resources.getDisplayMetrics();
-        float dp = iDisplayWidth / (metrics.densityDpi / 160f);
-        if (dp < 360) {
-            dp = (dp - 17) / 2;
-            float px = convertDpToPixel(dp, getApplicationContext());
-            gridView.setColumnWidth(Math.round(px));
-        }
+        recyclerView = findViewById(R.id.recyclerview);
+        recyclerView.setHasFixedSize(true);
+        layoutManager = new GridLayoutManager(getApplicationContext(), 3);
+        recyclerView.setLayoutManager(layoutManager);
 
         //retriving all images from database
         db = new SqliteDatabaseHandler(getApplicationContext());
-        fetchImageFiles();
-
         images = new ArrayList<>();
+        images = fetchImageFiles();
+        Log.i("image_trace", "total images: " + images.size());
+
         adapter = new ImagesAdapter(Images.this, images);
-        gridView.setAdapter(adapter);
+        recyclerView.setAdapter(adapter);
 
         //action menu
-        actionMenu = (ViewGroup) findViewById(R.id.action_menu);
+        actionMenu = findViewById(R.id.action_menu);
         actionMenu.setVisibility(View.GONE);
 
+        counterText = findViewById(R.id.action_menu_item_count);
+
         //menu button
-        menuButton = (ImageView) findViewById(R.id.menu_btn);
+        menuButton = findViewById(R.id.menu_btn);
         menuButton.setVisibility(View.VISIBLE);
 
-        //select all button
-        selectAllButton = (ImageView) findViewById(R.id.menu_select_all_btn);
-        selectAllButton.setVisibility(View.GONE);
-
         //action menu back button
-        actionMenuBackButton = (ImageView) findViewById(R.id.images_action_menu_back_btn);
+        actionMenuBackButton = findViewById(R.id.action_menu_back_btn);
         actionMenuBackButton.setOnClickListener(v -> {
             unSetActionMode();
             adapter.notifyDataSetChanged();
         });
 
-        //action menu rename button
-        actionMenuRenameButton = (ImageView) findViewById(R.id.images_action_menu_rename_btn);
-        actionMenuRenameButton.setAlpha(Float.valueOf("0.5"));
-
         //action menu info button
-        actionMenuInfoButton = (ImageView) findViewById(R.id.images_action_menu_details_btn);
+        actionMenuInfoButton = findViewById(R.id.action_menu_info_btn);
         actionMenuInfoButton.setAlpha(Float.valueOf("0.5"));
+        actionMenuInfoButton.setOnClickListener(view -> {
+            if (selectionList.size() == 1) {
+                ImageFile f = selectionList.get(0);
+                Dialog infoButtonDialog = new Dialog(Images.this);
+                infoButtonDialog.setContentView(R.layout.popup_file_info);
+                Objects.requireNonNull(infoButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+                Objects.requireNonNull(infoButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-        //action menu delete button
-        actionMenuDeleteButton = (ImageView) findViewById(R.id.images_action_menu_delete_btn);
-        actionMenuDeleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                adapter.updateAdapter(selectionList);
-                unSetActionMode();
-                adapter.notifyDataSetChanged();
+                ImageView icon = infoButtonDialog.findViewById(R.id.icon);
+                TextView name = infoButtonDialog.findViewById(R.id.name);
+                TextView path = infoButtonDialog.findViewById(R.id.path);
+                TextView size = infoButtonDialog.findViewById(R.id.size);
+                TextView date = infoButtonDialog.findViewById(R.id.date);
+                TextView type = infoButtonDialog.findViewById(R.id.type);
+                icon.setImageResource(R.drawable.image);
+                name.setText(FileHelper.getFileName(f.getNewPath()));
+                path.setText(f.getNewPath());
+                size.setText(f.getSize());
+                date.setText(f.getDate());
+                type.setText(R.string.file);
+                infoButtonDialog.show();
             }
         });
 
+        //action menu delete button
+        actionMenuDeleteButton = findViewById(R.id.action_menu_delete_btn);
+        actionMenuDeleteButton.setOnClickListener(v -> {
+            Dialog deleteButtonDialog = new Dialog(this);
+            deleteButtonDialog.setContentView(R.layout.popup_file_delete);
+            Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+            Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            deleteButtonDialog.show();
+
+            // delete confirmation listener
+            TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
+            TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
+            cancelBtn.setOnClickListener(view -> {
+                //cancel btn
+                deleteButtonDialog.dismiss();
+            });
+            deleteBtn.setOnClickListener(view -> {
+                //delete btn
+                adapter.deleteItems(selectionList, db);
+                unSetActionMode();
+                deleteButtonDialog.dismiss();
+                adapter.updateAdapter(images = fetchImageFiles());
+            });
+        });
+
         //select all button
+        selectAllButton = findViewById(R.id.menu_select_all_btn);
+        selectAllButton.setVisibility(View.GONE);
         selectAllButton.setOnClickListener(v -> {
             if(!isAllSelected) {
                 selectAllButton.setImageResource(R.drawable.checkbox_checked);
@@ -134,8 +165,8 @@ public class Images extends PortraitActivity {
         });
     }
 
-    public void fetchImageFiles() {
-        images = db.getAllImages();
+    public List<ImageFile> fetchImageFiles() {
+        return db.getAllImages();
     }
 
     @Override
@@ -160,6 +191,7 @@ public class Images extends PortraitActivity {
 
     public void unSetActionMode() {
         isInActionMode = false;
+        backButton.setVisibility(View.VISIBLE);
         menuButton.setVisibility(View.VISIBLE);
         selectAllButton.setVisibility(View.GONE);
         Animation topDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
@@ -169,7 +201,10 @@ public class Images extends PortraitActivity {
         selectionList.clear();
     }
 
-    public void setActionMode(Animation bottomUp){
+    public void setActionMode() {
+        isInActionMode = true;
+        backButton.setVisibility(View.GONE);
+        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
         menuButton.setVisibility(View.GONE);
         selectAllButton.setVisibility(View.VISIBLE);
         actionMenu.startAnimation(bottomUp);
@@ -177,14 +212,8 @@ public class Images extends PortraitActivity {
         adapter.notifyDataSetChanged();
     }
 
-    private float convertDpToPixel(float dp, Context context) {
-        Resources resource = context.getResources();
-        DisplayMetrics metrics = resource.getDisplayMetrics();
-        return dp * (metrics.densityDpi / 160f);
-    }
-
     public void prepareSelection(View view, int position) {
-        CheckBox cb = (CheckBox) view.findViewById(R.id.image_cb);
+        CheckBox cb = (CheckBox) view;
         if (!cb.isChecked()) {
             selectionList.add(images.get(position));
             cb.setChecked(true);
@@ -195,12 +224,33 @@ public class Images extends PortraitActivity {
             selectionCounter--;
 
         }
+
         if (selectionCounter == 1) {
-            actionMenuRenameButton.setAlpha(Float.valueOf("1.0"));
             actionMenuInfoButton.setAlpha(Float.valueOf("1.0"));
         } else {
-            actionMenuRenameButton.setAlpha(Float.valueOf("0.5"));
             actionMenuInfoButton.setAlpha(Float.valueOf("0.5"));
         }
+        if (selectionCounter > 0) {
+            actionMenuDeleteButton.setAlpha(Float.valueOf("1.0"));
+        } else {
+            actionMenuDeleteButton.setAlpha(Float.valueOf("0.5  "));
+        }
+        updateSelectionCounterText(selectionCounter);
+    }
+
+    public void updateSelectionCounterText(int counter) {
+        if (counter == 0) {
+            counterText.setText(R.string.no_item_selected);
+        } else if (counter == 1) {
+            counterText.setText(R.string.one_item_selected);
+        } else {
+            counterText.setText(counter + R.string.items_selected);
+        }
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        setActionMode();
+        return true;
     }
 }

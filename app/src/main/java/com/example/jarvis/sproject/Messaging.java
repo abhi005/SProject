@@ -19,6 +19,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,23 +32,21 @@ import utils.PortraitActivity;
 
 public class Messaging extends PortraitActivity implements View.OnLongClickListener {
 
-    public boolean isInActionMode = false;
-    public boolean isAllSelected = false;
-
-    private List<Conversation> conversations;
     private EditText searchField;
-    private ImageView menuButton;
+    public boolean isInActionMode = false;
     private ImageView backButton;
     private ImageView selectAllButton;
     private RecyclerView recyclerView;
     private MessagingAdapter messagingAdapter;
     private LinearLayoutManager layoutManager;
-
-    private SqliteDatabaseHandler db;
     private TextView actionMenuCounterText;
     private ImageView actionMenuDeleteButton;
     private ImageView actionMenuBackButton;
     private ViewGroup messagingActionMenu;
+    public boolean isAllSelected = false;
+    private ImageView newButton;
+    private SqliteDatabaseHandler db;
+    private List<Conversation> conversations;
     private List<Conversation> selectionList = new ArrayList<>();
     private int selectionCounter = 0;
 
@@ -70,8 +69,9 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
         db = new SqliteDatabaseHandler(getApplicationContext());
         getAllConversations();
 
-        //menu button
-        menuButton = (ImageView) findViewById(R.id.menu_btn);
+        //new button
+        newButton = (ImageView) findViewById(R.id.new_btn);
+        newButton.setOnClickListener(view -> Toast.makeText(Messaging.this, "new message created", Toast.LENGTH_LONG).show());
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
@@ -82,7 +82,7 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
 
 
         //search bar
-        searchField = (EditText) findViewById(R.id.search_field);
+        searchField = findViewById(R.id.search_field);
         searchField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -99,57 +99,46 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
             }
         });
 
-
         //action mode menu
-        messagingActionMenu = (ViewGroup) findViewById(R.id.action_menu);
+        messagingActionMenu = findViewById(R.id.action_menu);
         messagingActionMenu.setVisibility(View.GONE);
 
         //action menu counter text
-        actionMenuCounterText = (TextView) findViewById(R.id.messaging_action_menu_item_count);
+        actionMenuCounterText = findViewById(R.id.messaging_action_menu_item_count);
 
         //action menu delete button
-        actionMenuDeleteButton = (ImageView) findViewById(R.id.messaging_action_menu_delete_btn);
-        actionMenuDeleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                messagingAdapter.updateAdapter(selectionList);
-                unSetActionMode();
-                messagingAdapter.notifyDataSetChanged();
-            }
+        actionMenuDeleteButton = findViewById(R.id.messaging_action_menu_delete_btn);
+        actionMenuDeleteButton.setOnClickListener(v -> {
+            unSetActionMode();
+            messagingAdapter.notifyDataSetChanged();
         });
 
         //action menu back button
-        actionMenuBackButton = (ImageView) findViewById(R.id.messaging_action_menu_back_btn);
-        actionMenuBackButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                unSetActionMode();
-                messagingAdapter.notifyDataSetChanged();
-            }
+        actionMenuBackButton = findViewById(R.id.messaging_action_menu_back_btn);
+        actionMenuBackButton.setOnClickListener(v -> {
+            unSetActionMode();
+            messagingAdapter.notifyDataSetChanged();
         });
 
         //select all button
-        selectAllButton = (ImageView) findViewById(R.id.menu_select_all_btn);
+        selectAllButton = findViewById(R.id.menu_select_all_btn);
         selectAllButton.setVisibility(View.GONE);
-        selectAllButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!isAllSelected) {
-                    selectAllButton.setImageResource(R.drawable.checkbox_checked);
-                    selectionCounter = conversations.size();
-                    selectionList.clear();
-                    selectionList.addAll(conversations);
-                    updateSelectionCounterText(selectionCounter);
-                    isAllSelected = true;
-                } else {
-                    selectAllButton.setImageResource(R.drawable.checkbox_unchecked);
-                    selectionCounter = 0;
-                    selectionList.clear();
-                    updateSelectionCounterText(selectionCounter);
-                    isAllSelected = false;
-                }
-                messagingAdapter.notifyDataSetChanged();
+        selectAllButton.setOnClickListener(v -> {
+            if (!isAllSelected) {
+                selectAllButton.setImageResource(R.drawable.checkbox_checked);
+                selectionCounter = conversations.size();
+                selectionList.clear();
+                selectionList.addAll(conversations);
+                updateSelectionCounterText(selectionCounter);
+                isAllSelected = true;
+            } else {
+                selectAllButton.setImageResource(R.drawable.checkbox_unchecked);
+                selectionCounter = 0;
+                selectionList.clear();
+                updateSelectionCounterText(selectionCounter);
+                isAllSelected = false;
             }
+            messagingAdapter.notifyDataSetChanged();
         });
     }
 
@@ -203,7 +192,7 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
         messagingActionMenu.startAnimation(bottomUp);
         messagingActionMenu.setVisibility(View.VISIBLE);
         selectAllButton.setVisibility(View.VISIBLE);
-        menuButton.setVisibility(View.GONE);
+        newButton.setVisibility(View.GONE);
         messagingAdapter.notifyDataSetChanged();
     }
 
@@ -214,7 +203,7 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
         messagingActionMenu.startAnimation(topDown);
         messagingActionMenu.setVisibility(View.GONE);
         selectAllButton.setVisibility(View.GONE);
-        menuButton.setVisibility(View.VISIBLE);
+        newButton.setVisibility(View.VISIBLE);
         actionMenuCounterText.setText("0 item selected");
         selectionCounter = 0;
         selectionList.clear();

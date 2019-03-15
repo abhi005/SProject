@@ -1,17 +1,21 @@
 package Helper;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.jarvis.sproject.R;
 import com.example.jarvis.sproject.Zip;
 
 import java.util.List;
+import java.util.Objects;
 
 import Model.ZipFile;
 
@@ -56,23 +60,59 @@ public class ZipAdapter extends RecyclerView.Adapter<ZipAdapter.ViewHolder>{
             }
         }
 
-        holder.itemView.setOnLongClickListener(view -> {
-            activity.setActionMode();
-            return false;
-        });
-
         holder.itemView.setOnClickListener(v -> {
             if (activity.isInActionMode) {
-                CheckBox cb = (CheckBox) v.findViewById(R.id.item_cb);
+                CheckBox cb = v.findViewById(R.id.item_cb);
                 activity.prepareSelection(cb, position);
             } else {
+                onFileClick(zipFile);
             }
+        });
+    }
+
+    private void onFileClick(ZipFile item) {
+        Objects.requireNonNull(activity.fileClickDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+        Objects.requireNonNull(activity.fileClickDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        activity.fileClickDialog.show();
+
+        //file click popup on click listeners
+        LinearLayout decryptBtn = activity.fileClickDialog.findViewById(R.id.decrypt_btn);
+        LinearLayout openBtn = activity.fileClickDialog.findViewById(R.id.open_btn);
+        decryptBtn.setOnClickListener(view -> {
+            //decrypt file
+            FileHelper.decryptZipFile(activity, item);
+            updateAdapter(activity.fetchZipFiles());
+            activity.fileClickDialog.dismiss();
+        });
+        openBtn.setOnClickListener(view -> {
+            //open file
+            FileHelper.openEncryptedFile(activity, item.getNewPath(), item.getOriginalPath());
+            activity.fileClickDialog.dismiss();
         });
     }
 
     @Override
     public int getItemCount() {
         return files.size();
+    }
+
+    public void updateAdapter(List<ZipFile> list) {
+        files.clear();
+        files.addAll(list);
+        notifyDataSetChanged();
+    }
+
+    public void filterList(List<ZipFile> filteredList) {
+        files = filteredList;
+        notifyDataSetChanged();
+    }
+
+    public void deleteItems(List<ZipFile> list, SqliteDatabaseHandler db) {
+        for (ZipFile f : list) {
+            String path = f.getNewPath();
+            FileHelper.deleteFile(path);
+            db.deleteZip(f);
+        }
     }
 
     class ViewHolder extends RecyclerView.ViewHolder{
@@ -86,22 +126,12 @@ public class ZipAdapter extends RecyclerView.Adapter<ZipAdapter.ViewHolder>{
         public ViewHolder(View itemView, Zip activity) {
             super(itemView);
 
-            name = (TextView) itemView.findViewById(R.id.item_name);
-            details = (TextView) itemView.findViewById(R.id.item_details);
-            cb = (CheckBox) itemView.findViewById(R.id.item_cb);
+            name = itemView.findViewById(R.id.item_name);
+            details = itemView.findViewById(R.id.item_details);
+            cb = itemView.findViewById(R.id.item_cb);
             this.activity = activity;
-        }
-    }
 
-    public void filterList(List<ZipFile> filteredList) {
-        files = filteredList;
-        notifyDataSetChanged();
-    }
-
-    public void updateAdapter(List<ZipFile> list) {
-        for(ZipFile f : list) {
-            files.remove(f);
+            itemView.setOnLongClickListener(activity);
         }
-        notifyDataSetChanged();
     }
 }

@@ -1,96 +1,102 @@
 package Helper;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 
 import com.example.jarvis.sproject.Images;
 import com.example.jarvis.sproject.R;
 
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import Model.ImageFile;
 
-public class ImagesAdapter extends BaseAdapter {
+public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder> {
 
     private Images activity;
-    private List<ImageFile> images;
+    private List<ImageFile> files;
 
-    public ImagesAdapter(Context context, List<ImageFile> images) {
+    public ImagesAdapter(Context context, List<ImageFile> files) {
         this.activity = (Images) context;
-        this.images = images;
+        this.files = files;
+    }
+
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_images, parent, false);
+        return new ImagesAdapter.ViewHolder(itemView, activity);
     }
 
     @Override
-    public int getCount() {
-        return images.size();
-    }
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        ImageFile imageFile = files.get(position);
 
-    @Override
-    public Object getItem(int position) {
-        return images.get(position);
-    }
+        ByteArrayInputStream bais = new ByteArrayInputStream(imageFile.getThumbnail());
+        Bitmap thumbnailImage = BitmapFactory.decodeStream(bais);
+        holder.thumbnail.setImageBitmap(thumbnailImage);
 
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @SuppressLint("ViewHolder")
-    @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        convertView = LayoutInflater.from(activity).inflate(R.layout.item_layout_images, parent, false);
-        ImageView thumbnail = (ImageView) convertView.findViewById(R.id.image_thumbnail);
-        CheckBox cb = (CheckBox) convertView.findViewById(R.id.image_cb);
         if(!activity.isInActionMode) {
-            cb.setVisibility(View.GONE);
-            cb.setChecked(false);
+            holder.cb.setVisibility(View.GONE);
+            holder.cb.setChecked(false);
         } else {
-            cb.setVisibility(View.VISIBLE);
+            holder.cb.setVisibility(View.VISIBLE);
             if (activity.isAllSelected) {
-                cb.setChecked(true);
+                holder.cb.setChecked(true);
             } else {
-                cb.setChecked(false);
+                holder.cb.setChecked(false);
             }
         }
-        try {
-            byte[] imageData = images.get(position).getThumbnail();
-            Bitmap bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
-            thumbnail.setImageBitmap(bitmap);
-        } catch (Exception e) {
-            Log.i("image_trace", "error: " + e.getMessage());
-        }
 
-        convertView.setOnClickListener(v -> {
-            if(activity.isInActionMode) {
-                activity.prepareSelection(v, position);
+        holder.itemView.setOnClickListener(v -> {
+            if (activity.isInActionMode) {
+                activity.prepareSelection(holder.cb, position);
+            } else {
             }
         });
+    }
 
-        convertView.setOnLongClickListener(v -> {
-            activity.isInActionMode = true;
-            Animation bottomUp = AnimationUtils.loadAnimation(activity, R.anim.bottom_up);
-            activity.setActionMode(bottomUp);
-            return true;
-        });
-        return convertView;
+    @Override
+    public int getItemCount() {
+        return files.size();
     }
 
     public void updateAdapter(List<ImageFile> list) {
-        for(ImageFile c : list) {
-            images.remove(c);
+        files.clear();
+        files.addAll(list);
+        notifyDataSetChanged();
+    }
+
+    public void deleteItems(List<ImageFile> list, SqliteDatabaseHandler db) {
+        for (ImageFile f : list) {
+            String path = f.getNewPath();
+            FileHelper.deleteFile(path);
+            db.deleteImage(f);
         }
-        this.notifyDataSetChanged();
+    }
+
+    class ViewHolder extends RecyclerView.ViewHolder {
+        private ImageView thumbnail;
+        private CheckBox cb;
+
+        private Images activity;
+
+        public ViewHolder(View itemView, Images activity) {
+            super(itemView);
+
+            thumbnail = itemView.findViewById(R.id.image_thumbnail);
+            cb = itemView.findViewById(R.id.item_cb);
+            this.activity = activity;
+
+            itemView.setOnLongClickListener(activity);
+        }
     }
 }

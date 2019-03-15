@@ -14,43 +14,13 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/encrypt_btn"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:paddingTop="24dp"
-            android:paddingBottom="18dp"
-            android:background="?attr/selectableItemBackground"
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:gravity="center_vertical"
-            android:layout_height="match_parent">
-
-            <ImageView
-                android:src="@drawable/encrypt_file"
-                android:layout_width="@dimen/icon"
-                android:scaleType="centerInside"
-                android:layout_height="@dimen/icon" />
-
-            <TextView
-                android:text="@string/encrypt_file"
-                android:textColor="@color/darkGrey"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:textSize="@dimen/medium_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <LinearLayout
             android:id="@+id/open_btn"
             android:clickable="true"
             android:focusable="true"
             android:paddingStart="24dp"
             android:paddingEnd="24dp"
-            android:paddingTop="18dp"
-            android:paddingBottom="24dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="18dp"
             android:background="?attr/selectableItemBackground"
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -65,6 +35,36 @@
 
             <TextView
                 android:text="Open file"
+                android:textColor="@color/darkGrey"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:textSize="@dimen/medium_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/encrypt_btn"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingTop="18dp"
+            android:paddingBottom="24dp"
+            android:background="?attr/selectableItemBackground"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:gravity="center_vertical"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:src="@drawable/encrypt_file"
+                android:layout_width="@dimen/icon"
+                android:scaleType="centerInside"
+                android:layout_height="@dimen/icon" />
+
+            <TextView
+                android:text="@string/encrypt_file"
                 android:textColor="@color/darkGrey"
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp"

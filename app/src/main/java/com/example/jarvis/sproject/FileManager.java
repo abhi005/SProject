@@ -4,22 +4,18 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -37,11 +33,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -52,7 +45,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Stack;
 
-import Helper.EncryptFiles;
 import Helper.FileHelper;
 import Helper.FileManagerAdapter;
 import Helper.Global;
@@ -60,15 +52,12 @@ import Model.FileManagerItem;
 import utils.CustomBottomNavigation;
 import utils.PortraitActivity;
 
-import static android.os.Environment.getExternalStoragePublicDirectory;
-
 public class FileManager extends PortraitActivity implements View.OnLongClickListener, BottomNavigationView.OnNavigationItemSelectedListener  {
 
-    private ImageView storageButton;
-    private BottomNavigationView navigationView;
-    private Dialog storageButtonDialog;
+    //private Dialog storageButtonDialog;
     public Dialog fileClickDialog;
-    private ViewGroup searchBar;
+    //private ImageView storageButton;
+    private BottomNavigationView navigationView;
     private EditText searchField;
     private TextView currentPath;
     private RecyclerView recyclerView;
@@ -83,11 +72,10 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
 
 
     //storage type variable
-    private static int currentStorageType = 0;
     public boolean isInActionMode = false;
     public boolean isAllSelected = false;
     private static int selectionCounter = 0;
-    private String sdCardPath = "";
+    //private String sdCardPath = "";
     private ArrayList<FileManagerItem> selectionList = new ArrayList<>();
     List<FileManagerItem> directories = new ArrayList<FileManagerItem>();
     List<FileManagerItem> files = new ArrayList<FileManagerItem>();
@@ -106,25 +94,25 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         checkPermissionReadStorage(this);
 
         //customizing navigation
-        navigationView = (BottomNavigationView) findViewById(R.id.navigation);
+        navigationView = findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(this);
         CustomBottomNavigation.disableShiftMode(navigationView);
 
         //seting current path to tv
-        currentPath = (TextView) findViewById(R.id.current_path_tv);
+        currentPath = findViewById(R.id.current_path_tv);
 
         //recycler view initialization
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+        recyclerView = findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
         // setting sd card path
-        List<String> tempList = getExternalStorageDirectories();
-        sdCardPath = tempList.get(0);
+        //sdCardPath = FileHelper.getSdCardPath(FileManager.this);
 
         //setting file adapter
-        adapter = new FileManagerAdapter(directories, this, sdCardPath);
+        //adapter = new FileManagerAdapter(directories, this, sdCardPath);
+        adapter = new FileManagerAdapter(directories, this);
         recyclerView.setAdapter(adapter);
 
 
@@ -133,7 +121,7 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         fileClickDialog.setContentView(R.layout.popup_file_click);
 
         //storage type button
-        storageButton = (ImageView) findViewById(R.id.menu_storage_btn);
+        /*storageButton = findViewById(R.id.menu_storage_btn);
         storageButtonDialog = new Dialog(this);
         storageButton.setOnClickListener(v -> {
             storageButtonDialog.setContentView(R.layout.popup_storage_type);
@@ -142,8 +130,8 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
             storageButtonDialog.show();
 
             //storage type popup on click listeners
-            LinearLayout internalStorageBtn = (LinearLayout) storageButtonDialog.findViewById(R.id.internal_storage_btn);
-            LinearLayout sdcardStorageBtn = (LinearLayout) storageButtonDialog.findViewById(R.id.sd_card_btn);
+            LinearLayout internalStorageBtn = storageButtonDialog.findViewById(R.id.internal_storage_btn);
+            LinearLayout sdcardStorageBtn = storageButtonDialog.findViewById(R.id.sd_card_btn);
             internalStorageBtn.setOnClickListener(view -> {
                 //internal storage
                 changeStorageType(0);
@@ -155,17 +143,14 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
             sdcardStorageBtn.setOnClickListener(view -> {
                 //sd card
                 changeStorageType(1);
-                List<String> tempList1 = getExternalStorageDirectories();
-                String path = tempList1.get(0);
                 paths.clear();
-                forwardDirectory(path);
+                forwardDirectory(sdCardPath);
                 storageButtonDialog.dismiss();
             });
-        });
+        });*/
 
         //search bar
-        searchBar = (ViewGroup) findViewById(R.id.search_bar);
-        searchField = (EditText) findViewById(R.id.search_field);
+        searchField = findViewById(R.id.search_field);
         searchField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
@@ -185,55 +170,47 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         forwardDirectory(initialPath);
 
         //select all button
-        selectAllButton = (ImageView) findViewById(R.id.menu_select_all_btn);
+        selectAllButton = findViewById(R.id.menu_select_all_btn);
         selectAllButton.setVisibility(View.GONE);
-        selectAllButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!isAllSelected) {
-                    selectAllButton.setImageResource(R.drawable.checkbox_checked);
-                    selectionCounter = directories.size();
-                    selectionList.clear();
-                    selectionList.addAll(directories);
-                    updateSelectionCounterText(selectionCounter);
-                    isAllSelected = true;
-                } else {
-                    selectAllButton.setImageResource(R.drawable.checkbox_unchecked);
-                    selectionCounter = 0;
-                    selectionList.clear();
-                    updateSelectionCounterText(selectionCounter);
-                    isAllSelected = false;
-                }
-                adapter.notifyDataSetChanged();
+        selectAllButton.setOnClickListener(v -> {
+            if (!isAllSelected) {
+                selectAllButton.setImageResource(R.drawable.checkbox_checked);
+                selectionCounter = directories.size();
+                selectionList.clear();
+                selectionList.addAll(directories);
+                updateSelectionCounterText(selectionCounter);
+                isAllSelected = true;
+            } else {
+                selectAllButton.setImageResource(R.drawable.checkbox_unchecked);
+                selectionCounter = 0;
+                selectionList.clear();
+                updateSelectionCounterText(selectionCounter);
+                isAllSelected = false;
             }
+            adapter.notifyDataSetChanged();
         });
 
         //back button
-        backButton = (ImageView) findViewById(R.id.back_btn);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
+        backButton = findViewById(R.id.back_btn);
+        backButton.setOnClickListener(view -> onBackPressed());
 
         //action menu
-        actionMenu = (ViewGroup) findViewById(R.id.action_menu);
+        actionMenu = findViewById(R.id.action_menu);
         actionMenu.setVisibility(View.GONE);
 
         //action menu back button
-        actionMenuBackButton = (ImageView) findViewById(R.id.action_menu_back_btn);
+        actionMenuBackButton = findViewById(R.id.action_menu_back_btn);
         actionMenuBackButton.setOnClickListener(v -> {
             unSetActionMode();
             adapter.notifyDataSetChanged();
         });
 
         //action menu count text
-        actionMenuCountText = (TextView) findViewById(R.id.action_menu_item_count);
+        actionMenuCountText = findViewById(R.id.action_menu_item_count);
 
 
         //action menu delete button
-        actionMenuDeleteButton = (ImageView) findViewById(R.id.action_menu_delete_btn);
+        actionMenuDeleteButton = findViewById(R.id.action_menu_delete_btn);
         actionMenuDeleteButton.setAlpha(Float.valueOf("0.5"));
         actionMenuDeleteButton.setOnClickListener(v -> {
             Dialog deleteButtonDialog = new Dialog(this);
@@ -243,8 +220,8 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
             deleteButtonDialog.show();
 
             // delete confirmation listener
-            TextView cancelBtn = (TextView) deleteButtonDialog.findViewById(R.id.cancel_btn);
-            TextView deleteBtn = (TextView) deleteButtonDialog.findViewById(R.id.delete_btn);
+            TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
+            TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
             cancelBtn.setOnClickListener(view -> {
                 //cancel btn
                 deleteButtonDialog.dismiss();
@@ -259,7 +236,7 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
 
 
         //action menu info button
-        actionMenuInfoButton = (ImageView) findViewById(R.id.action_menu_info_btn);
+        actionMenuInfoButton = findViewById(R.id.action_menu_info_btn);
         actionMenuInfoButton.setAlpha(Float.valueOf("0.5"));
         actionMenuInfoButton.setOnClickListener(view -> {
             if (selectionList.size() == 1) {
@@ -269,12 +246,12 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
                 Objects.requireNonNull(infoButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
                 Objects.requireNonNull(infoButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-                ImageView icon = (ImageView) infoButtonDialog.findViewById(R.id.icon);
-                TextView name = (TextView) infoButtonDialog.findViewById(R.id.name);
-                TextView path = (TextView) infoButtonDialog.findViewById(R.id.path);
-                TextView size = (TextView) infoButtonDialog.findViewById(R.id.size);
-                TextView date = (TextView) infoButtonDialog.findViewById(R.id.date);
-                TextView type = (TextView) infoButtonDialog.findViewById(R.id.type);
+                ImageView icon = infoButtonDialog.findViewById(R.id.icon);
+                TextView name = infoButtonDialog.findViewById(R.id.name);
+                TextView path = infoButtonDialog.findViewById(R.id.path);
+                TextView size = infoButtonDialog.findViewById(R.id.size);
+                TextView date = infoButtonDialog.findViewById(R.id.date);
+                TextView type = infoButtonDialog.findViewById(R.id.type);
                 if (f.getType().equals("dir")) {
                     icon.setImageResource(R.drawable.folder);
                     name.setText(FileHelper.getDirectoryName(f.getPath()));
@@ -292,71 +269,11 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         });
     }
 
-
-
-    @SuppressLint("StaticFieldLeak")
-    class FetchFilesList extends AsyncTask<Void, Void, Void> {
-
-        private FileManager activity;
-
-        FetchFilesList(Context context) {
-            this.activity = (FileManager) context;
-        }
-
-        @Override
-        protected Void doInBackground(Void... paramss) {
-            directories.clear();
-            files.clear();
-            File[] dirs = currentDir.listFiles();
-
-            try {
-                for(File f : dirs) {
-                    Date lastModDate = new Date(f.lastModified());
-                    DateFormat formater = DateFormat.getDateInstance();
-                    String dateModify = formater.format(lastModDate);
-
-                    if(f.isDirectory()) {
-                        File[] fBuffer = f.listFiles();
-                        int buf = 0;
-                        if(fBuffer != null) {
-                            buf = fBuffer.length;
-                        } else {
-                            buf = 0;
-                        }
-                        String numOfItems = String.valueOf(buf);
-                        if (buf == 0) {
-                            numOfItems += " item";
-                        } else {
-                            numOfItems += " items";
-                        }
-
-                        directories.add(new FileManagerItem(f.getName(), f.getAbsolutePath(), numOfItems, dateModify, "dir", null));
-                    } else {
-                        String dataSize = FileHelper.getReadableFileSize(f.length());
-                        String ext = FileHelper.getFileExtension(f);
-                        files.add(new FileManagerItem(f.getName(), f.getAbsolutePath(), dataSize, dateModify, "file", ext));
-                    }
-                }
-            } catch (Exception e) {
-                Log.e("file_access_exception", e.getMessage());
-            }
-            Collections.sort(directories);
-            Collections.sort(files);
-            directories.addAll(files);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void v) {
-            adapter.notifyDataSetChanged();
-        }
-    }
-
     public void forwardDirectory(String path) {
         currentPath.setText(path);
         currentDir = new File(path);
         paths.add(path);
-        FetchFilesList obj = new FetchFilesList(this);
+        FetchFilesList obj = new FetchFilesList();
         obj.execute();
     }
 
@@ -365,32 +282,22 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         String newPath = paths.peek();
         currentPath.setText(newPath);
         currentDir = new File(newPath);
-        FetchFilesList obj = new FetchFilesList(this);
+        FetchFilesList obj = new FetchFilesList();
         obj.execute();
     }
 
-    public List<String> getExternalStorageDirectories() {
-        List<String> results = new ArrayList<>();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            File[] externalDirs = getExternalFilesDirs(null);
-            String internalRoot = Environment.getExternalStorageDirectory().getAbsolutePath().toLowerCase();
-
-            for (File file : externalDirs) {
-                if (file == null)
-                    continue;
-                String path = file.getPath().split("/Android")[0];
-
-                if (path.toLowerCase().startsWith(internalRoot))
-                    continue;
-
-                boolean addPath = false;
-                addPath = Environment.isExternalStorageRemovable(file);
-                if (addPath) {
-                    results.add(path);
-                }
-            }
-        }
-        return results;
+    public void setActionMode() {
+        isInActionMode = true;
+        backButton.setVisibility(View.GONE);
+        Animation topDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
+        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
+        navigationView.startAnimation(topDown);
+        actionMenu.startAnimation(bottomUp);
+        navigationView.setVisibility(View.GONE);
+        actionMenu.setVisibility(View.VISIBLE);
+        selectAllButton.setVisibility(View.VISIBLE);
+        //storageButton.setVisibility(View.GONE);
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -433,15 +340,13 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         }
     }
 
-    private void changeStorageType(int index) {
+    /*private void changeStorageType(int index) {
         if(index == 0) {
-            currentStorageType = 0;
             storageButton.setImageResource(R.drawable.storage);
         } else {
-            currentStorageType = 1;
             storageButton.setImageResource(R.drawable.sd_card);
         }
-    }
+    }*/
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setStatusBarGradient(Activity activity) {
@@ -508,20 +413,6 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         }
     }
 
-    public void setActionMode() {
-        isInActionMode = true;
-        backButton.setVisibility(View.GONE);
-        Animation topDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
-        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
-        navigationView.startAnimation(topDown);
-        actionMenu.startAnimation(bottomUp);
-        navigationView.setVisibility(View.GONE);
-        actionMenu.setVisibility(View.VISIBLE);
-        selectAllButton.setVisibility(View.VISIBLE);
-        storageButton.setVisibility(View.GONE);
-        adapter.notifyDataSetChanged();
-    }
-
     public void unSetActionMode() {
         isInActionMode = false;
         backButton.setVisibility(View.VISIBLE);
@@ -531,10 +422,63 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         actionMenu.startAnimation(topDown);
         actionMenu.setVisibility(View.GONE);
         navigationView.setVisibility(View.VISIBLE);
-        storageButton.setVisibility(View.VISIBLE);
+        //storageButton.setVisibility(View.VISIBLE);
         selectAllButton.setVisibility(View.GONE);
         selectionCounter = 0;
         selectionList.clear();
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    class FetchFilesList extends AsyncTask<Void, Void, Void> {
+
+        FetchFilesList() {
+        }
+
+        @Override
+        protected Void doInBackground(Void... paramss) {
+            directories.clear();
+            files.clear();
+            File[] dirs = currentDir.listFiles();
+
+            try {
+                for (File f : dirs) {
+                    Date lastModDate = new Date(f.lastModified());
+                    DateFormat formater = DateFormat.getDateInstance();
+                    String dateModify = formater.format(lastModDate);
+
+                    if (f.isDirectory()) {
+                        File[] fBuffer = f.listFiles();
+                        int buf = 0;
+                        if (fBuffer != null) {
+                            buf = fBuffer.length;
+                        }
+                        String numOfItems = String.valueOf(buf);
+                        if (buf == 0) {
+                            numOfItems += " item";
+                        } else {
+                            numOfItems += " items";
+                        }
+
+                        directories.add(new FileManagerItem(f.getName(), f.getAbsolutePath(), numOfItems, dateModify, "dir", null));
+                    } else {
+                        String dataSize = FileHelper.getReadableFileSize(f.length());
+                        String ext = FileHelper.getFileExtension(f);
+                        files.add(new FileManagerItem(f.getName(), f.getAbsolutePath(), dataSize, dateModify, "file", ext));
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("file_access_exception", e.getMessage());
+            }
+            Collections.sort(directories);
+            Collections.sort(files);
+            directories.addAll(files);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+            adapter.notifyDataSetChanged();
+        }
     }
 
     public void prepareSelection(View view, int position) {

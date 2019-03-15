@@ -109,7 +109,7 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:layout_marginBottom="@dimen/action_menu_bottom_margin"
-            layout="@layout/action_menu_document" />
+            layout="@layout/action_menu_1" />
 
     </RelativeLayout>
 </RelativeLayout>

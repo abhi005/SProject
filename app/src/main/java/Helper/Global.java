@@ -1,9 +1,8 @@
 package Helper;
 
-import android.widget.ArrayAdapter;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Global {
     public static final ArrayList<String> imageFileTypes = new ArrayList<String>(Arrays.asList("jpg", "jpeg", "png", "svg", "gif", "bmp"));
@@ -15,4 +14,6 @@ public class Global {
     public static final int MY_PERMISSIONS_REQUEST_READ_STORAGE = 100;
 
     public static final int thumbSize = 64;
+
+    public static final List<String> TEMP_FILES = new ArrayList<String>();
 }
