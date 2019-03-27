@@ -25,14 +25,6 @@
                 android:layout_height="180dp"
                 android:background="@drawable/home_header_gradient" />
 
-            <!--<ImageView
-                android:id="@+id/header_wave_pattern"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_alignBottom="@id/header_bg"
-                android:scaleType="fitCenter"
-                android:layout_marginBottom="-24dp"
-                android:background="@drawable/wave_animation_list" />-->
 
             <com.scwang.wave.MultiWaveHeader
                 android:id="@+id/header_wave_pattern"

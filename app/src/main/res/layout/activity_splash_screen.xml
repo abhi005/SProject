@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/darkBlack"
+    tools:context=".SplashScreen">
+
+    <!--<com.scwang.wave.MultiWaveHeader
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentTop="true"
+        android:scaleY="1"
+        app:mwhCloseColor="#3680d7"
+        app:mwhColorAlpha="0.3"
+        app:mwhGradientAngle="0"
+        app:mwhIsRunning="true"
+        app:mwhProgress="1"
+        app:mwhStartColor="#03cdfd"
+        app:mwhVelocity="3"
+        app:mwhWaveHeight="40dp"
+        app:mwhWaves="MultiWave"/>-->
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/logo" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="48dp"
+        android:letterSpacing=".5"
+        android:text="@string/seguro"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="normal" />
+
+    <!--<com.scwang.wave.MultiWaveHeader
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_alignParentBottom="true"
+        android:scaleY="-1"
+        app:mwhCloseColor="#ffffff"
+        app:mwhColorAlpha="0.4"
+        app:mwhGradientAngle="45"
+        app:mwhIsRunning="true"
+        app:mwhProgress="1"
+        app:mwhStartColor="#ffffff"
+        app:mwhVelocity="3"
+        app:mwhWaveHeight="40dp"
+        app:mwhWaves="MultiWave"/>-->
+</RelativeLayout>

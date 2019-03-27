@@ -115,11 +115,13 @@ public class Audio extends PortraitActivity implements View.OnLongClickListener 
                 selectionCounter = audioFiles.size();
                 selectionList.clear();
                 selectionList.addAll(audioFiles);
+                updateSelectionCounterText(selectionCounter);
                 isAllSelected = true;
             } else {
                 selectAllButton.setImageResource(R.drawable.checkbox_unchecked);
                 selectionCounter = 0;
                 selectionList.clear();
+                updateSelectionCounterText(selectionCounter);
                 isAllSelected = false;
             }
             audioAdapter.notifyDataSetChanged();
@@ -136,26 +138,28 @@ public class Audio extends PortraitActivity implements View.OnLongClickListener 
         //action menu delete button
         actionMenuDeleteButton = findViewById(R.id.action_menu_delete_btn);
         actionMenuDeleteButton.setOnClickListener(v -> {
-            Dialog deleteButtonDialog = new Dialog(this);
-            deleteButtonDialog.setContentView(R.layout.popup_file_delete);
-            Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
-            Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            deleteButtonDialog.show();
+            if (selectionList.size() > 0) {
+                Dialog deleteButtonDialog = new Dialog(this);
+                deleteButtonDialog.setContentView(R.layout.popup_file_delete);
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                deleteButtonDialog.show();
 
-            // delete confirmation listener
-            TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
-            TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
-            cancelBtn.setOnClickListener(view -> {
-                //cancel btn
-                deleteButtonDialog.dismiss();
-            });
-            deleteBtn.setOnClickListener(view -> {
-                //delete btn
-                audioAdapter.deleteItems(selectionList, db);
-                unSetActionMode();
-                deleteButtonDialog.dismiss();
-                audioAdapter.updateAdapter(audioFiles = fetchAudioFiles());
-            });
+                // delete confirmation listener
+                TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
+                TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
+                cancelBtn.setOnClickListener(view -> {
+                    //cancel btn
+                    deleteButtonDialog.dismiss();
+                });
+                deleteBtn.setOnClickListener(view -> {
+                    //delete btn
+                    audioAdapter.deleteItems(selectionList, db);
+                    unSetActionMode();
+                    deleteButtonDialog.dismiss();
+                    audioAdapter.updateAdapter(audioFiles = fetchAudioFiles());
+                });
+            }
         });
 
         //action menu back button
@@ -230,7 +234,7 @@ public class Audio extends PortraitActivity implements View.OnLongClickListener 
         } else if (counter == 1) {
             counterText.setText(R.string.one_item_selected);
         } else {
-            counterText.setText(counter + getString(R.string.items_selected));
+            counterText.setText(counter + " " + getString(R.string.items_selected));
         }
     }
 
@@ -255,6 +259,7 @@ public class Audio extends PortraitActivity implements View.OnLongClickListener 
         menuButton.setVisibility(View.VISIBLE);
         selectionCounter = 0;
         selectionList.clear();
+        updateSelectionCounterText(selectionCounter);
     }
 
     //search query filter method

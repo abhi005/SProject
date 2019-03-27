@@ -42,7 +42,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageHolder>
     @Override
     public void onBindViewHolder(@NonNull MessageHolder holder, int position) {
         LocalSms sms = smses.get(position);
-        RelativeLayout layout = holder.container;
         holder.messageText.setText(sms.getBody());
         String temp = sms.getDate();
         Date dateFormat= new Date(Long.valueOf(temp));
@@ -86,7 +85,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageHolder>
     }
 
     class MessageHolder extends RecyclerView.ViewHolder {
-        RelativeLayout container;
         TextView messageText;
         TextView timeDate;
 
@@ -95,9 +93,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageHolder>
         MessageHolder(View itemView, Chat chat) {
             super(itemView);
 
-            this.container = (RelativeLayout) itemView.findViewById(R.id.chat_message_item_container);
-            this.messageText = (TextView) itemView.findViewById(R.id.chat_item_message_text);
-            this.timeDate = (TextView) itemView.findViewById(R.id.chat_item_message_date_time);
+            this.messageText = itemView.findViewById(R.id.chat_item_message_text);
+            this.timeDate = itemView.findViewById(R.id.chat_item_message_date_time);
             this.chat = chat;
         }
     }

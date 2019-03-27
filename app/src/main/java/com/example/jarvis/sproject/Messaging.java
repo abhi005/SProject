@@ -2,6 +2,7 @@ package com.example.jarvis.sproject;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,7 +20,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +39,7 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
     private RecyclerView recyclerView;
     private MessagingAdapter messagingAdapter;
     private LinearLayoutManager layoutManager;
-    private TextView actionMenuCounterText;
+    private TextView actionMenuCountText;
     private ImageView actionMenuDeleteButton;
     private ImageView actionMenuBackButton;
     private ViewGroup messagingActionMenu;
@@ -57,23 +57,22 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
         setContentView(R.layout.activity_messaging);
 
         //back button
-        backButton = (ImageView) findViewById(R.id.back_btn);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Messaging.super.onBackPressed();
-            }
-        });
+        backButton = findViewById(R.id.back_btn);
+        backButton.setOnClickListener(v -> Messaging.super.onBackPressed());
 
         //preparing conversations data
         db = new SqliteDatabaseHandler(getApplicationContext());
-        getAllConversations();
+        conversations = new ArrayList<>();
+        conversations = getAllConversations();
 
         //new button
-        newButton = (ImageView) findViewById(R.id.new_btn);
-        newButton.setOnClickListener(view -> Toast.makeText(Messaging.this, "new message created", Toast.LENGTH_LONG).show());
+        newButton = findViewById(R.id.new_btn);
+        newButton.setOnClickListener(view -> {
+            Intent intent = new Intent(Messaging.this, NewChat.class);
+            startActivity(intent);
+        });
 
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+        recyclerView = findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         messagingAdapter = new MessagingAdapter(conversations, this);
         layoutManager = new LinearLayoutManager(this);
@@ -104,13 +103,16 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
         messagingActionMenu.setVisibility(View.GONE);
 
         //action menu counter text
-        actionMenuCounterText = findViewById(R.id.messaging_action_menu_item_count);
+        actionMenuCountText = findViewById(R.id.messaging_action_menu_item_count);
 
         //action menu delete button
         actionMenuDeleteButton = findViewById(R.id.messaging_action_menu_delete_btn);
         actionMenuDeleteButton.setOnClickListener(v -> {
-            unSetActionMode();
-            messagingAdapter.notifyDataSetChanged();
+            if (selectionList.size() > 0) {
+                messagingAdapter.deleteItems(selectionList);
+                unSetActionMode();
+                messagingAdapter.updateAdapter(conversations = getAllConversations());
+            }
         });
 
         //action menu back button
@@ -142,9 +144,10 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
         });
     }
 
-    public void getAllConversations() {
-        conversations = db.getAllThreads();
-        Collections.reverse(conversations);
+    public List<Conversation> getAllConversations() {
+        List<Conversation> list = db.getAllThreads();
+        Collections.reverse(list);
+        return list;
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -177,11 +180,11 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
 
     public void updateSelectionCounterText(int counter) {
         if(counter == 0) {
-            actionMenuCounterText.setText("0 item selected");
+            actionMenuCountText.setText("0 item selected");
         } else if(counter == 1) {
-            actionMenuCounterText.setText("1 item selected");
+            actionMenuCountText.setText("1 item selected");
         } else {
-            actionMenuCounterText.setText(counter + " items selected");
+            actionMenuCountText.setText(counter + " items selected");
         }
     }
 
@@ -204,9 +207,9 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
         messagingActionMenu.setVisibility(View.GONE);
         selectAllButton.setVisibility(View.GONE);
         newButton.setVisibility(View.VISIBLE);
-        actionMenuCounterText.setText("0 item selected");
         selectionCounter = 0;
         selectionList.clear();
+        updateSelectionCounterText(selectionCounter);
     }
 
     //search query filter method

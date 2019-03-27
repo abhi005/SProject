@@ -15,7 +15,7 @@
     <ImageView
         android:id="@+id/item_icon"
         android:layout_gravity="center"
-        android:src="@drawable/audio"
+        android:src="@drawable/zip_file"
         android:scaleType="centerCrop"
         android:background="@color/transparent"
         android:layout_width="@dimen/icon"

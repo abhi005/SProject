@@ -115,11 +115,13 @@ public class Document extends PortraitActivity implements View.OnLongClickListen
                 selectionCounter = docFiles.size();
                 selectionList.clear();
                 selectionList.addAll(docFiles);
+                updateSelectionCounterText(selectionCounter);
                 isAllSelected = true;
             } else {
                 selectAllButton.setImageResource(R.drawable.checkbox_unchecked);
                 selectionCounter = 0;
                 selectionList.clear();
+                updateSelectionCounterText(selectionCounter);
                 isAllSelected = false;
             }
             adapter.notifyDataSetChanged();
@@ -136,26 +138,28 @@ public class Document extends PortraitActivity implements View.OnLongClickListen
         //action menu delete button
         actionMenuDeleteButton = findViewById(R.id.action_menu_delete_btn);
         actionMenuDeleteButton.setOnClickListener(v -> {
-            Dialog deleteButtonDialog = new Dialog(this);
-            deleteButtonDialog.setContentView(R.layout.popup_file_delete);
-            Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
-            Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            deleteButtonDialog.show();
+            if (selectionList.size() > 0) {
+                Dialog deleteButtonDialog = new Dialog(this);
+                deleteButtonDialog.setContentView(R.layout.popup_file_delete);
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                deleteButtonDialog.show();
 
-            // delete confirmation listener
-            TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
-            TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
-            cancelBtn.setOnClickListener(view -> {
-                //cancel btn
-                deleteButtonDialog.dismiss();
-            });
-            deleteBtn.setOnClickListener(view -> {
-                //delete btn
-                adapter.deleteItems(selectionList, db);
-                unSetActionMode();
-                deleteButtonDialog.dismiss();
-                adapter.updateAdapter(docFiles = fetchDocFiles());
-            });
+                // delete confirmation listener
+                TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
+                TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
+                cancelBtn.setOnClickListener(view -> {
+                    //cancel btn
+                    deleteButtonDialog.dismiss();
+                });
+                deleteBtn.setOnClickListener(view -> {
+                    //delete btn
+                    adapter.deleteItems(selectionList, db);
+                    unSetActionMode();
+                    deleteButtonDialog.dismiss();
+                    adapter.updateAdapter(docFiles = fetchDocFiles());
+                });
+            }
         });
 
         //action menu back button
@@ -254,6 +258,7 @@ public class Document extends PortraitActivity implements View.OnLongClickListen
         menuButton.setVisibility(View.VISIBLE);
         selectionCounter = 0;
         selectionList.clear();
+        updateSelectionCounterText(selectionCounter);
     }
 
     //search query filter method

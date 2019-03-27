@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".NewChat">
+
+    <RelativeLayout
+        android:id="@+id/app_titlebar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/tool_bar_size"
+        android:background="@color/white"
+        android:elevation="0dp">
+
+        <ImageView
+            android:id="@+id/back_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignStart="@+id/person_name_tv"
+            android:background="?selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="@dimen/tool_bar_icon_padding"
+            android:scaleType="centerInside"
+            android:src="@drawable/back_arrow"
+            android:tint="@color/grey" />
+
+        <TextView
+            android:id="@+id/person_name_tv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:textColor="@color/darkGrey"
+            android:textSize="@dimen/heading" />
+
+        <ImageView
+            android:id="@+id/contact_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignEnd="@+id/person_name_tv"
+            android:background="?selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="@dimen/tool_bar_icon_padding"
+            android:scaleType="centerInside"
+            android:src="@drawable/people"
+            android:tint="@color/grey" />
+
+    </RelativeLayout>
+
+    <!--<android.support.v7.widget.RecyclerView
+        android:scrollbars="vertical"
+        android:layout_below="@+id/app_titlebar"
+        android:layout_above="@+id/bottom_bar"
+        android:id="@+id/recyclerview"
+        android:background="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />-->
+
+    <RelativeLayout
+        android:id="@+id/bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/white"
+        android:gravity="center">
+
+        <LinearLayout
+            android:id="@+id/edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:weightSum="10">
+
+            <EditText
+                android:id="@+id/message_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_weight="10"
+                android:background="@drawable/chat_edittext_background"
+                android:ems="10"
+                android:hint="@string/enter_text"
+                android:maxLines="2"
+                android:paddingStart="18dp"
+                android:paddingTop="12dp"
+                android:paddingEnd="18dp"
+                android:paddingBottom="12dp"
+                android:scrollHorizontally="false"
+                android:textColor="@color/grey"
+                android:textColorHint="@color/grey"
+                android:textSize="@dimen/text_field" />
+
+            <ImageView
+                android:id="@+id/send_btn"
+                android:layout_width="@dimen/chat_send_button"
+                android:layout_height="@dimen/chat_send_button"
+                android:layout_gravity="center"
+                android:background="@drawable/round_button_background"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="@dimen/chat_send_button_icon_padding"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_send_white_24dp" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>

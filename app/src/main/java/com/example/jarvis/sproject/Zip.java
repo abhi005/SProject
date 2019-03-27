@@ -114,11 +114,13 @@ public class Zip extends AppCompatActivity implements View.OnLongClickListener {
                 selectionCounter = zipFiles.size();
                 selectionList.clear();
                 selectionList.addAll(zipFiles);
+                updateSelectionCounterText(selectionCounter);
                 isAllSelected = true;
             } else {
                 selectAllButton.setImageResource(R.drawable.checkbox_unchecked);
                 selectionCounter = 0;
                 selectionList.clear();
+                updateSelectionCounterText(selectionCounter);
                 isAllSelected = false;
             }
             adapter.notifyDataSetChanged();
@@ -135,26 +137,28 @@ public class Zip extends AppCompatActivity implements View.OnLongClickListener {
         //action menu delete button
         actionMenuDeleteButton = findViewById(R.id.action_menu_delete_btn);
         actionMenuDeleteButton.setOnClickListener(v -> {
-            Dialog deleteButtonDialog = new Dialog(this);
-            deleteButtonDialog.setContentView(R.layout.popup_file_delete);
-            Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
-            Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            deleteButtonDialog.show();
+            if (selectionList.size() > 0) {
+                Dialog deleteButtonDialog = new Dialog(this);
+                deleteButtonDialog.setContentView(R.layout.popup_file_delete);
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                deleteButtonDialog.show();
 
-            // delete confirmation listener
-            TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
-            TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
-            cancelBtn.setOnClickListener(view -> {
-                //cancel btn
-                deleteButtonDialog.dismiss();
-            });
-            deleteBtn.setOnClickListener(view -> {
-                //delete btn
-                adapter.deleteItems(selectionList, db);
-                unSetActionMode();
-                deleteButtonDialog.dismiss();
-                adapter.updateAdapter(zipFiles = fetchZipFiles());
-            });
+                // delete confirmation listener
+                TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
+                TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
+                cancelBtn.setOnClickListener(view -> {
+                    //cancel btn
+                    deleteButtonDialog.dismiss();
+                });
+                deleteBtn.setOnClickListener(view -> {
+                    //delete btn
+                    adapter.deleteItems(selectionList, db);
+                    unSetActionMode();
+                    deleteButtonDialog.dismiss();
+                    adapter.updateAdapter(zipFiles = fetchZipFiles());
+                });
+            }
         });
 
         //action menu back button

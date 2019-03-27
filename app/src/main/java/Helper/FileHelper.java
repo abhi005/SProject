@@ -91,7 +91,7 @@ public class FileHelper {
         else return "";
     }
 
-    private static String getFileExtension(String path) {
+    static String getFileExtension(String path) {
         String[] temp = path.split("/");
         String fileName = temp[temp.length - 1];
         if(fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
@@ -141,6 +141,8 @@ public class FileHelper {
             return R.drawable.video;
         } else if (ext.equals("serg")) {
             return R.drawable.encrypted_file;
+        } else if (Global.zipFileTypes.contains(ext.toLowerCase())) {
+            return R.drawable.zip_file;
         } else {
             return R.drawable.default_file;
         }
@@ -153,10 +155,11 @@ public class FileHelper {
 
     static void openEncryptedFile(Context context, String newPath, String originalPath) {
         SqliteDatabaseHandler db = new SqliteDatabaseHandler(context);
-
+        int lIndex = originalPath.lastIndexOf("/");
+        String tempPath = originalPath.substring(0, lIndex + 1) + "temp_" + getFileName(originalPath) + "." + getFileExtension(originalPath);
         File file = new File(newPath);
-        String temp = db.getUserKey();
-        File tempFile = new File(originalPath);
+        String temp = Global.encryptionKey;
+        File tempFile = new File(tempPath);
         try {
             byte[] key = temp.getBytes();
 
@@ -197,7 +200,7 @@ public class FileHelper {
         SqliteDatabaseHandler db = new SqliteDatabaseHandler(context);
 
         File file = new File(eFile.getNewPath());
-        String temp = db.getUserKey();
+        String temp = Global.encryptionKey;
         File tempFile = new File(eFile.getOriginalPath());
         try {
             byte[] key = temp.getBytes();
@@ -227,7 +230,7 @@ public class FileHelper {
         SqliteDatabaseHandler db = new SqliteDatabaseHandler(context);
 
         File file = new File(eFile.getNewPath());
-        String temp = db.getUserKey();
+        String temp = Global.encryptionKey;
         File tempFile = new File(eFile.getOriginalPath());
         try {
             byte[] key = temp.getBytes();
@@ -257,7 +260,7 @@ public class FileHelper {
         SqliteDatabaseHandler db = new SqliteDatabaseHandler(context);
 
         File file = new File(eFile.getNewPath());
-        String temp = db.getUserKey();
+        String temp = Global.encryptionKey;
         File tempFile = new File(eFile.getOriginalPath());
         try {
             byte[] key = temp.getBytes();
@@ -287,7 +290,7 @@ public class FileHelper {
         SqliteDatabaseHandler db = new SqliteDatabaseHandler(context);
 
         File file = new File(eFile.getNewPath());
-        String temp = db.getUserKey();
+        String temp = Global.encryptionKey;
         File tempFile = new File(eFile.getOriginalPath());
         try {
             byte[] key = temp.getBytes();
@@ -313,11 +316,41 @@ public class FileHelper {
         }
     }
 
+    static void decryptImageFile(Context context, ImageFile eFile) {
+        SqliteDatabaseHandler db = new SqliteDatabaseHandler(context);
+
+        File file = new File(eFile.getNewPath());
+        String temp = Global.encryptionKey;
+        File tempFile = new File(eFile.getOriginalPath());
+        try {
+            byte[] key = temp.getBytes();
+
+            @SuppressLint("GetInstance") Cipher cipher = Cipher.getInstance("RC4/ECB/NoPadding");
+            Key sk = new SecretKeySpec(key, "RC4");
+            cipher.init(Cipher.DECRYPT_MODE, sk);
+            FileInputStream fis = new FileInputStream(file);
+            CipherInputStream cis = new CipherInputStream(fis, cipher);
+            ObjectInputStream ois = new ObjectInputStream(cis);
+            byte[] decrypted = (byte[]) ois.readObject();
+            FileOutputStream fos = new FileOutputStream(tempFile, false);
+            fos.write(decrypted);
+            ois.close();
+            cis.close();
+            fos.close();
+            file.delete();
+            db.deleteImage(eFile);
+        } catch (Exception e) {
+            Log.i("decrypt_file", "error : " + e.getMessage());
+        } finally {
+            db.close();
+        }
+    }
+
     static void encryptFile(Context context, String path) {
         SqliteDatabaseHandler db = new SqliteDatabaseHandler(context);
 
         File file = new File(path);
-        String temp = db.getUserKey();
+        String temp = Global.encryptionKey;
         String newPath = getNewPath(path, file.getName());
         File newFile = new File(newPath + ".serg");
         try {

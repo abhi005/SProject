@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.telephony.SmsManager;
-import android.util.Log;
 import android.widget.Toast;
 
 public class SmsHelper {
@@ -21,6 +20,7 @@ public class SmsHelper {
         } catch (Exception e) {
             e.printStackTrace();
         }finally{
+            assert c != null;
             c.close();
             return contactName;
         }
@@ -32,8 +32,13 @@ public class SmsHelper {
         Toast.makeText(context, "Message sent", Toast.LENGTH_LONG).show();
     }
 
-    public static void readSms(Context context, String address) {
+    static void readSms(Context context, String address) {
         SqliteDatabaseHandler db = new SqliteDatabaseHandler(context);
         db.readSms(address);
+    }
+
+    static void deleteThread(Context context, String address) {
+        SqliteDatabaseHandler db = new SqliteDatabaseHandler(context);
+        db.deleteSmsesByAddress(address);
     }
 }

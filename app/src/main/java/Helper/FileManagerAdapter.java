@@ -25,13 +25,6 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
 
     private List<FileManagerItem> files;
     private FileManager activity;
-    //private String sdCardPath;
-
-    /*public FileManagerAdapter(List<FileManagerItem> files, FileManager context, String sdCardPath) {
-        this.files = files;
-        this.activity = context;
-        this.sdCardPath = sdCardPath;
-    }*/
 
     public FileManagerAdapter(List<FileManagerItem> files, FileManager activity) {
         this.files = files;
@@ -103,11 +96,11 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
         ItemViewHolder(View itemView, FileManager context) {
             super(itemView);
 
-            this.itemName = (TextView) itemView.findViewById(R.id.vault_item_name);
-            this.itemDetails = (TextView) itemView.findViewById(R.id.vault_item_tv1);
-            this.icon = (ImageView) itemView.findViewById(R.id.vault_item_icon);
+            this.itemName = itemView.findViewById(R.id.vault_item_name);
+            this.itemDetails = itemView.findViewById(R.id.vault_item_tv1);
+            this.icon = itemView.findViewById(R.id.vault_item_icon);
             this.activity = context;
-            this.checkBox = (CheckBox) itemView.findViewById(R.id.vault_item_cb);
+            this.checkBox = itemView.findViewById(R.id.vault_item_cb);
 
             itemView.setOnLongClickListener(context);
         }
@@ -123,7 +116,6 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
         LinearLayout openBtn = activity.fileClickDialog.findViewById(R.id.open_btn);
         encryptBtn.setOnClickListener(view -> {
             //encrypt file
-            //FileHelper.encryptFile(activity, item.getPath(), sdCardPath);
             FileHelper.encryptFile(activity, item.getPath());
             activity.fileClickDialog.dismiss();
             Toast.makeText(activity, "file encrypted", Toast.LENGTH_LONG).show();

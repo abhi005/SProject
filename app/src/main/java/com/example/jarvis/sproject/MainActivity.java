@@ -25,7 +25,6 @@ import com.scwang.wave.MultiWaveHeader;
 
 import Helper.Global;
 import Helper.HomeMenuAdapter;
-import Helper.SqliteDatabaseHandler;
 import Services.SMSEncryptionService;
 import utils.CustomBottomNavigation;
 import utils.PortraitActivity;
@@ -51,8 +50,6 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         checkPermissionSms(this);
-        SqliteDatabaseHandler db = new SqliteDatabaseHandler(this);
-        db.addUserKey("12345678");
 
         // gridview
         homeMenu = (GridView) findViewById(R.id.grid_view_menu);
@@ -84,11 +81,6 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
         navigationView = (BottomNavigationView) findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(this);
         CustomBottomNavigation.disableShiftMode(navigationView);
-
-        //wave animation
-        //waveAnimation = findViewById(R.id.header_wave_pattern);
-        //waveAnimation.start();
-        //((AnimationDrawable) waveAnimation.getBackground()).start();
 
         //sms service
         smsService = new SMSEncryptionService(getApplicationContext());
@@ -199,5 +191,11 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
 
     public Context getContext() {
         return context;
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
+        //super.onBackPressed();
     }
 }

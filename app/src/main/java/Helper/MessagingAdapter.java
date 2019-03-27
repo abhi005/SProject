@@ -96,12 +96,6 @@ public class MessagingAdapter extends RecyclerView.Adapter<MessagingAdapter.Mess
         return conversations.size();
     }
 
-    public void updateAdapter(List<Conversation> list) {
-        conversations.clear();
-        conversations.addAll(list);
-        notifyDataSetChanged();
-    }
-
     public void filterList(List<Conversation> filteredList) {
         conversations = filteredList;
         notifyDataSetChanged();
@@ -127,6 +121,19 @@ public class MessagingAdapter extends RecyclerView.Adapter<MessagingAdapter.Mess
             this.messaging = messaging;
 
             itemView.setOnLongClickListener(messaging);
+        }
+    }
+
+    public void updateAdapter(List<Conversation> list) {
+        conversations.clear();
+        conversations.addAll(list);
+        notifyDataSetChanged();
+    }
+
+    public void deleteItems(List<Conversation> list) {
+        for (Conversation c : list) {
+            String address = c.getAddress();
+            SmsHelper.deleteThread(messaging, address);
         }
     }
 }

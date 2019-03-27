@@ -3,6 +3,8 @@ package Helper;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,12 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.example.jarvis.sproject.Images;
 import com.example.jarvis.sproject.R;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
+import java.util.Objects;
 
 import Model.ImageFile;
 
@@ -43,7 +47,6 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
         ByteArrayInputStream bais = new ByteArrayInputStream(imageFile.getThumbnail());
         Bitmap thumbnailImage = BitmapFactory.decodeStream(bais);
         holder.thumbnail.setImageBitmap(thumbnailImage);
-
         if(!activity.isInActionMode) {
             holder.cb.setVisibility(View.GONE);
             holder.cb.setChecked(false);
@@ -60,7 +63,29 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
             if (activity.isInActionMode) {
                 activity.prepareSelection(holder.cb, position);
             } else {
+                onFileClick(imageFile);
             }
+        });
+    }
+
+    private void onFileClick(ImageFile item) {
+        Objects.requireNonNull(activity.fileClickDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+        Objects.requireNonNull(activity.fileClickDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        activity.fileClickDialog.show();
+
+        //file click popup on click listeners
+        LinearLayout decryptBtn = activity.fileClickDialog.findViewById(R.id.decrypt_btn);
+        LinearLayout openBtn = activity.fileClickDialog.findViewById(R.id.open_btn);
+        decryptBtn.setOnClickListener(view -> {
+            //decrypt file
+            FileHelper.decryptImageFile(activity, item);
+            updateAdapter(activity.fetchImageFiles());
+            activity.fileClickDialog.dismiss();
+        });
+        openBtn.setOnClickListener(view -> {
+            //open file
+            FileHelper.openEncryptedFile(activity, item.getNewPath(), item.getOriginalPath());
+            activity.fileClickDialog.dismiss();
         });
     }
 

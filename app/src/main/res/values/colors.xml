@@ -7,11 +7,13 @@
 
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
+    <color name="darkBlack">#111111</color>
     <color name="grey">#a0a4a8</color>
     <color name="darkGrey">#44444A</color>
     <color name="lightGrey" >#cfd7df</color>
     <color name="primaryBlue">#36a0eb</color>
     <color name="primaryBlueTransparent">#5036a0eb</color>
+    <color name="errorRed">#bf0a30</color>
     <color name="blackTraparent">#10000000</color>
     <color name="transparent">#00ffffff</color>
 </resources>

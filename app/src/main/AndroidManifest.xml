@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.WRITE_SMS" />
@@ -19,15 +20,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Zip"></activity>
-        <activity android:name=".FileManager" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".FilePicker"></activity>
+        <activity android:name=".EnterPin" />
+        <activity android:name=".SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".NewChat" />
+        <activity android:name=".Zip" />
+        <activity android:name=".FileManager" />
+        <activity android:name=".MainActivity" />
         <activity
             android:name=".CallLogs"
             android:label="@string/title_activity_call_logs"
@@ -57,13 +62,13 @@
         <service
             android:name="Services.SMSEncryptionService"
             android:enabled="true"
-            android:process=":SMSEncryptionService"></service>
+            android:process=":SMSEncryptionService" />
 
         <receiver
             android:name="Services.SMSEncryptionRestarterBroadcastReceiver"
             android:enabled="true"
             android:exported="true"
-            android:label="RestartServiceWhenStopped"></receiver>
+            android:label="RestartServiceWhenStopped" />
     </application>
 
 </manifest>

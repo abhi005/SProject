@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import Model.AudioFile;
@@ -16,6 +15,7 @@ import Model.Conversation;
 import Model.DocFile;
 import Model.ImageFile;
 import Model.LocalSms;
+import Model.VaultFile;
 import Model.VideoFile;
 import Model.ZipFile;
 
@@ -38,6 +38,15 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
     private static final String TABLE_SECRET = "secret";
     private static final String SECRET_KEY_USERKEY = "userkey";
 
+
+    // vault table attributes
+    private static final String TABLE_VAULT = "vault";
+    private static final String VAULT_KEY_ID = "id";
+    private static final String VAULT_KEY_NAME = "name";
+    private static final String VAULT_KEY_ORIGINAL_PATH = "originalPath";
+    private static final String VAULT_KEY_EXT = "ext";
+    private static final String VAULT_KEY_DATE = "date";
+    private static final String VAULT_KEY_SIZE = "size";
 
     //encrypted file tabels
     private static final String TABLE_IMAGE = "image";
@@ -88,10 +97,15 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
                 + FILE_KEY_NEW_PATH + " TEXT, " + FILE_KEY_ORIGINAL_EXT + " TEXT, " + FILE_KEY_DATE + " TEXT, "
                 + FILE_KEY_SIZE + " TEXT )";
 
-        String CREATION_TABEL_ZIP = "CREATE TABLE " + TABLE_ZIP + " ( "
+        String CREATION_TABLE_ZIP = "CREATE TABLE " + TABLE_ZIP + " ( "
                 + FILE_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + FILE_KEY_ORIGINAL_PATH + " TEXT NOT NULL UNIQUE, "
                 + FILE_KEY_NEW_PATH + " TEXT, " + FILE_KEY_ORIGINAL_EXT + " TEXT, " + FILE_KEY_DATE + " TEXT, "
                 + FILE_KEY_SIZE + " TEXT )";
+
+        String CREATION_TABLE_VAULT = "CREATE TABLE " + TABLE_VAULT + " ( "
+                + VAULT_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + VAULT_KEY_NAME + " TEXT NOT NULL, "
+                + VAULT_KEY_ORIGINAL_PATH + " TEXT NOT NULL UNIQUE, " + VAULT_KEY_EXT + " TEXT, " + VAULT_KEY_DATE + " TEXT, "
+                + VAULT_KEY_SIZE + " TEXT )";
 
         sqLiteDatabase.execSQL(CREATION_TABLE_SMS);
         sqLiteDatabase.execSQL(CREATION_TABLE_SECRET);
@@ -99,7 +113,8 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATION_TABLE_VIDEO);
         sqLiteDatabase.execSQL(CREATION_TABLE_AUDIO);
         sqLiteDatabase.execSQL(CREATION_TABLE_DOCS);
-        sqLiteDatabase.execSQL(CREATION_TABEL_ZIP);
+        sqLiteDatabase.execSQL(CREATION_TABLE_ZIP);
+        sqLiteDatabase.execSQL(CREATION_TABLE_VAULT);
     }
 
     @Override
@@ -111,41 +126,11 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_AUDIO);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_VIDEO);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_IMAGE);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_VAULT);
         this.onCreate(sqLiteDatabase);
     }
 
     // sms encryption methods
-    public void deleteOneThread(LocalSms sms) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_SMS, "threadId = ?", new String[] { String.valueOf(sms.getThreadId()) });
-        db.close();
-    }
-
-    public List<LocalSms> allSmses() {
-
-        List<LocalSms> smses = new LinkedList<LocalSms>();
-        String query = "SELECT  * FROM " + TABLE_SMS;
-        SQLiteDatabase db = this.getWritableDatabase();
-        @SuppressLint("Recycle") Cursor cursor = db.rawQuery(query, null);
-        LocalSms sms = null;
-
-        if (cursor.moveToFirst()) {
-            do {
-                sms = new LocalSms();
-                sms.setThreadId(Integer.parseInt(cursor.getString(0)));
-                sms.setType(Integer.parseInt(cursor.getString(1)));
-                sms.setRead(Integer.parseInt(cursor.getString(2)));
-                sms.setDate(cursor.getString(3));
-                sms.setSentDate(cursor.getString(4));
-                sms.setBody(cursor.getString(5));
-                sms.setAddress(cursor.getString(6));
-                smses.add(sms);
-            } while (cursor.moveToNext());
-        }
-        db.close();
-        return smses;
-    }
-
     public List<LocalSms> getSmsByAddress(String address) {
         List<LocalSms> smses = new ArrayList<>();
         String query = "SELECT * FROM " + TABLE_SMS + " WHERE " + SMS_KEY_ADDRESS + " = \"" + address
@@ -183,6 +168,12 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         values.put(SMS_KEY_BODY, sms.getBody());
         values.put(SMS_KEY_ADDRESS, sms.getAddress());
         db.insert(TABLE_SMS,null, values);
+        db.close();
+    }
+
+    void deleteSmsesByAddress(String address) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_SMS, SMS_KEY_ADDRESS + " = ?", new String[]{address});
         db.close();
     }
 
@@ -437,6 +428,47 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         return list;
     }
 
+    //vault
+    void addVaultFile(VaultFile f) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(VAULT_KEY_NAME, f.getName());
+        values.put(VAULT_KEY_ORIGINAL_PATH, f.getOriginalPath());
+        values.put(VAULT_KEY_EXT, f.getOriginalExt());
+        values.put(VAULT_KEY_DATE, f.getDate());
+        values.put(VAULT_KEY_SIZE, f.getSize());
+        db.insert(TABLE_VAULT, null, values);
+        db.close();
+    }
+
+    void deleteVaultFile(VaultFile f) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_VAULT, VAULT_KEY_ID + " = ?", new String[]{String.valueOf(f.getId())});
+        db.close();
+    }
+
+    public List<VaultFile> getAllVaultFiles() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        List<VaultFile> list = new ArrayList<>();
+
+        String query = "SELECT * FROM " + TABLE_VAULT;
+        @SuppressLint("Recycle") Cursor c = db.rawQuery(query, null);
+        if (c.moveToFirst()) {
+            do {
+                VaultFile f = new VaultFile();
+                f.setId(Integer.parseInt(c.getString(0)));
+                f.setName(c.getString(1));
+                f.setOriginalPath(c.getString(2));
+                f.setOriginalExt(c.getString(3));
+                f.setDate(c.getString(4));
+                f.setSize(c.getString(5));
+                list.add(f);
+            } while (c.moveToNext());
+        }
+        db.close();
+        return list;
+    }
+
     // secret key methods
     public void addUserKey(String key) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -459,7 +491,7 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         db.update(TABLE_SECRET, values, null, null);
     }
 
-    String getUserKey() {
+    public String getUserKey() {
         String key = "";
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_SECRET + " LIMIT 1";

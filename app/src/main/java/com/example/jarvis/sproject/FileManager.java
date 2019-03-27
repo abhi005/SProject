@@ -54,9 +54,8 @@ import utils.PortraitActivity;
 
 public class FileManager extends PortraitActivity implements View.OnLongClickListener, BottomNavigationView.OnNavigationItemSelectedListener  {
 
-    //private Dialog storageButtonDialog;
+
     public Dialog fileClickDialog;
-    //private ImageView storageButton;
     private BottomNavigationView navigationView;
     private EditText searchField;
     private TextView currentPath;
@@ -71,11 +70,9 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
     private TextView actionMenuCountText;
 
 
-    //storage type variable
     public boolean isInActionMode = false;
     public boolean isAllSelected = false;
     private static int selectionCounter = 0;
-    //private String sdCardPath = "";
     private ArrayList<FileManagerItem> selectionList = new ArrayList<>();
     List<FileManagerItem> directories = new ArrayList<FileManagerItem>();
     List<FileManagerItem> files = new ArrayList<FileManagerItem>();
@@ -83,6 +80,48 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
 
     public File currentDir;
     private FileManagerAdapter adapter;
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void setStatusBarGradient(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = activity.getWindow();
+            Drawable background = activity.getResources().getDrawable(R.drawable.home_header_gradient);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(activity.getResources().getColor(android.R.color.transparent));
+            window.setNavigationBarColor(activity.getResources().getColor(android.R.color.transparent));
+            window.setBackgroundDrawable(background);
+        }
+    }
+
+    public void forwardDirectory(String path) {
+        currentPath.setText(path);
+        currentDir = new File(path);
+        paths.add(path);
+        FetchFilesList obj = new FetchFilesList();
+        obj.execute();
+    }
+
+    public void backwardDirectory() {
+        paths.pop();
+        String newPath = paths.peek();
+        currentPath.setText(newPath);
+        currentDir = new File(newPath);
+        FetchFilesList obj = new FetchFilesList();
+        obj.execute();
+    }
+
+    public void setActionMode() {
+        isInActionMode = true;
+        backButton.setVisibility(View.GONE);
+        Animation topDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
+        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
+        navigationView.startAnimation(topDown);
+        actionMenu.startAnimation(bottomUp);
+        navigationView.setVisibility(View.GONE);
+        actionMenu.setVisibility(View.VISIBLE);
+        selectAllButton.setVisibility(View.VISIBLE);
+        adapter.notifyDataSetChanged();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,11 +146,7 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        // setting sd card path
-        //sdCardPath = FileHelper.getSdCardPath(FileManager.this);
-
         //setting file adapter
-        //adapter = new FileManagerAdapter(directories, this, sdCardPath);
         adapter = new FileManagerAdapter(directories, this);
         recyclerView.setAdapter(adapter);
 
@@ -119,35 +154,6 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         //file click event
         fileClickDialog = new Dialog(this);
         fileClickDialog.setContentView(R.layout.popup_file_click);
-
-        //storage type button
-        /*storageButton = findViewById(R.id.menu_storage_btn);
-        storageButtonDialog = new Dialog(this);
-        storageButton.setOnClickListener(v -> {
-            storageButtonDialog.setContentView(R.layout.popup_storage_type);
-            Objects.requireNonNull(storageButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
-            Objects.requireNonNull(storageButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            storageButtonDialog.show();
-
-            //storage type popup on click listeners
-            LinearLayout internalStorageBtn = storageButtonDialog.findViewById(R.id.internal_storage_btn);
-            LinearLayout sdcardStorageBtn = storageButtonDialog.findViewById(R.id.sd_card_btn);
-            internalStorageBtn.setOnClickListener(view -> {
-                //internal storage
-                changeStorageType(0);
-                String path = Environment.getExternalStorageDirectory().getPath();
-                paths.clear();
-                forwardDirectory(path);
-                storageButtonDialog.dismiss();
-            });
-            sdcardStorageBtn.setOnClickListener(view -> {
-                //sd card
-                changeStorageType(1);
-                paths.clear();
-                forwardDirectory(sdCardPath);
-                storageButtonDialog.dismiss();
-            });
-        });*/
 
         //search bar
         searchField = findViewById(R.id.search_field);
@@ -213,25 +219,27 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         actionMenuDeleteButton = findViewById(R.id.action_menu_delete_btn);
         actionMenuDeleteButton.setAlpha(Float.valueOf("0.5"));
         actionMenuDeleteButton.setOnClickListener(v -> {
-            Dialog deleteButtonDialog = new Dialog(this);
-            deleteButtonDialog.setContentView(R.layout.popup_file_delete);
-            Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
-            Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            deleteButtonDialog.show();
+            if (selectionList.size() > 0) {
+                Dialog deleteButtonDialog = new Dialog(this);
+                deleteButtonDialog.setContentView(R.layout.popup_file_delete);
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                deleteButtonDialog.show();
 
-            // delete confirmation listener
-            TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
-            TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
-            cancelBtn.setOnClickListener(view -> {
-                //cancel btn
-                deleteButtonDialog.dismiss();
-            });
-            deleteBtn.setOnClickListener(view -> {
-                //delete btn
-                adapter.deleteItems(selectionList);
-                unSetActionMode();
-                deleteButtonDialog.dismiss();
-            });
+                // delete confirmation listener
+                TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
+                TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
+                cancelBtn.setOnClickListener(view -> {
+                    //cancel btn
+                    deleteButtonDialog.dismiss();
+                });
+                deleteBtn.setOnClickListener(view -> {
+                    //delete btn
+                    adapter.deleteItems(selectionList);
+                    unSetActionMode();
+                    deleteButtonDialog.dismiss();
+                });
+            }
         });
 
 
@@ -269,36 +277,6 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         });
     }
 
-    public void forwardDirectory(String path) {
-        currentPath.setText(path);
-        currentDir = new File(path);
-        paths.add(path);
-        FetchFilesList obj = new FetchFilesList();
-        obj.execute();
-    }
-
-    public void backwardDirectory() {
-        paths.pop();
-        String newPath = paths.peek();
-        currentPath.setText(newPath);
-        currentDir = new File(newPath);
-        FetchFilesList obj = new FetchFilesList();
-        obj.execute();
-    }
-
-    public void setActionMode() {
-        isInActionMode = true;
-        backButton.setVisibility(View.GONE);
-        Animation topDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
-        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
-        navigationView.startAnimation(topDown);
-        actionMenu.startAnimation(bottomUp);
-        navigationView.setVisibility(View.GONE);
-        actionMenu.setVisibility(View.VISIBLE);
-        selectAllButton.setVisibility(View.VISIBLE);
-        //storageButton.setVisibility(View.GONE);
-        adapter.notifyDataSetChanged();
-    }
 
     @Override
     public void onBackPressed() {
@@ -340,62 +318,6 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         }
     }
 
-    /*private void changeStorageType(int index) {
-        if(index == 0) {
-            storageButton.setImageResource(R.drawable.storage);
-        } else {
-            storageButton.setImageResource(R.drawable.sd_card);
-        }
-    }*/
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void setStatusBarGradient(Activity activity) {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = activity.getWindow();
-            Drawable background = activity.getResources().getDrawable(R.drawable.home_header_gradient);
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(activity.getResources().getColor(android.R.color.transparent));
-            window.setNavigationBarColor(activity.getResources().getColor(android.R.color.transparent));
-            window.setBackgroundDrawable(background);
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        updateNavigationBarState();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        overridePendingTransition(0, 0);
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.bottom_nav_home :
-                startActivity(new Intent(FileManager.this, MainActivity.class));
-                break;
-
-            case R.id.bottom_nav_folder :
-                startActivity(new Intent(FileManager.this, FileManager.class));
-                break;
-
-            case R.id.bottom_nav_vault :
-                startActivity(new Intent(FileManager.this, Vault.class));
-                break;
-
-            case R.id.bottom_nav_setting :
-                break;
-
-            default :
-                break;
-        }
-        finish();
-        return true;
-    }
 
     //search query filter method
     private void searchQueryFilter(String query) {
@@ -411,21 +333,6 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
         } else {
             adapter.filterList(directories);
         }
-    }
-
-    public void unSetActionMode() {
-        isInActionMode = false;
-        backButton.setVisibility(View.VISIBLE);
-        Animation topDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
-        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
-        navigationView.startAnimation(bottomUp);
-        actionMenu.startAnimation(topDown);
-        actionMenu.setVisibility(View.GONE);
-        navigationView.setVisibility(View.VISIBLE);
-        //storageButton.setVisibility(View.VISIBLE);
-        selectAllButton.setVisibility(View.GONE);
-        selectionCounter = 0;
-        selectionList.clear();
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -525,6 +432,58 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
     @Override
     public boolean onLongClick(View view) {
         setActionMode();
+        return true;
+    }
+
+    public void unSetActionMode() {
+        isInActionMode = false;
+        backButton.setVisibility(View.VISIBLE);
+        Animation topDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
+        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
+        navigationView.startAnimation(bottomUp);
+        actionMenu.startAnimation(topDown);
+        actionMenu.setVisibility(View.GONE);
+        navigationView.setVisibility(View.VISIBLE);
+        selectAllButton.setVisibility(View.GONE);
+        selectionCounter = 0;
+        selectionList.clear();
+        updateSelectionCounterText(selectionCounter);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        updateNavigationBarState();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        overridePendingTransition(0, 0);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.bottom_nav_home:
+                startActivity(new Intent(FileManager.this, MainActivity.class));
+                break;
+
+            case R.id.bottom_nav_folder:
+                startActivity(new Intent(FileManager.this, FileManager.class));
+                break;
+
+            case R.id.bottom_nav_vault:
+                startActivity(new Intent(FileManager.this, Vault.class));
+                break;
+
+            case R.id.bottom_nav_setting:
+                break;
+
+            default:
+                break;
+        }
+        finish();
         return true;
     }
 }

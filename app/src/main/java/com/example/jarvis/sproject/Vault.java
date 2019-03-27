@@ -1,9 +1,12 @@
 package com.example.jarvis.sproject;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -11,6 +14,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -25,36 +30,43 @@ import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
+import Helper.FileHelper;
+import Helper.Global;
+import Helper.SqliteDatabaseHandler;
 import Helper.VaultAdapter;
-import Model.File;
+import Model.VaultFile;
 import utils.CustomBottomNavigation;
 import utils.PortraitActivity;
+
 
 public class Vault extends PortraitActivity implements View.OnLongClickListener, BottomNavigationView.OnNavigationItemSelectedListener {
 
     private ImageView addButton;
     private BottomNavigationView navigationView;
-    private Dialog addButtonDialog;
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
     private VaultAdapter vaultAdapter;
     private EditText searchField;
     private ImageView selectAllButton;
     private ViewGroup actionMenu;
-    private ViewGroup searchBar;
+    public Dialog itemClickDialog;
     private ImageView actionMenuBackButton;
     private ImageView actionMenuDeleteButton;
-    private ImageView actionMenuRenameButton;
     private ImageView actionMenuInfoButton;
+    private TextView counterText;
 
     public boolean isInActionMode = false;
     public boolean isAllSelected = false;
-    private ArrayList<File> selectionList = new ArrayList<>();
-
-    private ArrayList<File> files;
+    private List<VaultFile> selectionList = new ArrayList<>();
+    private SqliteDatabaseHandler db;
+    private List<VaultFile> files;
     private int selectionCounter = 0;
 
     @Override
@@ -63,52 +75,41 @@ public class Vault extends PortraitActivity implements View.OnLongClickListener,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vault);
 
+        //check storage access permission
+        checkPermissionReadStorage(this);
+
+        //fetching all encrypted audio files
+        files = new ArrayList<>();
+        db = new SqliteDatabaseHandler(this);
+        files = fetchVaultFiles();
+
         //customizing navigation
-        navigationView = (BottomNavigationView) findViewById(R.id.navigation);
+        navigationView = findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(this);
         CustomBottomNavigation.disableShiftMode(navigationView);
 
-        addButtonDialog = new Dialog(this);
-
         //add new button
-        addButton = (ImageView) findViewById(R.id.menu_add_btn);
+        addButton = findViewById(R.id.menu_add_btn);
         addButton.setOnClickListener(v -> {
-            addButtonDialog.setContentView(R.layout.popup_vault_add);
-            addButtonDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            addButtonDialog.show();
+            Intent intent = new Intent(Vault.this, FilePicker.class);
+            startActivity(intent);
+            finish();
         });
 
-        //search bar
-        searchBar = (ViewGroup) findViewById(R.id.search_bar);
-
-        //prepare data
-        prepareData();
+        //item click dialogue
+        itemClickDialog = new Dialog(this);
+        itemClickDialog.setContentView(R.layout.popup_vault_file_click);
 
         //recycler view - adapter
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+        recyclerView = findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         vaultAdapter = new VaultAdapter(files, this);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(vaultAdapter);
 
-        //search bar hide effect with recycler view scroll
-        /*recyclerView.addOnScrollListener(new RecyclerScrollHideBehaviour() {
-            @Override
-            public void show() {
-                searchBar.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2)).start();
-                searchBar.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void hide() {
-                searchBar.setVisibility(View.GONE);
-                searchBar.animate().translationY(-searchBar.getHeight()).setInterpolator(new AccelerateInterpolator(2)).start();
-            }
-        });*/
-
         //search bar
-        searchField = (EditText) findViewById(R.id.search_field);
+        searchField = findViewById(R.id.search_field);
         searchField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -126,79 +127,157 @@ public class Vault extends PortraitActivity implements View.OnLongClickListener,
         });
 
         //select all button
-        selectAllButton = (ImageView) findViewById(R.id.menu_select_all_btn);
+        selectAllButton = findViewById(R.id.menu_select_all_btn);
         selectAllButton.setVisibility(View.GONE);
-        selectAllButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!isAllSelected) {
-                    selectAllButton.setImageResource(R.drawable.checkbox_checked);
-                    selectionCounter = files.size();
-                    selectionList.clear();
-                    selectionList.addAll(files);
-                    isAllSelected = true;
-                } else {
-                    selectAllButton.setImageResource(R.drawable.checkbox_unchecked);
-                    selectionCounter = 0;
-                    selectionList.clear();
-                    isAllSelected = false;
-                }
-                vaultAdapter.notifyDataSetChanged();
+        selectAllButton.setOnClickListener(v -> {
+            if (!isAllSelected) {
+                selectAllButton.setImageResource(R.drawable.checkbox_checked);
+                selectionCounter = files.size();
+                selectionList.clear();
+                selectionList.addAll(files);
+                updateSelectionCounterText(selectionCounter);
+                isAllSelected = true;
+            } else {
+                selectAllButton.setImageResource(R.drawable.checkbox_unchecked);
+                selectionCounter = 0;
+                selectionList.clear();
+                updateSelectionCounterText(selectionCounter);
+                isAllSelected = false;
             }
+            vaultAdapter.notifyDataSetChanged();
         });
 
         //action menu
-        actionMenu = (ViewGroup) findViewById(R.id.action_menu);
+        actionMenu = findViewById(R.id.action_menu);
         actionMenu.setVisibility(View.GONE);
 
-        //action menu back button
-        actionMenuBackButton = (ImageView) findViewById(R.id.vault_action_menu_back_btn);
-        actionMenuBackButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                unSetActionMode();
-                vaultAdapter.notifyDataSetChanged();
-            }
-        });
-
+        //counter text
+        counterText = findViewById(R.id.action_menu_item_count);
 
         //action menu delete button
-        actionMenuDeleteButton = (ImageView) findViewById(R.id.vault_action_menu_delete_btn);
-        actionMenuDeleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                vaultAdapter.updateAdapter(selectionList);
-                unSetActionMode();
-                vaultAdapter.notifyDataSetChanged();
+        actionMenuDeleteButton = findViewById(R.id.action_menu_delete_btn);
+        actionMenuDeleteButton.setAlpha(Float.valueOf("0.5"));
+        actionMenuDeleteButton.setOnClickListener(v -> {
+            if (selectionList.size() > 0) {
+                Dialog deleteButtonDialog = new Dialog(this);
+                deleteButtonDialog.setContentView(R.layout.popup_file_delete);
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                deleteButtonDialog.show();
+
+                // delete confirmation listener
+                TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
+                TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
+                cancelBtn.setOnClickListener(view -> {
+                    //cancel btn
+                    deleteButtonDialog.dismiss();
+                });
+                deleteBtn.setOnClickListener(view -> {
+                    //delete btn
+                    vaultAdapter.deleteItems(selectionList, db);
+                    unSetActionMode();
+                    deleteButtonDialog.dismiss();
+                    vaultAdapter.updateAdapter(files = fetchVaultFiles());
+                });
             }
         });
 
-
-        //action menu rename button
-        actionMenuRenameButton = (ImageView) findViewById(R.id.vault_action_menu_rename_btn);
-        actionMenuRenameButton.setAlpha(Float.valueOf("0.5"));
-
+        //action menu back button
+        actionMenuBackButton = findViewById(R.id.action_menu_back_btn);
+        actionMenuBackButton.setOnClickListener(v -> {
+            unSetActionMode();
+            vaultAdapter.notifyDataSetChanged();
+        });
 
         //action menu info button
-        actionMenuInfoButton = (ImageView) findViewById(R.id.vault_action_menu_details_btn);
+        actionMenuInfoButton = findViewById(R.id.action_menu_info_btn);
         actionMenuInfoButton.setAlpha(Float.valueOf("0.5"));
+        actionMenuInfoButton.setOnClickListener(view -> {
+            if (selectionList.size() == 1) {
+                VaultFile f = selectionList.get(0);
+                Dialog infoButtonDialog = new Dialog(Vault.this);
+                infoButtonDialog.setContentView(R.layout.popup_file_info);
+                Objects.requireNonNull(infoButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+                Objects.requireNonNull(infoButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+                ImageView icon = infoButtonDialog.findViewById(R.id.icon);
+                TextView name = infoButtonDialog.findViewById(R.id.name);
+                TextView path = infoButtonDialog.findViewById(R.id.path);
+                TextView size = infoButtonDialog.findViewById(R.id.size);
+                TextView date = infoButtonDialog.findViewById(R.id.date);
+                icon.setImageResource(FileHelper.getFileIcon(f.getOriginalExt()));
+                name.setText(f.getName());
+                path.setText(f.getOriginalPath());
+                size.setText(f.getSize());
+                date.setText(f.getDate());
+                infoButtonDialog.show();
+            }
+        });
+    }
+
+    public List<VaultFile> fetchVaultFiles() {
+        return db.getAllVaultFiles();
+    }
+
+    //storage permission
+    public void checkPermissionReadStorage(Activity activity) {
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, Global.MY_PERMISSIONS_REQUEST_READ_STORAGE);
+        }
     }
 
 
-    //search query filter method
-    private void searchQueryFilter(String query) {
-        if(query.length() != 0) {
-            ArrayList<File> resultList = new ArrayList<>();
-            for(File f : files) {
-                String name = f.getName();
-                if(name.toLowerCase().contains(query.toLowerCase())) {
-                    resultList.add(f);
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case Global.MY_PERMISSIONS_REQUEST_READ_STORAGE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    finish();
+                    overridePendingTransition(0, 0);
+                    startActivity(getIntent());
+                    overridePendingTransition(0, 0);
+                } else {
+                    Toast.makeText(this, "application needs storage access to work properly", Toast.LENGTH_LONG).show();
                 }
             }
-            vaultAdapter.filterList(resultList);
+        }
+    }
+
+    public void prepareSelection(View view, int position) {
+
+        CheckBox cb = (CheckBox) view;
+        if (!cb.isChecked()) {
+            selectionList.add(files.get(position));
+            cb.setChecked(true);
+            selectionCounter++;
         } else {
-            vaultAdapter.filterList(files);
+            cb.setChecked(false);
+            selectionList.remove(files.get(position));
+            selectionCounter--;
+        }
+
+        if (selectionCounter == 1) {
+            actionMenuInfoButton.setAlpha(Float.valueOf("1.0"));
+        } else {
+            actionMenuInfoButton.setAlpha(Float.valueOf("0.5"));
+        }
+        if (selectionCounter > 0) {
+            actionMenuDeleteButton.setAlpha(Float.valueOf("1.0"));
+        } else {
+            actionMenuDeleteButton.setAlpha(Float.valueOf("0.5  "));
+        }
+        updateSelectionCounterText(selectionCounter);
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateSelectionCounterText(int counter) {
+        if (counter == 0) {
+            counterText.setText(R.string.no_item_selected);
+        } else if (counter == 1) {
+            counterText.setText(R.string.one_item_selected);
+        } else {
+            counterText.setText(counter + " " + getString(R.string.items_selected));
         }
     }
 
@@ -210,8 +289,8 @@ public class Vault extends PortraitActivity implements View.OnLongClickListener,
         actionMenu.startAnimation(bottomUp);
         navigationView.setVisibility(View.GONE);
         actionMenu.setVisibility(View.VISIBLE);
-        selectAllButton.setVisibility(View.VISIBLE);
         addButton.setVisibility(View.GONE);
+        selectAllButton.setVisibility(View.VISIBLE);
         vaultAdapter.notifyDataSetChanged();
     }
 
@@ -223,49 +302,26 @@ public class Vault extends PortraitActivity implements View.OnLongClickListener,
         actionMenu.startAnimation(topDown);
         actionMenu.setVisibility(View.GONE);
         navigationView.setVisibility(View.VISIBLE);
-        addButton.setVisibility(View.VISIBLE);
         selectAllButton.setVisibility(View.GONE);
+        addButton.setVisibility(View.VISIBLE);
         selectionCounter = 0;
         selectionList.clear();
+        updateSelectionCounterText(selectionCounter);
     }
 
-    private void prepareData() {
-        files = new ArrayList<>();
-        files.add(new File("Android", "dir", "04/08/2016", 539.65));
-        files.add(new File("resume", "doc", "03/09/2018", 10.123));
-        files.add(new File("My Pic", "image", "03/09/2018", 1.66));
-        files.add(new File("Shape of you", "audio", "25/07/2017", 11.9936));
-        files.add(new File("Interstellar", "video", "17/12/2015", 1228.8));
-        files.add(new File("Android", "dir", "04/08/2016", 539.65));
-        files.add(new File("resume", "doc", "03/09/2018", 10.123));
-        files.add(new File("My Pic", "image", "03/09/2018", 1.66));
-        files.add(new File("Shape of you", "audio", "25/07/2017", 11.9936));
-        files.add(new File("Interstellar", "video", "17/12/2015", 1228.8));
-        files.add(new File("Android", "dir", "04/08/2016", 539.65));
-        files.add(new File("resume", "doc", "03/09/2018", 10.123));
-        files.add(new File("My Pic", "image", "03/09/2018", 1.66));
-        files.add(new File("Shape of you", "audio", "25/07/2017", 11.9936));
-        files.add(new File("Interstellar", "video", "17/12/2015", 1228.8));
-    }
-
-    public void prepareSelection(View view, int position) {
-        CheckBox cb = (CheckBox) view;
-        if (!cb.isChecked()) {
-            selectionList.add(files.get(position));
-            cb.setChecked(true);
-            selectionCounter++;
+    //search query filter method
+    private void searchQueryFilter(String query) {
+        if (query.length() != 0) {
+            List<VaultFile> resultList = new ArrayList<>();
+            for (VaultFile f : files) {
+                String name = f.getName();
+                if (name.toLowerCase().contains(query.toLowerCase())) {
+                    resultList.add(f);
+                }
+            }
+            vaultAdapter.filterList(resultList);
         } else {
-            cb.setChecked(false);
-            selectionList.remove(files.get(position));
-            selectionCounter--;
-
-        }
-        if (selectionCounter == 1) {
-            actionMenuRenameButton.setAlpha(Float.valueOf("1.0"));
-            actionMenuInfoButton.setAlpha(Float.valueOf("1.0"));
-        } else {
-            actionMenuRenameButton.setAlpha(Float.valueOf("0.5"));
-            actionMenuInfoButton.setAlpha(Float.valueOf("0.5"));
+            vaultAdapter.filterList(files);
         }
     }
 
@@ -298,6 +354,12 @@ public class Vault extends PortraitActivity implements View.OnLongClickListener,
     protected void onPause() {
         super.onPause();
         overridePendingTransition(0, 0);
+    }
+
+    @Override
+    protected void onDestroy() {
+        FileHelper.deleteTempFile();
+        super.onDestroy();
     }
 
     @Override

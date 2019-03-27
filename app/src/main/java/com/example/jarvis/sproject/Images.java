@@ -1,5 +1,6 @@
 package com.example.jarvis.sproject;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
@@ -9,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -42,6 +42,7 @@ public class Images extends PortraitActivity implements View.OnLongClickListener
     private int selectionCounter = 0;
     private List<ImageFile> images;
 
+    public Dialog fileClickDialog;
     private ViewGroup actionMenu;
     private TextView counterText;
     private ImageView menuButton;
@@ -51,6 +52,30 @@ public class Images extends PortraitActivity implements View.OnLongClickListener
     private ImageView actionMenuInfoButton;
     private ImageView actionMenuDeleteButton;
     private SqliteDatabaseHandler db;
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void setStatusBarGradient(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = activity.getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(activity.getResources().getColor(android.R.color.white));
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        }
+    }
+
+    public List<ImageFile> fetchImageFiles() {
+        return db.getAllImages();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isInActionMode) {
+            unSetActionMode();
+            adapter.notifyDataSetChanged();
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,8 +96,12 @@ public class Images extends PortraitActivity implements View.OnLongClickListener
         db = new SqliteDatabaseHandler(getApplicationContext());
         images = new ArrayList<>();
         images = fetchImageFiles();
-        Log.i("image_trace", "total images: " + images.size());
 
+        //file click dialogue box
+        fileClickDialog = new Dialog(this);
+        fileClickDialog.setContentView(R.layout.popup_encrypted_file_click);
+
+        //adapter
         adapter = new ImagesAdapter(Images.this, images);
         recyclerView.setAdapter(adapter);
 
@@ -123,26 +152,28 @@ public class Images extends PortraitActivity implements View.OnLongClickListener
         //action menu delete button
         actionMenuDeleteButton = findViewById(R.id.action_menu_delete_btn);
         actionMenuDeleteButton.setOnClickListener(v -> {
-            Dialog deleteButtonDialog = new Dialog(this);
-            deleteButtonDialog.setContentView(R.layout.popup_file_delete);
-            Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
-            Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            deleteButtonDialog.show();
+            if (selectionList.size() > 0) {
+                Dialog deleteButtonDialog = new Dialog(this);
+                deleteButtonDialog.setContentView(R.layout.popup_file_delete);
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                deleteButtonDialog.show();
 
-            // delete confirmation listener
-            TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
-            TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
-            cancelBtn.setOnClickListener(view -> {
-                //cancel btn
-                deleteButtonDialog.dismiss();
-            });
-            deleteBtn.setOnClickListener(view -> {
-                //delete btn
-                adapter.deleteItems(selectionList, db);
-                unSetActionMode();
-                deleteButtonDialog.dismiss();
-                adapter.updateAdapter(images = fetchImageFiles());
-            });
+                // delete confirmation listener
+                TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
+                TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
+                cancelBtn.setOnClickListener(view -> {
+                    //cancel btn
+                    deleteButtonDialog.dismiss();
+                });
+                deleteBtn.setOnClickListener(view -> {
+                    //delete btn
+                    adapter.deleteItems(selectionList, db);
+                    unSetActionMode();
+                    deleteButtonDialog.dismiss();
+                    adapter.updateAdapter(images = fetchImageFiles());
+                });
+            }
         });
 
         //select all button
@@ -163,42 +194,6 @@ public class Images extends PortraitActivity implements View.OnLongClickListener
             }
             adapter.notifyDataSetChanged();
         });
-    }
-
-    public List<ImageFile> fetchImageFiles() {
-        return db.getAllImages();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if(isInActionMode) {
-            unSetActionMode();
-            adapter.notifyDataSetChanged();
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void setStatusBarGradient(Activity activity) {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = activity.getWindow();
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(activity.getResources().getColor(android.R.color.white));
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        }
-    }
-
-    public void unSetActionMode() {
-        isInActionMode = false;
-        backButton.setVisibility(View.VISIBLE);
-        menuButton.setVisibility(View.VISIBLE);
-        selectAllButton.setVisibility(View.GONE);
-        Animation topDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
-        actionMenu.startAnimation(topDown);
-        actionMenu.setVisibility(View.GONE);
-        selectionCounter = 0;
-        selectionList.clear();
     }
 
     public void setActionMode() {
@@ -238,13 +233,27 @@ public class Images extends PortraitActivity implements View.OnLongClickListener
         updateSelectionCounterText(selectionCounter);
     }
 
-    public void updateSelectionCounterText(int counter) {
+    public void unSetActionMode() {
+        isInActionMode = false;
+        backButton.setVisibility(View.VISIBLE);
+        menuButton.setVisibility(View.VISIBLE);
+        selectAllButton.setVisibility(View.GONE);
+        Animation topDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
+        actionMenu.startAnimation(topDown);
+        actionMenu.setVisibility(View.GONE);
+        selectionCounter = 0;
+        selectionList.clear();
+        updateSelectionCounterText(selectionCounter);
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateSelectionCounterText(int counter) {
         if (counter == 0) {
             counterText.setText(R.string.no_item_selected);
         } else if (counter == 1) {
             counterText.setText(R.string.one_item_selected);
         } else {
-            counterText.setText(counter + R.string.items_selected);
+            counterText.setText(counter + " " + getString(R.string.items_selected));
         }
     }
 
@@ -252,5 +261,11 @@ public class Images extends PortraitActivity implements View.OnLongClickListener
     public boolean onLongClick(View view) {
         setActionMode();
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        FileHelper.deleteTempFile();
+        super.onDestroy();
     }
 }
