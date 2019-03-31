@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -32,7 +33,7 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.AudioViewHol
     @NonNull
     @Override
     public AudioViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_audio, parent, false);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_1, parent, false);
         return new AudioAdapter.AudioViewHolder(itemView, activity);
     }
 
@@ -40,6 +41,7 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.AudioViewHol
     public void onBindViewHolder(@NonNull AudioViewHolder holder, int position) {
         AudioFile audioFile = files.get(position);
 
+        holder.icon.setImageResource(R.drawable.audio);
         String originalPath = audioFile.getOriginalPath();
         String name = FileHelper.getFileName(originalPath);
         holder.name.setText(name);
@@ -119,6 +121,7 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.AudioViewHol
     class AudioViewHolder extends RecyclerView.ViewHolder {
 
         TextView name;
+        ImageView icon;
         TextView details;
         CheckBox cb;
 
@@ -128,6 +131,7 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.AudioViewHol
             super(itemView);
 
             name = itemView.findViewById(R.id.item_name);
+            icon = itemView.findViewById(R.id.item_icon);
             details = itemView.findViewById(R.id.item_details);
             cb = itemView.findViewById(R.id.item_cb);
             this.activity = activity;

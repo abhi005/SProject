@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -32,7 +33,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     @NonNull
     @Override
     public VideoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_video, parent, false);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_1, parent, false);
         return new VideoAdapter.VideoViewHolder(itemView, activity);
     }
 
@@ -40,6 +41,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     public void onBindViewHolder(@NonNull VideoViewHolder holder, int position) {
         VideoFile videoFile = files.get(position);
 
+        holder.icon.setImageResource(R.drawable.video);
+        ;
         String originalPath = videoFile.getOriginalPath();
         String name = FileHelper.getFileName(originalPath);
         holder.name.setText(name);
@@ -120,6 +123,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     class VideoViewHolder extends RecyclerView.ViewHolder {
 
         TextView name;
+        ImageView icon;
         TextView details;
         CheckBox cb;
 
@@ -129,6 +133,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             super(itemView);
 
             name = itemView.findViewById(R.id.item_name);
+            icon = itemView.findViewById(R.id.item_icon);
             details = itemView.findViewById(R.id.item_details);
             cb = itemView.findViewById(R.id.item_cb);
             this.activity = context;

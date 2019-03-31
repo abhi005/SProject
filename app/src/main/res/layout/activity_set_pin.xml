@@ -5,13 +5,14 @@
     android:layout_height="match_parent"
     android:background="@color/white"
     android:orientation="vertical"
-    tools:context=".EnterPin">
+    tools:context=".SetPin">
+
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
-        android:text="@string/enter_pin"
+        android:text="@string/set_pin"
         android:textAlignment="center"
         android:textColor="@color/darkGrey"
         android:textSize="18sp"
@@ -27,10 +28,10 @@
         android:textSize="14sp"
         android:visibility="invisible" />
 
-
     <include
         layout="@layout/pin_keypad"
-        android:layout_height="match_parent"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="center" />
+
 </LinearLayout>

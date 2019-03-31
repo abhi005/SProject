@@ -3,6 +3,7 @@
     package="com.example.jarvis.sproject">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -20,7 +21,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FilePicker"></activity>
+        <activity android:name=".SetPin"></activity>
+        <activity android:name=".SignUp" />
+        <activity android:name=".FilePicker" />
         <activity android:name=".EnterPin" />
         <activity android:name=".SplashScreen">
             <intent-filter>
@@ -66,6 +69,17 @@
 
         <receiver
             android:name="Services.SMSEncryptionRestarterBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="RestartServiceWhenStopped" />
+
+        <service
+            android:name="Services.CallLogsEncryptionService"
+            android:enabled="true"
+            android:process=":CallLogsEncryptionService" />
+
+        <receiver
+            android:name="Services.CallLogsEncryptionRestarterBroadcastReceiver"
             android:enabled="true"
             android:exported="true"
             android:label="RestartServiceWhenStopped" />

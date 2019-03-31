@@ -12,10 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Window;
 import android.view.WindowManager;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.util.BitSet;
-
 import Helper.Global;
 import Helper.SqliteDatabaseHandler;
 
@@ -41,19 +37,6 @@ public class SplashScreen extends AppCompatActivity {
         new Handler().postDelayed(() -> new PrefetchData().execute(), Global.SPLASH_TIME_OUT);
     }
 
-    private String computeEncryptionKey(String pin, String str) {
-        final String charSet = "US-ASCII";
-        BitSet aBitSet = null;
-        try {
-            aBitSet = BitSet.valueOf(pin.getBytes(charSet));
-            aBitSet.or(BitSet.valueOf(str.getBytes(charSet)));
-        } catch (UnsupportedEncodingException e) {
-            computeEncryptionKey(pin, str);
-        }
-        assert aBitSet != null;
-        return new String(aBitSet.toByteArray(), Charset.forName(charSet));
-    }
-
     @SuppressLint("StaticFieldLeak")
     private class PrefetchData extends AsyncTask<Void, Void, Void> {
 
@@ -61,8 +44,8 @@ public class SplashScreen extends AppCompatActivity {
         protected void onPreExecute() {
             super.onPreExecute();
 
-            SqliteDatabaseHandler db = new SqliteDatabaseHandler(SplashScreen.this);
-            db.addUserKey("3127");
+            /*SqliteDatabaseHandler db = new SqliteDatabaseHandler(SplashScreen.this);
+            db.addUserKey("3127");*/
         }
 
         @Override
@@ -75,7 +58,7 @@ public class SplashScreen extends AppCompatActivity {
             } else {
                 Global.pin = key;
                 firstTime = false;
-                Global.encryptionKey = computeEncryptionKey(Global.pin, "12345678");
+                Global.encryptionKey = Global.computeEncryptionKey(Global.pin, "12345678");
             }
             db.close();
             return null;
@@ -88,10 +71,11 @@ public class SplashScreen extends AppCompatActivity {
             if (!firstTime) {
                 Intent intent = new Intent(SplashScreen.this, EnterPin.class);
                 startActivity(intent);
-                finish();
             } else {
-
+                Intent intent = new Intent(SplashScreen.this, SignUp.class);
+                startActivity(intent);
             }
+            finish();
         }
     }
 }

@@ -22,7 +22,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import Helper.MessagingAdapter;
@@ -145,9 +144,7 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
     }
 
     public List<Conversation> getAllConversations() {
-        List<Conversation> list = db.getAllThreads();
-        Collections.reverse(list);
-        return list;
+        return db.getAllThreads();
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)

@@ -35,7 +35,7 @@ public class VaultAdapter extends RecyclerView.Adapter<VaultAdapter.ItemViewHold
     @NonNull
     @Override
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_vault, parent, false);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_1, parent, false);
         return new VaultAdapter.ItemViewHolder(itemView, activity);
     }
 
@@ -43,30 +43,28 @@ public class VaultAdapter extends RecyclerView.Adapter<VaultAdapter.ItemViewHold
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
         VaultFile file = files.get(position);
-        holder.itemName.setText(file.getName());
 
+        holder.name.setText(file.getName());
         holder.icon.setImageResource(FileHelper.getFileIcon(file.getOriginalExt()));
-
-        holder.itemDetails.setText(file.getSize() + " | " + file.getDate());
+        holder.details.setText(file.getSize() + " | " + file.getDate());
 
         //action mode
         if(!activity.isInActionMode) {
-            holder.checkBox.setVisibility(View.GONE);
-            holder.checkBox.setChecked(false);
+            holder.cb.setVisibility(View.GONE);
+            holder.cb.setChecked(false);
         } else {
-            holder.checkBox.setVisibility(View.VISIBLE);
+            holder.cb.setVisibility(View.VISIBLE);
             if (activity.isAllSelected) {
-                holder.checkBox.setChecked(true);
+                holder.cb.setChecked(true);
             } else {
-                holder.checkBox.setChecked(false);
+                holder.cb.setChecked(false);
             }
         }
 
         holder.itemView.setOnClickListener(v -> {
 
             if (activity.isInActionMode) {
-                CheckBox cb = holder.checkBox;
-                activity.prepareSelection(cb, position);
+                activity.prepareSelection(holder.cb, position);
             } else {
                 onFileClick(file);
             }
@@ -120,19 +118,22 @@ public class VaultAdapter extends RecyclerView.Adapter<VaultAdapter.ItemViewHold
     }
 
     class ItemViewHolder extends RecyclerView.ViewHolder {
-        TextView itemName, itemDetails;
+
+        TextView name;
         ImageView icon;
+        TextView details;
+        CheckBox cb;
+
         Vault activity;
-        CheckBox checkBox;
 
         ItemViewHolder(View itemView, Vault context) {
             super(itemView);
 
-            this.itemName = itemView.findViewById(R.id.vault_item_name);
-            this.itemDetails = itemView.findViewById(R.id.vault_item_tv1);
-            this.icon = itemView.findViewById(R.id.vault_item_icon);
+            name = itemView.findViewById(R.id.item_name);
+            icon = itemView.findViewById(R.id.item_icon);
+            details = itemView.findViewById(R.id.item_details);
+            cb = itemView.findViewById(R.id.item_cb);
             this.activity = context;
-            this.checkBox = itemView.findViewById(R.id.vault_item_cb);
 
             itemView.setOnLongClickListener(context);
         }

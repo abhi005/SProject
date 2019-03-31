@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:paddingStart="32dp"
+    android:paddingEnd="32dp"
+    tools:context=".SignUp">
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="100dp"
+        android:background="@color/transparent"
+        android:clickable="false"
+        android:focusable="false"
+        android:src="@drawable/logo" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/logo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="12dp"
+        android:letterSpacing=".3"
+        android:text="@string/seguro"
+        android:textColor="@color/darkGrey"
+        android:textSize="18sp"
+        android:textStyle="normal" />
+
+    <EditText
+        android:id="@+id/name_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/email_et"
+        android:layout_marginBottom="18dp"
+        android:background="@drawable/bottom_border"
+        android:ems="10"
+        android:hint="@string/name"
+        android:paddingStart="8dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="16dp"
+        android:textColor="@color/darkGrey"
+        android:textColorHint="@color/lightGrey"
+        android:textSize="16sp" />
+
+
+    <EditText
+        android:id="@+id/email_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/next_btn"
+        android:layout_marginBottom="42dp"
+        android:background="@drawable/bottom_border"
+        android:ems="10"
+        android:hint="@string/email_id"
+        android:paddingStart="8dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="16dp"
+        android:textColor="@color/darkGrey"
+        android:textColorHint="@color/lightGrey"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/next_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="64dp"
+        android:background="@drawable/rounded_button"
+        android:clickable="true"
+        android:elevation="0dp"
+        android:focusable="true"
+        android:paddingStart="48dp"
+        android:paddingTop="14dp"
+        android:paddingEnd="48dp"
+        android:paddingBottom="14dp"
+        android:text="@string/next"
+        android:textColor="@color/white"
+        android:textSize="14sp" />
+</RelativeLayout>

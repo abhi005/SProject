@@ -49,5 +49,8 @@
     <string name="export_file">Export file</string>
     <string name="open_file">Open file</string>
     <string name="wrong_pin">wrong pin</string>
+    <string name="email_id">Email ID</string>
+    <string name="name">Name</string>
+    <string name="set_pin">Set Pin</string>
 
 </resources>

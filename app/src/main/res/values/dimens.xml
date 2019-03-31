@@ -33,7 +33,7 @@
     <!-- home -->
     <dimen name="home_icon">42dp</dimen>
 
-    <!-- call logs -->
+    <!-- localCall logs -->
     <dimen name="call_type_icon">16dp</dimen>
 
     <!-- chat -->

@@ -7,15 +7,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.IBinder;
 import android.provider.Telephony;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
-import android.widget.Toast;
 
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -86,7 +82,7 @@ public class SMSEncryptionService extends Service {
         int totalSMS = 0;
         if (c != null) {
             totalSMS = c.getCount();
-            SqliteDatabaseHandler db = new SqliteDatabaseHandler(this);;
+            SqliteDatabaseHandler db = new SqliteDatabaseHandler(this);
             if (c.moveToFirst()) {
                 for (int j = 0; j < totalSMS; j++) {
                     String smsDate = c.getString(c.getColumnIndexOrThrow(Telephony.Sms.DATE));

@@ -1,5 +1,6 @@
 package Helper;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -31,14 +32,15 @@ public class FilePickerAdapter extends RecyclerView.Adapter<FilePickerAdapter.It
     @NonNull
     @Override
     public FilePickerAdapter.ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_vault, parent, false);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_1, parent, false);
         return new FilePickerAdapter.ItemViewHolder(itemView, activity);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull FilePickerAdapter.ItemViewHolder holder, int position) {
         FileManagerItem file = files.get(position);
-        holder.itemName.setText(file.getName());
+        holder.name.setText(file.getName());
 
         if (file.getType().equals("dir")) {
             holder.icon.setImageResource(R.drawable.folder);
@@ -48,7 +50,7 @@ public class FilePickerAdapter extends RecyclerView.Adapter<FilePickerAdapter.It
 
         String size = file.getData();
         String date = file.getDate();
-        holder.itemDetails.setText(size + " | " + date);
+        holder.details.setText(size + " | " + date);
 
         holder.itemView.setTag(position);
 
@@ -74,17 +76,20 @@ public class FilePickerAdapter extends RecyclerView.Adapter<FilePickerAdapter.It
     }
 
     class ItemViewHolder extends RecyclerView.ViewHolder {
-        TextView itemName, itemDetails;
+        TextView name;
         ImageView icon;
+        TextView details;
+        CheckBox cb;
+
         FilePicker activity;
 
         ItemViewHolder(View itemView, FilePicker context) {
             super(itemView);
 
-            this.itemName = itemView.findViewById(R.id.vault_item_name);
-            this.itemDetails = itemView.findViewById(R.id.vault_item_tv1);
-            this.icon = itemView.findViewById(R.id.vault_item_icon);
-            CheckBox cb = itemView.findViewById(R.id.vault_item_cb);
+            name = itemView.findViewById(R.id.item_name);
+            icon = itemView.findViewById(R.id.item_icon);
+            details = itemView.findViewById(R.id.item_details);
+            cb = itemView.findViewById(R.id.item_cb);
             cb.setVisibility(View.GONE);
             this.activity = context;
         }

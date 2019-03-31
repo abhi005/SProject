@@ -14,6 +14,7 @@ import Model.AudioFile;
 import Model.Conversation;
 import Model.DocFile;
 import Model.ImageFile;
+import Model.LocalCall;
 import Model.LocalSms;
 import Model.VaultFile;
 import Model.VideoFile;
@@ -33,6 +34,14 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
     private static final String SMS_KEY_SENT_DATE = "sentDate";
     private static final String SMS_KEY_BODY = "body";
     private static final String SMS_KEY_ADDRESS = "address";
+
+    // calllogs table attributes
+    private static final String TABLE_CALLS = "calls";
+    private static final String CALLS_KEY_ID = "id";
+    private static final String CALLS_KEY_TYPE = "type";
+    private static final String CALLS_KEY_NUMBER = "contact";
+    private static final String CALLS_KEY_DATE = "date";
+    private static final String CALLS_KEY_DURATION = "duration";
 
     // secret key table attributes
     private static final String TABLE_SECRET = "secret";
@@ -74,6 +83,11 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
                 + "threadId INTEGER, " + "type INTEGER, " + "read INTEGER, "
                 + "date TEXT, " + "sentDate TEXT, " + "body TEXT, " + "address TEXT, PRIMARY KEY (body, date))";
 
+        String CREATION_TABLE_CALLS = "CREATE TABLE calls ("
+                + CALLS_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + CALLS_KEY_TYPE + " INTEGER, "
+                + CALLS_KEY_NUMBER + " TEXT, " + CALLS_KEY_DATE + " TEXT, " + CALLS_KEY_DURATION
+                + " TEXT, UNIQUE (" + CALLS_KEY_NUMBER + ", " + CALLS_KEY_DATE + "))";
+
         String CREATION_TABLE_SECRET = "CREATE TABLE " + TABLE_SECRET + " ( "
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, " + SECRET_KEY_USERKEY + " TEXT )";
 
@@ -108,6 +122,7 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
                 + VAULT_KEY_SIZE + " TEXT )";
 
         sqLiteDatabase.execSQL(CREATION_TABLE_SMS);
+        sqLiteDatabase.execSQL(CREATION_TABLE_CALLS);
         sqLiteDatabase.execSQL(CREATION_TABLE_SECRET);
         sqLiteDatabase.execSQL(CREATION_TABLE_IMAGE);
         sqLiteDatabase.execSQL(CREATION_TABLE_VIDEO);
@@ -127,6 +142,7 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_VIDEO);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_IMAGE);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_VAULT);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_CALLS);
         this.onCreate(sqLiteDatabase);
     }
 
@@ -213,6 +229,40 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         db.close();
         return threads;
     }
+
+    // call logs encryption methods
+    public void addCall(LocalCall call) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(CALLS_KEY_NUMBER, call.getNumber());
+        values.put(CALLS_KEY_TYPE, call.getType());
+        values.put(CALLS_KEY_DATE, call.getDate());
+        values.put(CALLS_KEY_DURATION, call.getDuration());
+        db.insert(TABLE_CALLS, null, values);
+        db.close();
+    }
+
+    public List<LocalCall> getAllCalls() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        List<LocalCall> list = new ArrayList<>();
+
+        String query = "SELECT * FROM " + TABLE_CALLS;
+        @SuppressLint("Recycle") Cursor c = db.rawQuery(query, null);
+        if (c.moveToFirst()) {
+            do {
+                LocalCall call = new LocalCall();
+                call.setId(Integer.parseInt(c.getString(0)));
+                call.setType(Integer.parseInt(c.getString(1)));
+                call.setNumber(c.getString(2));
+                call.setDate(c.getString(3));
+                call.setDuration(c.getString(4));
+                list.add(call);
+            } while (c.moveToNext());
+        }
+        db.close();
+        return list;
+    }
+
 
     //encrypted file's methods
 

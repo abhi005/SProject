@@ -1,5 +1,6 @@
 package Helper;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
@@ -34,14 +35,15 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
     @NonNull
     @Override
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_vault, parent, false);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_1, parent, false);
         return new FileManagerAdapter.ItemViewHolder(itemView, activity);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull FileManagerAdapter.ItemViewHolder holder, int position) {
         FileManagerItem file = files.get(position);
-        holder.itemName.setText(file.getName());
+        holder.name.setText(file.getName());
 
         if (file.getType().equals("dir")) {
             holder.icon.setImageResource(R.drawable.folder);
@@ -51,27 +53,26 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
 
         String size = file.getData();
         String date = file.getDate();
-        holder.itemDetails.setText(size + " | " + date);
+        holder.details.setText(size + " | " + date);
 
         holder.itemView.setTag(position);
 
         //action mode
         if(!activity.isInActionMode) {
-            holder.checkBox.setVisibility(View.GONE);
-            holder.checkBox.setChecked(false);
+            holder.cb.setVisibility(View.GONE);
+            holder.cb.setChecked(false);
         } else {
-            holder.checkBox.setVisibility(View.VISIBLE);
+            holder.cb.setVisibility(View.VISIBLE);
             if (activity.isAllSelected) {
-                holder.checkBox.setChecked(true);
+                holder.cb.setChecked(true);
             } else {
-                holder.checkBox.setChecked(false);
+                holder.cb.setChecked(false);
             }
         }
 
         holder.itemView.setOnClickListener(v -> {
             if (activity.isInActionMode) {
-                CheckBox cb = v.findViewById(R.id.vault_item_cb);
-                activity.prepareSelection(cb, (int) v.getTag());
+                activity.prepareSelection(holder.cb, (int) v.getTag());
             } else {
                 if (file.getType().toLowerCase().equals("dir")) {
                     activity.forwardDirectory(file.getPath());
@@ -88,19 +89,21 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
     }
 
     class ItemViewHolder extends RecyclerView.ViewHolder {
-        TextView itemName, itemDetails;
+
+        TextView name;
         ImageView icon;
+        TextView details;
+        CheckBox cb;
         FileManager activity;
-        CheckBox checkBox;
 
         ItemViewHolder(View itemView, FileManager context) {
             super(itemView);
 
-            this.itemName = itemView.findViewById(R.id.vault_item_name);
-            this.itemDetails = itemView.findViewById(R.id.vault_item_tv1);
-            this.icon = itemView.findViewById(R.id.vault_item_icon);
+            name = itemView.findViewById(R.id.item_name);
+            icon = itemView.findViewById(R.id.item_icon);
+            details = itemView.findViewById(R.id.item_details);
+            cb = itemView.findViewById(R.id.item_cb);
             this.activity = context;
-            this.checkBox = itemView.findViewById(R.id.vault_item_cb);
 
             itemView.setOnLongClickListener(context);
         }

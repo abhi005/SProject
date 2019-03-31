@@ -16,7 +16,7 @@
         <ImageView
             android:id="@+id/call_history_item_person_btn"
             android:layout_gravity="center"
-            android:src="@drawable/profile"
+            android:src="@drawable/person"
             android:scaleType="centerInside"
             android:tint="@color/grey"
             android:layout_width="@dimen/icon"
@@ -54,15 +54,6 @@
                     android:layout_width="@dimen/call_type_icon"
                     android:layout_height="@dimen/call_type_icon" />
             </LinearLayout>
-
-            <TextView
-                android:text="@string/text"
-                android:textColor="@color/grey"
-                android:lines="1"
-                android:textSize="@dimen/small_text"
-                android:id="@+id/call_history_item_tv2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
 
             <TextView
                 android:text="@string/text"

@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -34,7 +35,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocVie
     @NonNull
     @Override
     public DocViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_document, parent, false);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_1, parent, false);
         return new DocumentAdapter.DocViewHolder(itemView, activity);
     }
 
@@ -42,6 +43,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocVie
     public void onBindViewHolder(@NonNull DocViewHolder holder, int position) {
         DocFile docFile = files.get(position);
 
+        holder.icon.setImageResource(R.drawable.doc);
         String originalPath = docFile.getOriginalPath();
         String name = FileHelper.getFileName(originalPath);
         holder.name.setText(name);
@@ -124,6 +126,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocVie
         TextView name;
         TextView details;
         CheckBox cb;
+        ImageView icon;
 
         Document activity;
 
@@ -132,6 +135,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocVie
 
 
             name = itemView.findViewById(R.id.item_name);
+            icon = itemView.findViewById(R.id.item_icon);
             details = itemView.findViewById(R.id.item_details);
             cb = itemView.findViewById(R.id.item_cb);
             this.activity = activity;

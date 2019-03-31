@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -32,7 +33,7 @@ public class ZipAdapter extends RecyclerView.Adapter<ZipAdapter.ViewHolder>{
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_zip, parent, false);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout_1, parent, false);
         return new ZipAdapter.ViewHolder(itemView, activity);
     }
 
@@ -40,6 +41,7 @@ public class ZipAdapter extends RecyclerView.Adapter<ZipAdapter.ViewHolder>{
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ZipFile zipFile = files.get(position);
 
+        holder.icon.setImageResource(R.drawable.zip_file);
         String originalPath = zipFile.getOriginalPath();
         String name = FileHelper.getFileName(originalPath);
         holder.name.setText(name);
@@ -118,6 +120,7 @@ public class ZipAdapter extends RecyclerView.Adapter<ZipAdapter.ViewHolder>{
     class ViewHolder extends RecyclerView.ViewHolder{
 
         TextView name;
+        ImageView icon;
         TextView details;
         CheckBox cb;
 
@@ -127,6 +130,7 @@ public class ZipAdapter extends RecyclerView.Adapter<ZipAdapter.ViewHolder>{
             super(itemView);
 
             name = itemView.findViewById(R.id.item_name);
+            icon = itemView.findViewById(R.id.item_icon);
             details = itemView.findViewById(R.id.item_details);
             cb = itemView.findViewById(R.id.item_cb);
             this.activity = activity;

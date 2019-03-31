@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -21,10 +20,9 @@ import android.view.WindowManager;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import com.scwang.wave.MultiWaveHeader;
-
 import Helper.Global;
 import Helper.HomeMenuAdapter;
+import Services.CallLogsEncryptionService;
 import Services.SMSEncryptionService;
 import utils.CustomBottomNavigation;
 import utils.PortraitActivity;
@@ -33,10 +31,11 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
 
     Intent smsServiceIntent;
     private SMSEncryptionService smsService;
+    Intent callLogServiceIntent;
+    private CallLogsEncryptionService callLogsService;
     Context context;
 
     private GridView homeMenu;
-    private MultiWaveHeader waveAnimation;
     private BottomNavigationView navigationView;
     int[] homeIcons = {R.drawable.home_call, R.drawable.home_message, R.drawable.home_image, R.drawable.home_audio, R.drawable.home_video, R.drawable.home_doc, R.drawable.home_zip};
     String[] homeIconsTitle = {"Phone", "Messaging", "Images", "Audios", "Videos", "Docs", "Zip"};
@@ -47,12 +46,11 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
         super.onCreate(savedInstanceState);
         context = getApplicationContext();
         setContentView(R.layout.activity_main);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         checkPermissionSms(this);
 
         // gridview
-        homeMenu = (GridView) findViewById(R.id.grid_view_menu);
+        homeMenu = findViewById(R.id.grid_view_menu);
         HomeMenuAdapter homeMenuAdapter = new HomeMenuAdapter(this, homeIcons, homeIconsTitle);
         homeMenu.setAdapter(homeMenuAdapter);
         homeMenu.setOnItemClickListener((parent, view, position, id) -> {
@@ -78,15 +76,22 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
         });
 
         //customizing navigation
-        navigationView = (BottomNavigationView) findViewById(R.id.navigation);
+        navigationView = findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(this);
         CustomBottomNavigation.disableShiftMode(navigationView);
 
         //sms service
         smsService = new SMSEncryptionService(getApplicationContext());
         smsServiceIntent = new Intent(getContext(), smsService.getClass());
-        if (!isSMSServiceRunning(smsService.getClass())) {
+        if (!isServicesRunning(smsService.getClass())) {
             startService(smsServiceIntent);
+        }
+
+        //call log service
+        callLogsService = new CallLogsEncryptionService(getApplicationContext());
+        callLogServiceIntent = new Intent(getContext(), callLogsService.getClass());
+        if (!isServicesRunning(callLogsService.getClass())) {
+            startService(callLogServiceIntent);
         }
     }
 
@@ -95,8 +100,9 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED
         || ContextCompat.checkSelfPermission(activity, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED
         || ContextCompat.checkSelfPermission(activity, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED
-        || ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS, Manifest.permission.SEND_SMS, Manifest.permission.READ_CONTACTS}, Global.MY_PERMISSIONS_REQUEST_READ_STORAGE);
+                || ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS, Manifest.permission.SEND_SMS, Manifest.permission.READ_CONTACTS, Manifest.permission.READ_CALL_LOG}, Global.MY_PERMISSIONS_REQUEST_READ_STORAGE);
         }
     }
 
@@ -129,7 +135,7 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
         }
     }
 
-    private boolean isSMSServiceRunning(Class<?> serviceClass) {
+    private boolean isServicesRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         assert manager != null;
         for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
