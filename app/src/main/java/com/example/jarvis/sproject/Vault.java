@@ -388,6 +388,7 @@ public class Vault extends PortraitActivity implements View.OnLongClickListener,
                 break;
 
             case R.id.bottom_nav_setting :
+                startActivity(new Intent(Vault.this, Setting.class));
                 break;
 
             default :

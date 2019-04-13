@@ -217,6 +217,7 @@ public class FileHelper {
             ois.close();
             cis.close();
             fos.close();
+            db.decreaseUserData(file.length());
             file.delete();
             db.deleteAudio(eFile);
         } catch (Exception e) {
@@ -247,6 +248,7 @@ public class FileHelper {
             ois.close();
             cis.close();
             fos.close();
+            db.decreaseUserData(file.length());
             file.delete();
             db.deleteVideo(eFile);
         } catch (Exception e) {
@@ -277,6 +279,7 @@ public class FileHelper {
             ois.close();
             cis.close();
             fos.close();
+            db.decreaseUserData(file.length());
             file.delete();
             db.deleteDoc(eFile);
         } catch (Exception e) {
@@ -307,6 +310,7 @@ public class FileHelper {
             ois.close();
             cis.close();
             fos.close();
+            db.decreaseUserData(file.length());
             file.delete();
             db.deleteZip(eFile);
         } catch (Exception e) {
@@ -337,6 +341,7 @@ public class FileHelper {
             ois.close();
             cis.close();
             fos.close();
+            db.decreaseUserData(file.length());
             file.delete();
             db.deleteImage(eFile);
         } catch (Exception e) {
@@ -375,7 +380,7 @@ public class FileHelper {
             if(Global.imageFileTypes.contains(ext.toLowerCase())) {
                 Bitmap bitmap = BitmapFactory.decodeFile(path);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 50, baos);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 0, baos);
                 byte[] thumbnail = baos.toByteArray();
                 ImageFile f = new ImageFile(path, newPath + ".serg", ext, dateModify, getReadableFileSize(file.length()), thumbnail);
                 db.addImage(f);
@@ -397,6 +402,7 @@ public class FileHelper {
                 ZipFile f = new ZipFile(path, newPath + ".serg", ext, dateModify, getReadableFileSize(file.length()));
                 db.addZip(f);
             }
+            db.increaseUserData(file.length());
             db.close();
             file.delete();
 

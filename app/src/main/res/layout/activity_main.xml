@@ -64,17 +64,18 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
-                        android:text="54"
+                        android:text="0.4"
                         android:textColor="@color/white"
                         android:textSize="32sp" />
 
                     <TextView
+                        android:id="@+id/data_size_unit"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="5dp"
                         android:layout_marginTop="8dp"
                         android:layout_toEndOf="@+id/encryption_data"
-                        android:text="@string/percentage_symbol"
+                        android:text="@string/gb"
                         android:textColor="@color/white"
                         android:textSize="@dimen/small_text" />
 

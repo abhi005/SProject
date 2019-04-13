@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.example.jarvis.sproject.R;
 import com.example.jarvis.sproject.Video;
 
+import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
@@ -115,6 +116,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     public void deleteItems(List<VideoFile> list, SqliteDatabaseHandler db) {
         for (VideoFile f : list) {
             String path = f.getNewPath();
+            File file = new File(path);
+            db.decreaseUserData(file.length());
             FileHelper.deleteFile(path);
             db.deleteVideo(f);
         }

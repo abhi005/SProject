@@ -28,7 +28,7 @@
             android:layout_height="match_parent">
 
             <ImageView
-                android:src="@drawable/sd_card"
+                android:src="@drawable/open_file"
                 android:layout_width="@dimen/icon"
                 android:scaleType="centerInside"
                 android:layout_height="@dimen/icon" />

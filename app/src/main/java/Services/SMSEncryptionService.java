@@ -7,10 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.IBinder;
 import android.provider.Telephony;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -85,6 +87,7 @@ public class SMSEncryptionService extends Service {
             SqliteDatabaseHandler db = new SqliteDatabaseHandler(this);
             if (c.moveToFirst()) {
                 for (int j = 0; j < totalSMS; j++) {
+                    String smsId = c.getString(c.getColumnIndexOrThrow("_id"));
                     String smsDate = c.getString(c.getColumnIndexOrThrow(Telephony.Sms.DATE));
                     int read = c.getInt(c.getColumnIndexOrThrow(Telephony.Sms.READ));
                     String smsDateSent = c.getString(c.getColumnIndexOrThrow(Telephony.Sms.DATE_SENT));
@@ -95,7 +98,12 @@ public class SMSEncryptionService extends Service {
 
                     LocalSms sms = new LocalSms(threadId, type, read, smsDate, smsDateSent, body, address);
                     db.addSms(sms);
-                    //cr.delete(Telephony.Sms.CONTENT_URI, null, null);
+                    try {
+                        //cr.delete(Telephony.Sms.CONTENT_URI, null, null);
+                        getContentResolver().delete(Uri.parse("content://sms/inbox" + smsId), null, null);
+                    } catch (Exception e) {
+                        Log.i("smsError", e.getMessage());
+                    }
                     c.moveToNext();
                 }
             }

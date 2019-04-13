@@ -3,6 +3,9 @@ package com.example.jarvis.sproject;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,6 +27,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import Helper.CallLogsAdapter;
 import Helper.SqliteDatabaseHandler;
@@ -146,9 +150,28 @@ public class CallLogs extends PortraitActivity implements View.OnLongClickListen
         //action menu delete button
         deleteButton = findViewById(R.id.call_history_action_menu_delete_btn);
         deleteButton.setOnClickListener(v -> {
-            callLogsAdapter.updateAdapter(selectionList);
-            unSetActionMode();
-            callLogsAdapter.notifyDataSetChanged();
+            if (selectionList.size() > 0) {
+                Dialog deleteButtonDialog = new Dialog(this);
+                deleteButtonDialog.setContentView(R.layout.popup_file_delete);
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                deleteButtonDialog.show();
+
+                // delete confirmation listener
+                TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
+                TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
+                cancelBtn.setOnClickListener(view -> {
+                    //cancel btn
+                    deleteButtonDialog.dismiss();
+                });
+                deleteBtn.setOnClickListener(view -> {
+                    //delete btn
+                    callLogsAdapter.deleteItems(selectionList);
+                    unSetActionMode();
+                    deleteButtonDialog.dismiss();
+                    callLogsAdapter.updateAdapter(callList = fetchCallLogs());
+                });
+            }
         });
 
         //action menu back button

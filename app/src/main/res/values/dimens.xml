@@ -44,6 +44,5 @@
 
     <!-- audio -->
     <!-- audio file image -->
-    <dimen name="audio_file_image">36dp</dimen>
 
 </resources>

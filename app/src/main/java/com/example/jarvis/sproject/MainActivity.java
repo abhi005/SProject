@@ -1,6 +1,7 @@
 package com.example.jarvis.sproject;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -18,10 +19,16 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.util.Objects;
+
+import Helper.FileHelper;
 import Helper.Global;
 import Helper.HomeMenuAdapter;
+import Helper.SqliteDatabaseHandler;
 import Services.CallLogsEncryptionService;
 import Services.SMSEncryptionService;
 import utils.CustomBottomNavigation;
@@ -36,10 +43,14 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
     Context context;
 
     private GridView homeMenu;
+    private TextView freeSpace;
+    private TextView encryptedData;
+    private TextView encryptedDataUnit;
     private BottomNavigationView navigationView;
     int[] homeIcons = {R.drawable.home_call, R.drawable.home_message, R.drawable.home_image, R.drawable.home_audio, R.drawable.home_video, R.drawable.home_doc, R.drawable.home_zip};
     String[] homeIconsTitle = {"Phone", "Messaging", "Images", "Audios", "Videos", "Docs", "Zip"};
 
+    @SuppressLint("DefaultLocale")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setStatusBarGradient(this);
@@ -48,7 +59,20 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
         setContentView(R.layout.activity_main);
 
         checkPermissionSms(this);
+        SqliteDatabaseHandler db = new SqliteDatabaseHandler(this);
 
+        freeSpace = findViewById(R.id.storage_data);
+        encryptedData = findViewById(R.id.encryption_data);
+        encryptedDataUnit = findViewById(R.id.data_size_unit);
+        double freeBytesExternal = new File(Objects.requireNonNull(getExternalFilesDir(null)).toString()).getUsableSpace();
+        freeBytesExternal /= Math.pow(10, 9);
+        freeSpace.setText(String.format("%1.2f", freeBytesExternal));
+
+        long encryptedDataSize = db.getUserData();
+        String temp = FileHelper.getReadableFileSize(encryptedDataSize);
+        String unit = temp.substring(temp.length() - 2);
+        encryptedData.setText(temp.substring(0, temp.length() - 2).trim());
+        encryptedDataUnit.setText(unit.trim());
         // gridview
         homeMenu = findViewById(R.id.grid_view_menu);
         HomeMenuAdapter homeMenuAdapter = new HomeMenuAdapter(this, homeIcons, homeIconsTitle);
@@ -98,11 +122,12 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
     //storage permission
     public void checkPermissionSms(Activity activity){
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED
-        || ContextCompat.checkSelfPermission(activity, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED
-        || ContextCompat.checkSelfPermission(activity, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(activity, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(activity, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED
                 || ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS, Manifest.permission.SEND_SMS, Manifest.permission.READ_CONTACTS, Manifest.permission.READ_CALL_LOG}, Global.MY_PERMISSIONS_REQUEST_READ_STORAGE);
+                || ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(activity, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS, Manifest.permission.SEND_SMS, Manifest.permission.READ_CONTACTS, Manifest.permission.READ_CALL_LOG, Manifest.permission.CALL_PHONE}, Global.MY_PERMISSIONS_REQUEST_READ_STORAGE);
         }
     }
 
@@ -180,6 +205,7 @@ public class MainActivity extends PortraitActivity implements BottomNavigationVi
                 break;
 
             case R.id.bottom_nav_setting :
+                startActivity(new Intent(MainActivity.this, Setting.class));
                 break;
 
             default :

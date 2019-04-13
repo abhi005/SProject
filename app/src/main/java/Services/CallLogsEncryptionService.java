@@ -73,15 +73,17 @@ public class CallLogsEncryptionService extends Service {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private void encryptAllCallLogs() {
         ContentResolver cr = this.getContentResolver();
-        @SuppressLint("MissingPermission") Cursor c = cr.query(CallLog.Calls.CONTENT_URI, null, null, null, CallLog.Calls.DATE + " DESC");
+        Cursor c = cr.query(CallLog.Calls.CONTENT_URI, null, null, null, CallLog.Calls.DATE + " DESC");
         int totalCalls = 0;
         if (c != null) {
             totalCalls = c.getCount();
             SqliteDatabaseHandler db = new SqliteDatabaseHandler(this);
             if (c.moveToFirst()) {
                 for (int i = 0; i < totalCalls; i++) {
+                    int callId = Integer.parseInt(c.getString(c.getColumnIndexOrThrow(CallLog.Calls._ID)));
                     String number = c.getString(c.getColumnIndexOrThrow(CallLog.Calls.NUMBER));
                     String callType = c.getString(c.getColumnIndexOrThrow(CallLog.Calls.TYPE));
                     String date = c.getString(c.getColumnIndexOrThrow(CallLog.Calls.DATE));
@@ -95,8 +97,9 @@ public class CallLogsEncryptionService extends Service {
                     } else {
                         type = 3;
                     }
-                    LocalCall call = new LocalCall(number, type, date, duration);
+                    LocalCall call = new LocalCall(callId, number, type, date, duration);
                     db.addCall(call);
+                    cr.delete(CallLog.Calls.CONTENT_URI, CallLog.Calls._ID + " = ? ", new String[]{String.valueOf(callId)});
                     c.moveToNext();
                 }
             }

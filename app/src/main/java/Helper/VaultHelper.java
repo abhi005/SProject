@@ -53,6 +53,7 @@ public class VaultHelper {
 
             VaultFile f = new VaultFile(filename, file.getPath(), fileExt, dateModify, FileHelper.getReadableFileSize(file.length()));
             db.addVaultFile(f);
+            db.increaseUserData(file.length());
             db.close();
             file.delete();
         } catch (Exception e) {
@@ -61,8 +62,6 @@ public class VaultHelper {
     }
 
     static void openEncryptedFile(Context context, String name, String originalPath) {
-        SqliteDatabaseHandler db = new SqliteDatabaseHandler(context);
-
         File directory = context.getFilesDir();
         File file = new File(directory, name + ".serg");
         int lIndex = originalPath.lastIndexOf("/");
@@ -113,6 +112,7 @@ public class VaultHelper {
             ois.close();
             cis.close();
             fos.close();
+            db.decreaseUserData(eFile.length());
             context.deleteFile(file.getName());
             //eFile.delete();
             db.deleteVaultFile(file);
@@ -124,8 +124,11 @@ public class VaultHelper {
     }
 
     static void deleteFile(Context context, String name) {
+        SqliteDatabaseHandler db = new SqliteDatabaseHandler(context);
         File directory = context.getFilesDir();
         File file = new File(directory, name);
+        db.decreaseUserData(file.length());
         file.delete();
+        db.close();
     }
 }

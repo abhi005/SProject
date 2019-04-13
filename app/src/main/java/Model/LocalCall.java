@@ -3,6 +3,7 @@ package Model;
 public class LocalCall {
 
     private int id;
+    private int callId;
     private String number;
     private int type; //1 : outgoing, 2 : incoming, 3 : missed
     private String date;
@@ -11,7 +12,8 @@ public class LocalCall {
     public LocalCall() {
     }
 
-    public LocalCall(String number, int type, String date, String duration) {
+    public LocalCall(int callId, String number, int type, String date, String duration) {
+        this.callId = callId;
         this.number = number;
         this.type = type;
         this.date = date;
@@ -24,6 +26,14 @@ public class LocalCall {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getCallId() {
+        return callId;
+    }
+
+    public void setCallId(int callId) {
+        this.callId = callId;
     }
 
     public String getNumber() {

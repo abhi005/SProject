@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.example.jarvis.sproject.Audio;
 import com.example.jarvis.sproject.R;
 
+import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
@@ -113,6 +114,8 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.AudioViewHol
     public void deleteItems(List<AudioFile> list, SqliteDatabaseHandler db) {
         for (AudioFile f : list) {
             String path = f.getNewPath();
+            File file = new File(path);
+            db.decreaseUserData(file.length());
             FileHelper.deleteFile(path);
             db.deleteAudio(f);
         }

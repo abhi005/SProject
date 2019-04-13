@@ -478,6 +478,7 @@ public class FileManager extends PortraitActivity implements View.OnLongClickLis
                 break;
 
             case R.id.bottom_nav_setting:
+                startActivity(new Intent(FileManager.this, Setting.class));
                 break;
 
             default:

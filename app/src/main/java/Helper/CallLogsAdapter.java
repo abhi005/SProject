@@ -92,7 +92,7 @@ public class CallLogsAdapter extends RecyclerView.Adapter<CallLogsAdapter.MyView
                 CheckBox cb = v.findViewById(R.id.call_history_item_cb);
                 activity.prepareSelection(cb, position);
             } else {
-
+                CallLogsHelper.makeCall(activity, localCall.getNumber());
             }
         });
 
@@ -109,10 +109,16 @@ public class CallLogsAdapter extends RecyclerView.Adapter<CallLogsAdapter.MyView
     }
 
     public void updateAdapter(List<LocalCall> list) {
-        for (LocalCall c : list) {
-            callList.remove(c);
-        }
+        callList.clear();
+        callList.addAll(list);
         notifyDataSetChanged();
+    }
+
+    public void deleteItems(List<LocalCall> list) {
+        for (LocalCall c : list) {
+            int id = c.getId();
+            CallLogsHelper.deleteCallLog(activity, id);
+        }
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {

@@ -31,7 +31,7 @@
                 android:layout_width="@dimen/icon"
                 android:layout_height="@dimen/icon"
                 android:scaleType="centerInside"
-                android:src="@drawable/sd_card" />
+                android:src="@drawable/open_file" />
 
             <TextView
                 android:layout_width="match_parent"

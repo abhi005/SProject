@@ -3,6 +3,7 @@ package com.example.jarvis.sproject;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -77,7 +78,11 @@ public class FilePicker extends AppCompatActivity {
 
         //back button
         backButton = findViewById(R.id.back_btn);
-        backButton.setOnClickListener(view -> onBackPressed());
+        backButton.setOnClickListener(view -> {
+            Intent intent = new Intent(FilePicker.this, Vault.class);
+            startActivity(intent);
+            finish();
+        });
     }
 
     public void forwardDirectory(String path) {

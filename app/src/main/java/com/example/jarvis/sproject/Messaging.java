@@ -2,7 +2,10 @@ package com.example.jarvis.sproject;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,6 +26,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import Helper.MessagingAdapter;
 import Helper.SqliteDatabaseHandler;
@@ -108,9 +112,26 @@ public class Messaging extends PortraitActivity implements View.OnLongClickListe
         actionMenuDeleteButton = findViewById(R.id.messaging_action_menu_delete_btn);
         actionMenuDeleteButton.setOnClickListener(v -> {
             if (selectionList.size() > 0) {
-                messagingAdapter.deleteItems(selectionList);
-                unSetActionMode();
-                messagingAdapter.updateAdapter(conversations = getAllConversations());
+                Dialog deleteButtonDialog = new Dialog(this);
+                deleteButtonDialog.setContentView(R.layout.popup_file_delete);
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).getAttributes().windowAnimations = R.style.DialogAnimation;
+                Objects.requireNonNull(deleteButtonDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                deleteButtonDialog.show();
+
+                // delete confirmation listener
+                TextView cancelBtn = deleteButtonDialog.findViewById(R.id.cancel_btn);
+                TextView deleteBtn = deleteButtonDialog.findViewById(R.id.delete_btn);
+                cancelBtn.setOnClickListener(view -> {
+                    //cancel btn
+                    deleteButtonDialog.dismiss();
+                });
+                deleteBtn.setOnClickListener(view -> {
+                    //delete btn
+                    messagingAdapter.deleteItems(selectionList);
+                    unSetActionMode();
+                    deleteButtonDialog.dismiss();
+                    messagingAdapter.updateAdapter(conversations = getAllConversations());
+                });
             }
         });
 

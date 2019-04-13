@@ -38,6 +38,7 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
     // calllogs table attributes
     private static final String TABLE_CALLS = "calls";
     private static final String CALLS_KEY_ID = "id";
+    private static final String CALLS_KEY_CALL_ID = "callId";
     private static final String CALLS_KEY_TYPE = "type";
     private static final String CALLS_KEY_NUMBER = "contact";
     private static final String CALLS_KEY_DATE = "date";
@@ -47,6 +48,11 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
     private static final String TABLE_SECRET = "secret";
     private static final String SECRET_KEY_USERKEY = "userkey";
 
+    // user details table attributes
+    private static final String TABLE_USER = "user";
+    private static final String USER_KEY_NAME = "name";
+    private static final String USER_KEY_EMAIL = "email";
+    private static final String USER_KEY_DATA = "data";
 
     // vault table attributes
     private static final String TABLE_VAULT = "vault";
@@ -84,12 +90,16 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
                 + "date TEXT, " + "sentDate TEXT, " + "body TEXT, " + "address TEXT, PRIMARY KEY (body, date))";
 
         String CREATION_TABLE_CALLS = "CREATE TABLE calls ("
-                + CALLS_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + CALLS_KEY_TYPE + " INTEGER, "
-                + CALLS_KEY_NUMBER + " TEXT, " + CALLS_KEY_DATE + " TEXT, " + CALLS_KEY_DURATION
-                + " TEXT, UNIQUE (" + CALLS_KEY_NUMBER + ", " + CALLS_KEY_DATE + "))";
+                + CALLS_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + CALLS_KEY_CALL_ID + " INTEGER NOT NULL UNIQUE, "
+                + CALLS_KEY_TYPE + " INTEGER, " + CALLS_KEY_NUMBER + " TEXT, " + CALLS_KEY_DATE + " TEXT, "
+                + CALLS_KEY_DURATION + " TEXT )";
 
         String CREATION_TABLE_SECRET = "CREATE TABLE " + TABLE_SECRET + " ( "
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, " + SECRET_KEY_USERKEY + " TEXT )";
+
+        String CREATION_TABLE_USER = "CREATE TABLE " + TABLE_USER + " ( "
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT, " + USER_KEY_NAME + " TEXT, "
+                + USER_KEY_EMAIL + " TEXT NOT NULL UNIQUE, " + USER_KEY_DATA + " TEXT )";
 
         String CREATION_TABLE_IMAGE = "CREATE TABLE " + TABLE_IMAGE + " ( "
                 + FILE_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + FILE_KEY_ORIGINAL_PATH + " TEXT, "
@@ -124,6 +134,7 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATION_TABLE_SMS);
         sqLiteDatabase.execSQL(CREATION_TABLE_CALLS);
         sqLiteDatabase.execSQL(CREATION_TABLE_SECRET);
+        sqLiteDatabase.execSQL(CREATION_TABLE_USER);
         sqLiteDatabase.execSQL(CREATION_TABLE_IMAGE);
         sqLiteDatabase.execSQL(CREATION_TABLE_VIDEO);
         sqLiteDatabase.execSQL(CREATION_TABLE_AUDIO);
@@ -136,6 +147,7 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_SMS);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_SECRET);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_USER);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_ZIP);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_DOCS);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_AUDIO);
@@ -143,6 +155,7 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_IMAGE);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_VAULT);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_CALLS);
+
         this.onCreate(sqLiteDatabase);
     }
 
@@ -234,6 +247,7 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
     public void addCall(LocalCall call) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put(CALLS_KEY_CALL_ID, call.getCallId());
         values.put(CALLS_KEY_NUMBER, call.getNumber());
         values.put(CALLS_KEY_TYPE, call.getType());
         values.put(CALLS_KEY_DATE, call.getDate());
@@ -246,21 +260,28 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         List<LocalCall> list = new ArrayList<>();
 
-        String query = "SELECT * FROM " + TABLE_CALLS;
+        String query = "SELECT * FROM " + TABLE_CALLS + " ORDER BY " + CALLS_KEY_DATE + " DESC";
         @SuppressLint("Recycle") Cursor c = db.rawQuery(query, null);
         if (c.moveToFirst()) {
             do {
                 LocalCall call = new LocalCall();
                 call.setId(Integer.parseInt(c.getString(0)));
-                call.setType(Integer.parseInt(c.getString(1)));
-                call.setNumber(c.getString(2));
-                call.setDate(c.getString(3));
-                call.setDuration(c.getString(4));
+                call.setCallId(Integer.parseInt(c.getString(1)));
+                call.setType(Integer.parseInt(c.getString(2)));
+                call.setNumber(c.getString(3));
+                call.setDate(c.getString(4));
+                call.setDuration(c.getString(5));
                 list.add(call);
             } while (c.moveToNext());
         }
         db.close();
         return list;
+    }
+
+    void deleteCallLogById(int id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_CALLS, CALLS_KEY_ID + " = ?", new String[]{String.valueOf(id)});
+        db.close();
     }
 
 
@@ -517,6 +538,76 @@ public class SqliteDatabaseHandler extends SQLiteOpenHelper {
         }
         db.close();
         return list;
+    }
+
+    //user methods
+
+    public long addUser(String name, String email) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "SELECT * FROM " + TABLE_USER;
+        @SuppressLint("Recycle") Cursor c = db.rawQuery(query, null);
+        long i = 0;
+        if (c.getCount() > 0) {
+            i = updateUser(name, email);
+        } else {
+            ContentValues values = new ContentValues();
+            values.put(USER_KEY_NAME, name);
+            values.put(USER_KEY_EMAIL, email);
+            values.put(USER_KEY_DATA, "0");
+            i = db.insert(TABLE_USER, null, values);
+        }
+        db.close();
+        return i;
+    }
+
+    private long updateUser(String name, String email) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(USER_KEY_NAME, name);
+        values.put(USER_KEY_EMAIL, email);
+        values.put(USER_KEY_DATA, "0");
+        return db.update(TABLE_USER, values, null, null);
+    }
+
+    public String[] getUserDetails() {
+        String[] array = new String[2];
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_USER + " LIMIT 1";
+        @SuppressLint("Recycle") Cursor c = db.rawQuery(query, null);
+        if (c.moveToFirst()) {
+            array[0] = c.getString(1);
+            array[1] = c.getString(2);
+        }
+        return array;
+    }
+
+    public long getUserData() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT " + USER_KEY_DATA + " FROM " + TABLE_USER + " LIMIT 1";
+        @SuppressLint("Recycle") Cursor c = db.rawQuery(query, null);
+        long data = 0;
+        if (c.moveToFirst()) {
+            data = Long.parseLong(c.getString(0));
+        }
+        return data;
+    }
+
+    void increaseUserData(long data) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        long oldData = getUserData();
+        values.put(USER_KEY_DATA, String.valueOf(oldData + data));
+        db.update(TABLE_USER, values, null, null);
+        db.close();
+    }
+
+    void decreaseUserData(long data) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        long oldData = getUserData();
+        values.put(USER_KEY_DATA, String.valueOf(oldData - data));
+        db.update(TABLE_USER, values, null, null);
+        db.close();
     }
 
     // secret key methods

@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.example.jarvis.sproject.Document;
 import com.example.jarvis.sproject.R;
 
+import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
@@ -116,6 +117,8 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocVie
     public void deleteItems(List<DocFile> list, SqliteDatabaseHandler db) {
         for (DocFile f : list) {
             String path = f.getNewPath();
+            File file = new File(path);
+            db.decreaseUserData(file.length());
             FileHelper.deleteFile(path);
             db.deleteDoc(f);
         }

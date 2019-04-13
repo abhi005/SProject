@@ -18,6 +18,7 @@ import com.example.jarvis.sproject.Images;
 import com.example.jarvis.sproject.R;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
@@ -103,6 +104,8 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
     public void deleteItems(List<ImageFile> list, SqliteDatabaseHandler db) {
         for (ImageFile f : list) {
             String path = f.getNewPath();
+            File file = new File(path);
+            db.decreaseUserData(file.length());
             FileHelper.deleteFile(path);
             db.deleteImage(f);
         }

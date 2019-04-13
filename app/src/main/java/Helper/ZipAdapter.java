@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.example.jarvis.sproject.R;
 import com.example.jarvis.sproject.Zip;
 
+import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
@@ -112,6 +113,8 @@ public class ZipAdapter extends RecyclerView.Adapter<ZipAdapter.ViewHolder>{
     public void deleteItems(List<ZipFile> list, SqliteDatabaseHandler db) {
         for (ZipFile f : list) {
             String path = f.getNewPath();
+            File file = new File(path);
+            db.decreaseUserData(file.length());
             FileHelper.deleteFile(path);
             db.deleteZip(f);
         }

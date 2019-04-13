@@ -9,12 +9,17 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
+import Helper.SqliteDatabaseHandler;
 import utils.PortraitActivity;
 
 public class SignUp extends PortraitActivity implements View.OnClickListener {
 
     private Button nextButton;
+    private EditText nameEt;
+    private EditText emailEt;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setStatusBarGradient(Activity activity) {
@@ -32,11 +37,31 @@ public class SignUp extends PortraitActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
+        nameEt = findViewById(R.id.name_et);
+        emailEt = findViewById(R.id.email_et);
+
         nextButton = findViewById(R.id.next_btn);
         nextButton.setOnClickListener(view -> {
-            Intent intent = new Intent(SignUp.this, SetPin.class);
-            startActivity(intent);
-            finish();
+
+            String name = nameEt.getText().toString();
+            String email = emailEt.getText().toString();
+            if (name.trim().equals("")) {
+                Toast.makeText(SignUp.this, "Enter valid name", Toast.LENGTH_LONG).show();
+            } else if (email.trim().equals("")) {
+                Toast.makeText(SignUp.this, "Enter valid email", Toast.LENGTH_LONG).show();
+            } else {
+                SqliteDatabaseHandler db = new SqliteDatabaseHandler(SignUp.this);
+                long i = db.addUser(name, email);
+                if (i != -1 && i != 0) {
+                    Intent intent = new Intent(SignUp.this, SetPin.class);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    nameEt.setText("");
+                    emailEt.setText("");
+                    Toast.makeText(SignUp.this, "Try again!", Toast.LENGTH_LONG).show();
+                }
+            }
         });
     }
 
